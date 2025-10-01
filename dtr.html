@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Tabla con Filtro</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f9fc;
+        margin: 0;
+        padding: 20px;
+    }
+    .tabla-contenedor {
+        width: 95%;
+        margin: auto;
+        border: 1px solid #b5d0e0;
+        background: white;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        border-radius: 5px;
+    }
+    .tabla-header {
+        background: #d7eaf7;
+        padding: 10px;
+        font-weight: bold;
+        border-bottom: 1px solid #b5d0e0;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th {
+        background: #eaf4fb;
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #b5d0e0;
+        position: relative;
+    }
+    td {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+    }
+    tr:hover {
+        background: #f2faff;
+    }
+    /* Filtro */
+    .filter-box {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: white;
+        border: 1px solid #ccc;
+        padding: 5px;
+        z-index: 100;
+        width: 150px;
+    }
+    .filter-box select,
+    .filter-box input {
+        margin: 3px 0;
+        width: 100%;
+        padding: 3px;
+        font-size: 12px;
+    }
+    .filter-btn {
+        cursor: pointer;
+        font-size: 14px;
+        padding: 2px 5px;
+        background: #cce4f7;
+        border: 1px solid #7aaad9;
+        border-radius: 3px;
+        margin-left: 5px;
+    }
+</style>
+</head>
+<body>
+
+<div class="tabla-contenedor">
+    <div class="tabla-header">SOCIEDAD: CLINICA REGIONAL LIRCAY SPA</div>
+    <table id="tabla">
+        <thead>
+            <tr>
+                <th>Código <button class="filter-btn" onclick="toggleFilter(this)">≡</button>
+                    <div class="filter-box">
+                        <select>
+                            <option value="contiene">Contiene</option>
+                            <option value="igual">Igual</option>
+                            <option value="empieza">Empieza con</option>
+                        </select>
+                        <input type="text" onkeyup="filtrarTabla(this)">
+                    </div>
+                </th>
+                <th>RUT <button class="filter-btn" onclick="toggleFilter(this)">≡</button>
+                    <div class="filter-box">
+                        <select>
+                            <option value="contiene">Contiene</option>
+                            <option value="igual">Igual</option>
+                            <option value="empieza">Empieza con</option>
+                        </select>
+                        <input type="text" onkeyup="filtrarTabla(this)">
+                    </div>
+                </th>
+                <th>Nombre <button class="filter-btn" onclick="toggleFilter(this)">≡</button>
+                    <div class="filter-box">
+                        <select>
+                            <option value="contiene">Contiene</option>
+                            <option value="igual">Igual</option>
+                            <option value="empieza">Empieza con</option>
+                        </select>
+                        <input type="text" onkeyup="filtrarTabla(this)">
+                    </div>
+                </th>
+                <th>Dirección</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td><td>93.626.000-4</td><td>3M CHILE S A</td><td>SANTA ISABEL 1001 PROVIDENCIA</td><td>228701</td><td></td>
+            </tr>
+            <tr>
+                <td>3</td><td>96.689.310-9</td><td>TRANSBANK S A</td><td>HUERFANOS 770 PISO 10</td><td>6386383</td><td></td>
+            </tr>
+            <tr>
+                <td>6</td><td>81.378.300-2</td><td>ABBOTT LABORATORIOS DE CHILE LTDA</td><td>AV. EL SALTO 5380, HUECHURABA</td><td>5576062</td><td>maria.pazruiz@abbott.com</td>
+            </tr>
+            <tr>
+                <td>8</td><td>76.641.770-K</td><td>ARAYA Y CIA LIMITADA</td><td>TOCORNAL 1334</td><td>5526665</td><td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+function toggleFilter(btn) {
+    let box = btn.nextElementSibling;
+    box.style.display = (box.style.display === "block") ? "none" : "block";
+}
+
+function filtrarTabla(input) {
+    let filtro = input.value.toLowerCase();
+    let select = input.previousElementSibling.value;
+    let th = input.closest("th");
+    let index = Array.from(th.parentNode.children).indexOf(th);
+    let filas = document.querySelectorAll("#tabla tbody tr");
+
+    filas.forEach(fila => {
+        let celda = fila.children[index].innerText.toLowerCase();
+        let mostrar = false;
+
+        if (select === "contiene" && celda.includes(filtro)) mostrar = true;
+        if (select === "igual" && celda === filtro) mostrar = true;
+        if (select === "empieza" && celda.startsWith(filtro)) mostrar = true;
+
+        fila.style.display = mostrar ? "" : "none";
+    });
+}
+</script>
+
+</body>
+</html>
