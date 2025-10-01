@@ -187,6 +187,13 @@
             padding: 20px;
             color: #666;
         }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            min-height: 600px; /* Altura mínima para evitar problemas de visualización */
+        }
     </style>
 </head>
 <body>
@@ -423,43 +430,20 @@
             });
         });
 
-        // Función para cargar contenido HTML en .content
-        async function loadContent(path) {
+        // Función para cargar contenido en iframe para aislamiento de estilos
+        function loadContent(path) {
             if (path === '#') {
                 document.querySelector('.content').innerHTML = '<div class="loading">Contenido no disponible.</div>';
                 return;
             }
-            try {
-                document.querySelector('.content').innerHTML = '<div class="loading">Cargando...</div>';
-                const response = await fetch(path);
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar el contenido');
-                }
-                const html = await response.text();
-                document.querySelector('.content').innerHTML = html;
-                // Opcional: Cargar CSS y JS si existen (asumiendo nombres estándar)
-                const cssLink = path.replace('.html', '.css');
-                const jsPath = path.replace('.html', '.js');
-                // Cargar CSS dinámicamente si existe
-                const cssResponse = await fetch(cssLink);
-                if (cssResponse.ok) {
-                    const css = await cssResponse.text();
-                    const style = document.createElement('style');
-                    style.textContent = css;
-                    document.head.appendChild(style);
-                }
-                // Cargar JS dinámicamente si existe
-                const jsResponse = await fetch(jsPath);
-                if (jsResponse.ok) {
-                    const js = await jsResponse.text();
-                    const script = document.createElement('script');
-                    script.textContent = js;
-                    document.body.appendChild(script);
-                }
-            } catch (error) {
-                console.error('Error al cargar:', error);
-                document.querySelector('.content').innerHTML = '<div class="loading">Error al cargar el contenido.</div>';
-            }
+            const iframe = document.createElement('iframe');
+            iframe.src = path;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.style.minHeight = '600px';
+            document.querySelector('.content').innerHTML = '';
+            document.querySelector('.content').appendChild(iframe);
         }
 
         // Cerrar sesión desde sidebar (ya manejado en el click handler)
