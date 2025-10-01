@@ -101,6 +101,10 @@ body {
     flex-direction: column;
     align-items: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-width: 400px; /* Ancho máximo reducido para la tarjeta */
+    width: 100%; /* Ocupa el ancho disponible pero limitado */
+    margin-left: auto;
+    margin-right: auto; /* Centrado */
 }
 
 .card-header {
@@ -108,7 +112,7 @@ body {
     align-items: center;
     gap: 10px;
     margin-bottom: 15px;
-    width: 60%;
+    width: 100%;
     justify-content: center;
 }
 
@@ -200,5 +204,9 @@ body {
 
     .user-info {
         text-align: center;
+    }
+
+    #credential-card {
+        max-width: 100%; /* En móviles, ocupa todo el ancho disponible */
     }
 }
