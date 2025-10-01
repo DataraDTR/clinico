@@ -68,8 +68,9 @@ body {
 
 .btn-crear {
     grid-column: 1 / -1; /* El botón ocupa las 4 columnas */
-    width: 100%;
-    padding: 12px;
+    width: auto; /* Ancho automático para que no sea tan ancho */
+    max-width: 250px; /* Límite máximo de ancho */
+    padding: 12px 24px;
     background-color: #3A5795;
     color: white;
     border: none;
@@ -77,7 +78,8 @@ body {
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
-    margin-top: 10px;
+    margin: 10px auto 0; /* Centrado horizontal y margen superior */
+    justify-self: center; /* Centrado en la grid */
     grid-row: 4; /* En la cuarta fila, después de todos los campos */
 }
 
@@ -116,5 +118,6 @@ body {
     .btn-crear {
         grid-column: 1;
         grid-row: auto;
+        max-width: 100%;
     }
 }
