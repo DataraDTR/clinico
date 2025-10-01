@@ -192,7 +192,7 @@
             width: 100%;
             height: 100%;
             border: none;
-            min-height: 600px; /* Altura mínima para evitar problemas de visualización */
+            min-height: 600px;
         }
     </style>
 </head>
@@ -252,7 +252,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
@@ -272,14 +271,12 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Verificar autenticación al cargar
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                window.location.replace('../index.html'); // Redirigir a login si no autenticado (usar replace para evitar back)
+                window.location.replace('../index.html');
                 return;
             }
 
-            // Obtener datos del usuario
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
                 const userData = userDoc.data();
@@ -290,7 +287,7 @@
         window.logout = async () => {
             try {
                 await signOut(auth);
-                window.location.replace('../index.html'); // Usar replace para reemplazar la entrada en el historial
+                window.location.replace('../index.html'); 
             } catch (error) {
                 console.error('Error al cerrar sesión:', error);
             }
@@ -298,7 +295,6 @@
     </script>
 
     <script>
-        // Actualizar fecha actual
         function updateDate() {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -306,7 +302,6 @@
         }
         updateDate();
 
-        // Definir submenús específicos para cada opción principal
         const submenus = {
             'implantes': [
                 { text: 'Cargas', path: 'modulos/implantes/cargas/cargas.html', icon: 'fas fa-upload' },
@@ -382,7 +377,6 @@
             ]
         };
 
-        // Manejo de submenús
         document.querySelectorAll('.main-menu a[data-submenu]').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -395,12 +389,10 @@
                 const submenuContent = document.querySelector('.submenu-content');
                 const mainMenu = document.querySelector('.main-menu');
 
-                // Ocultar main-menu y mostrar submenu
                 mainMenu.style.display = 'none';
                 submenu.style.display = 'block';
 
-                // Cargar contenido del submenú específico
-                submenuContent.innerHTML = ''; // Limpiar
+                submenuContent.innerHTML = ''; 
                 const items = submenus[submenuId] || [
                     { text: 'Opción 1', path: '#', icon: 'fas fa-list' },
                     { text: 'Opción 2', path: '#', icon: 'fas fa-edit' },
@@ -419,9 +411,8 @@
                     submenuContent.appendChild(a);
                 });
 
-                // Manejo de back-link (agregar listener si no existe)
                 const backLink = document.querySelector('.back-link');
-                backLink.replaceWith(backLink.cloneNode(true)); // Clonar para resetear listeners
+                backLink.replaceWith(backLink.cloneNode(true)); 
                 document.querySelector('.back-link').addEventListener('click', (e) => {
                     e.preventDefault();
                     mainMenu.style.display = 'block';
@@ -430,7 +421,6 @@
             });
         });
 
-        // Función para cargar contenido en iframe para aislamiento de estilos
         function loadContent(path) {
             if (path === '#') {
                 document.querySelector('.content').innerHTML = '<div class="loading">Contenido no disponible.</div>';
@@ -446,7 +436,6 @@
             document.querySelector('.content').appendChild(iframe);
         }
 
-        // Cerrar sesión desde sidebar (ya manejado en el click handler)
     </script>
 </body>
 </html>
