@@ -65,8 +65,8 @@ body {
 
 .users-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Ancho mínimo reducido para tarjetas más pequeñas */
-    gap: 15px; /* Gap reducido para más compacto */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
     flex: 1;
 }
 
@@ -74,14 +74,14 @@ body {
     background: #f8f9fa;
     border: 2px solid #3A5795;
     border-radius: 12px;
-    padding: 12px; /* Padding reducido para menos altura */
+    padding: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: transform 0.2s, box-shadow 0.2s;
-    max-height: 200px; /* Altura máxima reducida para tarjetas más cortas */
-    overflow: hidden; /* Oculta contenido si excede la altura */
+    max-height: 200px;
+    overflow: hidden;
 }
 
 .user-card:hover {
@@ -92,21 +92,21 @@ body {
 .card-header {
     display: flex;
     align-items: center;
-    gap: 8px; /* Gap reducido */
-    margin-bottom: 8px; /* Margen reducido */
+    gap: 8px;
+    margin-bottom: 8px;
     width: 100%;
     justify-content: center;
 }
 
 .company-icon {
-    width: 25px; /* Icono de empresa más pequeño */
+    width: 25px;
     height: 25px;
     border-radius: 50%;
 }
 
 .card-header h2 {
     color: #3A5795;
-    font-size: 12px; /* Fuente más pequeña */
+    font-size: 12px;
     margin: 0;
     text-align: center;
     font-weight: bold;
@@ -115,12 +115,12 @@ body {
 .card-body {
     display: flex;
     align-items: center;
-    gap: 12px; /* Gap reducido */
+    gap: 12px;
     width: 100%;
 }
 
 .user-icon {
-    width: 50px; /* Icono de usuario más pequeño */
+    width: 50px;
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
@@ -134,21 +134,87 @@ body {
 
 .user-info h3 {
     color: #333;
-    font-size: 14px; /* Fuente más pequeña */
-    margin-bottom: 5px; /* Margen reducido */
-    white-space: nowrap; /* Evita que el nombre se rompa en líneas */
+    font-size: 14px;
+    margin-bottom: 5px;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .user-info p {
     color: #555;
-    font-size: 11px; /* Fuente más pequeña */
-    margin: 2px 0; /* Margen reducido */
-    line-height: 1.2; /* Línea más compacta */
-    white-space: nowrap; /* Evita que el texto se rompa */
+    font-size: 11px;
+    margin: 2px 0;
+    line-height: 1.2;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.edit-btn {
+    background: #3A5795;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    margin-top: 5px;
+}
+
+.edit-btn:hover {
+    background: #2e4a7a;
+}
+
+.editing .user-info input {
+    width: 100%;
+    padding: 2px;
+    border: 1px solid #3A5795;
+    border-radius: 2px;
+    font-size: 11px;
+    box-sizing: border-box;
+}
+
+.editing .user-info p {
+    display: none;
+}
+
+.editing .edit-btn {
+    background: #28a745;
+}
+
+.editing .edit-btn:hover {
+    background: #218838;
+}
+
+.save-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    margin-left: 5px;
+}
+
+.save-btn:hover {
+    background: #218838;
+}
+
+.cancel-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    margin-left: 5px;
+}
+
+.cancel-btn:hover {
+    background: #c82333;
 }
 
 /* No hay mensaje en esta página, pero por consistencia */
@@ -183,7 +249,7 @@ body {
     .card-body {
         flex-direction: column;
         text-align: center;
-        gap: 8px; /* Gap más pequeño en móviles */
+        gap: 8px;
     }
 
     .user-info {
@@ -192,7 +258,7 @@ body {
 
     .user-info h3,
     .user-info p {
-        white-space: normal; /* Permite wrap en móviles */
+        white-space: normal;
     }
 
     #outer-container-lista {

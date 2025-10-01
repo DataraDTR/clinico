@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -64,10 +64,11 @@ async function loadUsers(searchTerm = '') {
     }
 }
 
-// Renderizar tarjeta de usuario
+// Renderizar tarjeta de usuario con funcionalidad de edición
 function renderUserCard(user) {
     const card = document.createElement('div');
     card.className = 'user-card';
+    card.dataset.userId = user.id; // Para identificar al usuario
 
     // Icono basado en sexo
     const iconMap = {
@@ -85,18 +86,76 @@ function renderUserCard(user) {
         <div class="card-body">
             <img src="${userIconSrc}" alt="Icono de usuario" class="user-icon">
             <div class="user-info">
-                <h3>${user.fullName}</h3>
-                <p><strong>Usuario:</strong> ${user.username}</p>
-                <p><strong>Email:</strong> ${user.email}</p>
-                <p><strong>Fecha Nacimiento:</strong> ${user.birthDate}</p>
-                <p><strong>Sexo:</strong> ${user.sex.charAt(0).toUpperCase() + user.sex.slice(1)}</p>
-                <p><strong>Módulo:</strong> ${user.module}</p>
-                <p><strong>Categoría:</strong> ${user.category}</p>
+                <h3 class="editable" data-field="fullName">${user.fullName}</h3>
+                <p class="editable" data-field="username"><strong>Usuario:</strong> ${user.username}</p>
+                <p class="editable" data-field="email"><strong>Email:</strong> ${user.email}</p>
+                <p class="editable" data-field="birthDate"><strong>Fecha Nacimiento:</strong> ${user.birthDate}</p>
+                <p class="editable" data-field="sex"><strong>Sexo:</strong> ${user.sex.charAt(0).toUpperCase() + user.sex.slice(1)}</p>
+                <p class="editable" data-field="module"><strong>Módulo:</strong> ${user.module}</p>
+                <p class="editable" data-field="category"><strong>Categoría:</strong> ${user.category}</p>
             </div>
         </div>
+        <button class="edit-btn">Editar</button>
     `;
 
+    // Event listener para el botón editar
+    const editBtn = card.querySelector('.edit-btn');
+    editBtn.addEventListener('click', () => toggleEditMode(card, user));
+
     usersList.appendChild(card);
+}
+
+// Alternar modo edición
+function toggleEditMode(card, originalUser) {
+    const userInfo = card.querySelector('.user-info');
+    const editBtn = card.querySelector('.edit-btn');
+    const editableFields = userInfo.querySelectorAll('.editable');
+
+    if (card.classList.contains('editing')) {
+        // Guardar cambios
+        const updates = {};
+        editableFields.forEach(field => {
+            const input = field.querySelector('input');
+            if (input) {
+                const fieldName = field.dataset.field;
+                updates[fieldName] = input.value;
+                field.innerHTML = input.dataset.originalValue; // Restaurar texto original temporalmente
+            }
+        });
+
+        // Actualizar en Firestore
+        updateDoc(doc(db, 'users', card.dataset.userId), updates)
+            .then(() => {
+                card.classList.remove('editing');
+                editBtn.textContent = 'Editar';
+                editBtn.classList.remove('save-btn');
+                loadUsers(searchInput.value); // Recargar para actualizar todas las tarjetas
+            })
+            .catch((error) => {
+                console.error('Error al actualizar usuario:', error);
+                alert('Error al actualizar usuario.');
+            });
+    } else {
+        // Modo edición
+        card.classList.add('editing');
+        editBtn.textContent = 'Guardar';
+        editBtn.classList.add('save-btn');
+
+        editableFields.forEach(field => {
+            const text = field.textContent.trim();
+            const fieldName = field.dataset.field;
+            const originalValue = originalUser[fieldName] || text;
+
+            const input = document.createElement('input');
+            input.type = fieldName === 'email' ? 'email' : (fieldName === 'birthDate' ? 'date' : 'text');
+            input.value = originalValue;
+            input.dataset.originalValue = originalValue;
+            input.autocomplete = 'off';
+
+            field.innerHTML = '';
+            field.appendChild(input);
+        });
+    }
 }
 
 // Event listener para búsqueda en tiempo real
