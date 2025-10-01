@@ -23,6 +23,64 @@ const usersList = document.getElementById('users-list');
 const searchInput = document.getElementById('search-input');
 let allUsers = []; // Almacenar todos los usuarios para filtrado local
 
+// Función para crear input o select para el campo (definida antes de usarla)
+function createInputForField(fieldName, value) {
+    if (fieldName === 'sex') {
+        return `
+            <div class="label">Sexo:</div>
+            <select class="edit-input">
+                <option value="masculino" ${value === 'masculino' ? 'selected' : ''}>Masculino</option>
+                <option value="femenino" ${value === 'femenino' ? 'selected' : ''}>Femenino</option>
+                <option value="otro" ${value === 'otro' ? 'selected' : ''}>Otro</option>
+            </select>
+        `;
+    } else if (fieldName === 'module') {
+        return `
+            <div class="label">Módulo:</div>
+            <select class="edit-input">
+                <option value="Salud" ${value === 'Salud' ? 'selected' : ''}>Salud</option>
+                <option value="Album" ${value === 'Album' ? 'selected' : ''}>Album</option>
+                <option value="Personal" ${value === 'Personal' ? 'selected' : ''}>Personal</option>
+            </select>
+        `;
+    } else if (fieldName === 'category') {
+        return `
+            <div class="label">Categoría:</div>
+            <select class="edit-input">
+                <option value="Administrador" ${value === 'Administrador' ? 'selected' : ''}>Administrador</option>
+                <option value="Coordinadora" ${value === 'Coordinadora' ? 'selected' : ''}>Coordinadora</option>
+                <option value="Corporativa" ${value === 'Corporativa' ? 'selected' : ''}>Corporativa</option>
+                <option value="Operador" ${value === 'Operador' ? 'selected' : ''}>Operador</option>
+                <option value="Laboratorio" ${value === 'Laboratorio' ? 'selected' : ''}>Laboratorio</option>
+            </select>
+        `;
+    } else if (fieldName === 'fullName') {
+        return `
+            <div class="label">Nombre Completo:</div>
+            <input type="text" class="edit-input" value="${value}" autocomplete="off">
+        `;
+    } else if (fieldName === 'birthDate') {
+        return `
+            <div class="label">Fecha Nacimiento:</div>
+            <input type="date" class="edit-input" value="${value}" autocomplete="off">
+        `;
+    } else if (fieldName === 'email') {
+        return `
+            <div class="label">Email:</div>
+            <input type="email" class="edit-input" value="${value}" autocomplete="off">
+        `;
+    } else if (fieldName === 'username') {
+        return `
+            <div class="label">Usuario:</div>
+            <input type="text" class="edit-input" value="${value}" autocomplete="off">
+        `;
+    }
+    return `
+        <div class="label">${fieldName}:</div>
+        <input type="text" class="edit-input" value="${value}" autocomplete="off">
+    `;
+}
+
 // Verificar autenticación
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
