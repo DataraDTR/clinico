@@ -181,6 +181,12 @@
             list-style: disc;
             padding-left: 18px;
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -293,11 +299,91 @@
         }
         updateDate();
 
+        // Definir submenús específicos para cada opción principal
+        const submenus = {
+            'implantes': [
+                { text: 'Cargas', path: 'modulos/implantes/cargas/cargas.html', icon: 'fas fa-upload' },
+                { text: 'Pacientes', path: 'modulos/implantes/pacientes/pacientes.html', icon: 'fas fa-user-md' },
+                { text: 'Referencias', path: 'modulos/implantes/referencias/referencias.html', icon: 'fas fa-link' },
+                { text: 'Paquetización', path: 'modulos/implantes/paquetizacion/paquetizacion.html', icon: 'fas fa-boxes' },
+                { text: 'Mantenedor', path: 'modulos/implantes/mantenedor/mantenedor.html', icon: 'fas fa-tools' },
+                { text: 'Tránsito', path: 'modulos/implantes/transito/transito.html', icon: 'fas fa-shipping-fast' }
+            ],
+            'consignacion': [
+                { text: 'Inventario', path: 'modulos/consignacion/inventario/inventario.html', icon: 'fas fa-list' },
+                { text: 'Entradas', path: 'modulos/consignacion/entradas/entradas.html', icon: 'fas fa-sign-in-alt' },
+                { text: 'Salidas', path: 'modulos/consignacion/salidas/salidas.html', icon: 'fas fa-sign-out-alt' },
+                { text: 'Reportes', path: 'modulos/consignacion/reportes/reportes.html', icon: 'fas fa-chart-bar' }
+            ],
+            'historico': [
+                { text: 'Registros', path: 'modulos/historico/registros/registros.html', icon: 'fas fa-history' },
+                { text: 'Búsqueda', path: 'modulos/historico/busqueda/busqueda.html', icon: 'fas fa-search' },
+                { text: 'Exportar', path: 'modulos/historico/exportar/exportar.html', icon: 'fas fa-download' }
+            ],
+            'laboratorio': [
+                { text: 'Ingresos', path: 'modulos/laboratorio/ingresos/ingresos.html', icon: 'fas fa-plus' },
+                { text: 'Resumen', path: 'modulos/laboratorio/resumen/resumen.html', icon: 'fas fa-chart-pie' }
+            ],
+            'visualizador': [
+                { text: 'Gráficos', path: 'modulos/visualizador/graficos/graficos.html', icon: 'fas fa-chart-line' },
+                { text: 'Tablas', path: 'modulos/visualizador/tablas/tablas.html', icon: 'fas fa-table' },
+                { text: 'Filtros', path: 'modulos/visualizador/filtros/filtros.html', icon: 'fas fa-filter' }
+            ],
+            'prestacion': [
+                { text: 'Medicos', path: 'modulos/prestaciones/medicos/medicos.html', icon: 'fas fa-user-md' },
+                { text: 'Empresas', path: 'modulos/prestaciones/empresas/empresas.html', icon: 'fas fa-building' }
+            ],
+            'herramientas': [
+                { text: 'Calculadoras', path: 'modulos/herramientas/calculadoras/calculadoras.html', icon: 'fas fa-calculator' },
+                { text: 'Convertidores', path: 'modulos/herramientas/convertidores/convertidores.html', icon: 'fas fa-exchange-alt' },
+                { text: 'Utilidades', path: 'modulos/herramientas/utilidades/utilidades.html', icon: 'fas fa-wrench' }
+            ],
+            'importacion': [
+                { text: 'Archivos', path: 'modulos/importacion/archivos/archivos.html', icon: 'fas fa-file-import' },
+                { text: 'Validación', path: 'modulos/importacion/validacion/validacion.html', icon: 'fas fa-check-circle' },
+                { text: 'Procesar', path: 'modulos/importacion/procesar/procesar.html', icon: 'fas fa-play' }
+            ],
+            'apuntes': [
+                { text: 'Notas', path: 'modulos/apuntes/notas/notas.html', icon: 'fas fa-sticky-note' },
+                { text: 'Categorías', path: 'modulos/apuntes/categorias/categorias.html', icon: 'fas fa-tags' },
+                { text: 'Búsqueda', path: 'modulos/apuntes/busqueda/busqueda.html', icon: 'fas fa-search' }
+            ],
+            'migracion': [
+                { text: 'Datos', path: 'modulos/migracion/datos/datos.html', icon: 'fas fa-database' },
+                { text: 'Configuración', path: 'modulos/migracion/configuracion/configuracion.html', icon: 'fas fa-cog' },
+                { text: 'Ejecutar', path: 'modulos/migracion/ejecutar/ejecutar.html', icon: 'fas fa-forward' }
+            ],
+            'dashboard': [
+                { text: 'Resumen', path: 'modulos/dashboard/resumen/resumen.html', icon: 'fas fa-tachometer-alt' },
+                { text: 'Métricas', path: 'modulos/dashboard/metricas/metricas.html', icon: 'fas fa-chart-bar' },
+                { text: 'Alertas', path: 'modulos/dashboard/alertas/alertas.html', icon: 'fas fa-bell' }
+            ],
+            'archivos': [
+                { text: 'Gestión', path: 'modulos/archivos/gestion/gestion.html', icon: 'fas fa-folder-open' },
+                { text: 'Subir', path: 'modulos/archivos/subir/subir.html', icon: 'fas fa-upload' },
+                { text: 'Descargar', path: 'modulos/archivos/descargar/descargar.html', icon: 'fas fa-download' }
+            ],
+            'usuarios': [
+                { text: 'Lista', path: 'modulos/usuarios/lista/lista.html', icon: 'fas fa-users' },
+                { text: 'Crear', path: 'modulos/usuarios/crear/crear.html', icon: 'fas fa-user-plus' },
+                { text: 'Roles', path: 'modulos/usuarios/roles/roles.html', icon: 'fas fa-user-tag' }
+            ],
+            'configuracion': [
+                { text: 'General', path: 'modulos/configuracion/general/general.html', icon: 'fas fa-cog' },
+                { text: 'Seguridad', path: 'modulos/configuracion/seguridad/seguridad.html', icon: 'fas fa-shield-alt' },
+                { text: 'Sistema', path: 'modulos/configuracion/sistema/sistema.html', icon: 'fas fa-server' }
+            ]
+        };
+
         // Manejo de submenús
         document.querySelectorAll('.main-menu a[data-submenu]').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const submenuId = link.getAttribute('data-submenu');
+                if (submenuId === 'cerrar-sesion') {
+                    logout();
+                    return;
+                }
                 const submenu = document.querySelector('.submenu');
                 const submenuContent = document.querySelector('.submenu-content');
                 const mainMenu = document.querySelector('.main-menu');
@@ -306,23 +392,29 @@
                 mainMenu.style.display = 'none';
                 submenu.style.display = 'block';
 
-                // Cargar contenido del submenú (aquí puedes agregar lógica dinámica)
+                // Cargar contenido del submenú específico
                 submenuContent.innerHTML = ''; // Limpiar
-                // Ejemplo: agregar enlaces ficticios
-                const subItems = [
-                    { text: 'Opción 1', icon: 'fas fa-list' },
-                    { text: 'Opción 2', icon: 'fas fa-edit' },
-                    { text: 'Opción 3', icon: 'fas fa-trash' }
+                const items = submenus[submenuId] || [
+                    { text: 'Opción 1', path: '#', icon: 'fas fa-list' },
+                    { text: 'Opción 2', path: '#', icon: 'fas fa-edit' },
+                    { text: 'Opción 3', path: '#', icon: 'fas fa-trash' }
                 ];
-                subItems.forEach(item => {
+                items.forEach(item => {
                     const a = document.createElement('a');
                     a.href = '#';
                     a.innerHTML = `<i class="${item.icon}"></i> <span class="menu-text submenu-text">${item.text}</span>`;
+                    a.setAttribute('data-path', item.path);
                     a.setAttribute('data-tooltip', item.text);
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        loadContent(item.path);
+                    });
                     submenuContent.appendChild(a);
                 });
 
-                // Manejo de back-link
+                // Manejo de back-link (agregar listener si no existe)
+                const backLink = document.querySelector('.back-link');
+                backLink.replaceWith(backLink.cloneNode(true)); // Clonar para resetear listeners
                 document.querySelector('.back-link').addEventListener('click', (e) => {
                     e.preventDefault();
                     mainMenu.style.display = 'block';
@@ -331,11 +423,46 @@
             });
         });
 
-        // Cerrar sesión desde sidebar (si se selecciona)
-        document.querySelector('a[data-submenu="cerrar-sesion"]').addEventListener('click', (e) => {
-            e.preventDefault();
-            logout();
-        });
+        // Función para cargar contenido HTML en .content
+        async function loadContent(path) {
+            if (path === '#') {
+                document.querySelector('.content').innerHTML = '<div class="loading">Contenido no disponible.</div>';
+                return;
+            }
+            try {
+                document.querySelector('.content').innerHTML = '<div class="loading">Cargando...</div>';
+                const response = await fetch(path);
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar el contenido');
+                }
+                const html = await response.text();
+                document.querySelector('.content').innerHTML = html;
+                // Opcional: Cargar CSS y JS si existen (asumiendo nombres estándar)
+                const cssLink = path.replace('.html', '.css');
+                const jsPath = path.replace('.html', '.js');
+                // Cargar CSS dinámicamente si existe
+                const cssResponse = await fetch(cssLink);
+                if (cssResponse.ok) {
+                    const css = await cssResponse.text();
+                    const style = document.createElement('style');
+                    style.textContent = css;
+                    document.head.appendChild(style);
+                }
+                // Cargar JS dinámicamente si existe
+                const jsResponse = await fetch(jsPath);
+                if (jsResponse.ok) {
+                    const js = await jsResponse.text();
+                    const script = document.createElement('script');
+                    script.textContent = js;
+                    document.body.appendChild(script);
+                }
+            } catch (error) {
+                console.error('Error al cargar:', error);
+                document.querySelector('.content').innerHTML = '<div class="loading">Error al cargar el contenido.</div>';
+            }
+        }
+
+        // Cerrar sesión desde sidebar (ya manejado en el click handler)
     </script>
 </body>
 </html>
