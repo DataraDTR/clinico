@@ -87,25 +87,32 @@ function renderUserCard(user) {
             <img src="${userIconSrc}" alt="Icono de usuario" class="user-icon">
             <div class="user-info">
                 <div class="editable-field" data-field="fullName">
-                    <h3>${user.fullName}</h3>
+                    <span class="display-text"><h3>${user.fullName}</h3></span>
+                    <span class="edit-input" style="display: none;">${createInputForField('fullName', user.fullName)}</span>
                 </div>
                 <div class="editable-field" data-field="username">
-                    <p><strong>Usuario:</strong> ${user.username}</p>
+                    <span class="display-text"><p><strong>Usuario:</strong> ${user.username}</p></span>
+                    <span class="edit-input" style="display: none;">${createInputForField('username', user.username)}</span>
                 </div>
                 <div class="editable-field" data-field="email">
-                    <p><strong>Email:</strong> ${user.email}</p>
+                    <span class="display-text"><p><strong>Email:</strong> ${user.email}</p></span>
+                    <span class="edit-input" style="display: none;">${createInputForField('email', user.email)}</span>
                 </div>
                 <div class="editable-field" data-field="birthDate">
-                    <p><strong>Fecha Nacimiento:</strong> ${user.birthDate}</p>
+                    <span class="display-text"><p><strong>Fecha Nacimiento:</strong> ${user.birthDate}</p></span>
+                    <span class="edit-input" style="display: none;">${createInputForField('birthDate', user.birthDate)}</span>
                 </div>
                 <div class="editable-field" data-field="sex">
-                    <p><strong>Sexo:</strong> ${user.sex.charAt(0).toUpperCase() + user.sex.slice(1)}</p>
+                    <span class="display-text"><p><strong>Sexo:</strong> ${user.sex.charAt(0).toUpperCase() + user.sex.slice(1)}</p></span>
+                    <span class="edit-input" style="display: none;">${createInputForField('sex', user.sex)}</span>
                 </div>
                 <div class="editable-field" data-field="module">
-                    <p><strong>Módulo:</strong> ${user.module}</p>
+                    <span class="display-text"><p><strong>Módulo:</strong> ${user.module}</p></span>
+                    <span class="edit-input" style="display: none;">${createInputForField('module', user.module)}</span>
                 </div>
                 <div class="editable-field" data-field="category">
-                    <p><strong>Categoría:</strong> ${user.category}</p>
+                    <span class="display-text"><p><strong>Categoría:</strong> ${user.category}</p></span>
+                    <span class="edit-input" style="display: none;">${createInputForField('category', user.category)}</span>
                 </div>
             </div>
         </div>
@@ -122,7 +129,6 @@ function renderUserCard(user) {
     const editBtn = card.querySelector('.edit-btn');
     const saveBtn = card.querySelector('.save-btn');
     const cancelBtn = card.querySelector('.cancel-btn');
-    const buttonsContainer = card.querySelector('.buttons-container');
 
     editBtn.addEventListener('click', () => enterEditMode(card, user));
 
@@ -144,57 +150,11 @@ function enterEditMode(card, user) {
     saveCancel.style.display = 'flex';
 
     editableFields.forEach(field => {
-        const fieldName = field.dataset.field;
-        const originalValue = user[fieldName];
-        const labelText = field.querySelector('strong') ? field.querySelector('strong').textContent : '';
-
-        field.innerHTML = `
-            <div class="label">${labelText}</div>
-            <div class="input-container">
-                ${createInputForField(fieldName, originalValue)}
-            </div>
-        `;
+        const displayText = field.querySelector('.display-text');
+        const editInput = field.querySelector('.edit-input');
+        displayText.style.display = 'none';
+        editInput.style.display = 'block';
     });
-}
-
-// Crear input o select para el campo
-function createInputForField(fieldName, value) {
-    if (fieldName === 'sex') {
-        return `
-            <select class="edit-input">
-                <option value="masculino" ${value === 'masculino' ? 'selected' : ''}>Masculino</option>
-                <option value="femenino" ${value === 'femenino' ? 'selected' : ''}>Femenino</option>
-                <option value="otro" ${value === 'otro' ? 'selected' : ''}>Otro</option>
-            </select>
-        `;
-    } else if (fieldName === 'module') {
-        return `
-            <select class="edit-input">
-                <option value="Salud" ${value === 'Salud' ? 'selected' : ''}>Salud</option>
-                <option value="Album" ${value === 'Album' ? 'selected' : ''}>Album</option>
-                <option value="Personal" ${value === 'Personal' ? 'selected' : ''}>Personal</option>
-            </select>
-        `;
-    } else if (fieldName === 'category') {
-        return `
-            <select class="edit-input">
-                <option value="Administrador" ${value === 'Administrador' ? 'selected' : ''}>Administrador</option>
-                <option value="Coordinadora" ${value === 'Coordinadora' ? 'selected' : ''}>Coordinadora</option>
-                <option value="Corporativa" ${value === 'Corporativa' ? 'selected' : ''}>Corporativa</option>
-                <option value="Operador" ${value === 'Operador' ? 'selected' : ''}>Operador</option>
-                <option value="Laboratorio" ${value === 'Laboratorio' ? 'selected' : ''}>Laboratorio</option>
-            </select>
-        `;
-    } else if (fieldName === 'fullName') {
-        return `<input type="text" class="edit-input" value="${value}" autocomplete="off">`;
-    } else if (fieldName === 'birthDate') {
-        return `<input type="date" class="edit-input" value="${value}" autocomplete="off">`;
-    } else if (fieldName === 'email') {
-        return `<input type="email" class="edit-input" value="${value}" autocomplete="off">`;
-    } else if (fieldName === 'username') {
-        return `<input type="text" class="edit-input" value="${value}" autocomplete="off">`;
-    }
-    return `<input type="text" class="edit-input" value="${value}" autocomplete="off">`;
 }
 
 // Guardar ediciones
@@ -234,13 +194,13 @@ function cancelEdit(card, user) {
     editableFields.forEach(field => {
         const fieldName = field.dataset.field;
         const originalValue = user[fieldName];
-        const labelText = getLabel(fieldName);
-
-        if (fieldName === 'fullName') {
-            field.innerHTML = `<h3>${originalValue}</h3>`;
-        } else {
-            field.innerHTML = `<p><strong>${labelText}:</strong> ${originalValue}</p>`;
-        }
+        const displayText = field.querySelector('.display-text');
+        const editInput = field.querySelector('.edit-input');
+        displayText.innerHTML = fieldName === 'fullName' 
+            ? `<h3>${originalValue}</h3>` 
+            : `<p><strong>${getLabel(fieldName)}:</strong> ${originalValue}</p>`;
+        displayText.style.display = 'block';
+        editInput.style.display = 'none';
     });
 }
 

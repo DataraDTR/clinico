@@ -89,6 +89,12 @@ body {
     box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 }
 
+.user-card.editing {
+    max-height: none; /* Permite expansión durante edición */
+    overflow: visible;
+    height: auto; /* Ajusta altura automáticamente */
+}
+
 .card-header {
     display: flex;
     align-items: center;
@@ -166,62 +172,60 @@ body {
     background: #2e4a7a;
 }
 
-.editing .user-info input,
-.editing .user-info select {
-    width: 100%;
-    padding: 2px;
-    border: 1px solid #3A5795;
-    border-radius: 2px;
-    font-size: 11px;
-    box-sizing: border-box;
-    margin-top: 2px;
-}
-
-.editing .user-info .label {
-    display: inline;
-    font-weight: bold;
-    color: #333;
-}
-
-.editing .user-info .input-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
 .buttons-container {
     display: flex;
     justify-content: center;
     gap: 5px;
     margin-top: 5px;
+    width: 100%;
 }
 
-.save-btn {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 10px;
+.save-cancel-buttons {
+    display: none;
 }
 
-.save-btn:hover {
-    background: #218838;
+.editing .edit-btn {
+    display: none;
 }
 
-.cancel-btn {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 10px;
+.editing .save-cancel-buttons {
+    display: flex;
 }
 
-.cancel-btn:hover {
-    background: #c82333;
+.editing .user-info .display-text {
+    display: none;
+}
+
+.editing .user-info .edit-input {
+    display: block;
+}
+
+.edit-input {
+    width: 100%;
+    padding: 2px 4px;
+    border: 1px solid #3A5795;
+    border-radius: 2px;
+    font-size: 11px;
+    box-sizing: border-box;
+    margin-top: 2px;
+    display: none; /* Oculto por defecto */
+}
+
+.edit-input select {
+    padding: 4px;
+}
+
+.display-text {
+    display: block; /* Visible por defecto */
+}
+
+/* Labels durante edición */
+.editing .label {
+    font-weight: bold;
+    color: #333;
+    font-size: 11px;
+    margin-bottom: 2px;
+    display: block;
 }
 
 /* No hay mensaje en esta página, pero por consistencia */
