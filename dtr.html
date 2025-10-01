@@ -1,161 +1,293 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Tabla con Filtro</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f5f9fc;
-        margin: 0;
-        padding: 20px;
-    }
-    .tabla-contenedor {
-        width: 95%;
-        margin: auto;
-        border: 1px solid #b5d0e0;
-        background: white;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        border-radius: 5px;
-    }
-    .tabla-header {
-        background: #d7eaf7;
-        padding: 10px;
-        font-weight: bold;
-        border-bottom: 1px solid #b5d0e0;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    th {
-        background: #eaf4fb;
-        padding: 8px;
-        text-align: left;
-        border-bottom: 1px solid #b5d0e0;
-        position: relative;
-    }
-    td {
-        padding: 8px;
-        border-bottom: 1px solid #eee;
-    }
-    tr:hover {
-        background: #f2faff;
-    }
-    /* Filtro */
-    .filter-box {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background: white;
-        border: 1px solid #ccc;
-        padding: 5px;
-        z-index: 100;
-        width: 150px;
-    }
-    .filter-box select,
-    .filter-box input {
-        margin: 3px 0;
-        width: 100%;
-        padding: 3px;
-        font-size: 12px;
-    }
-    .filter-btn {
-        cursor: pointer;
-        font-size: 14px;
-        padding: 2px 5px;
-        background: #cce4f7;
-        border: 1px solid #7aaad9;
-        border-radius: 3px;
-        margin-left: 5px;
-    }
-</style>
-</head>
-<body>
+import React, { useState, useMemo } from 'react';
+import { Search, ChevronDown, ChevronUp } from 'lucide-react';
 
-<div class="tabla-contenedor">
-    <div class="tabla-header">SOCIEDAD: CLINICA REGIONAL LIRCAY SPA</div>
-    <table id="tabla">
-        <thead>
-            <tr>
-                <th>Código <button class="filter-btn" onclick="toggleFilter(this)">≡</button>
-                    <div class="filter-box">
-                        <select>
-                            <option value="contiene">Contiene</option>
-                            <option value="igual">Igual</option>
-                            <option value="empieza">Empieza con</option>
-                        </select>
-                        <input type="text" onkeyup="filtrarTabla(this)">
-                    </div>
-                </th>
-                <th>RUT <button class="filter-btn" onclick="toggleFilter(this)">≡</button>
-                    <div class="filter-box">
-                        <select>
-                            <option value="contiene">Contiene</option>
-                            <option value="igual">Igual</option>
-                            <option value="empieza">Empieza con</option>
-                        </select>
-                        <input type="text" onkeyup="filtrarTabla(this)">
-                    </div>
-                </th>
-                <th>Nombre <button class="filter-btn" onclick="toggleFilter(this)">≡</button>
-                    <div class="filter-box">
-                        <select>
-                            <option value="contiene">Contiene</option>
-                            <option value="igual">Igual</option>
-                            <option value="empieza">Empieza con</option>
-                        </select>
-                        <input type="text" onkeyup="filtrarTabla(this)">
-                    </div>
-                </th>
-                <th>Dirección</th>
-                <th>Teléfono</th>
-                <th>Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td><td>93.626.000-4</td><td>3M CHILE S A</td><td>SANTA ISABEL 1001 PROVIDENCIA</td><td>228701</td><td></td>
-            </tr>
-            <tr>
-                <td>3</td><td>96.689.310-9</td><td>TRANSBANK S A</td><td>HUERFANOS 770 PISO 10</td><td>6386383</td><td></td>
-            </tr>
-            <tr>
-                <td>6</td><td>81.378.300-2</td><td>ABBOTT LABORATORIOS DE CHILE LTDA</td><td>AV. EL SALTO 5380, HUECHURABA</td><td>5576062</td><td>maria.pazruiz@abbott.com</td>
-            </tr>
-            <tr>
-                <td>8</td><td>76.641.770-K</td><td>ARAYA Y CIA LIMITADA</td><td>TOCORNAL 1334</td><td>5526665</td><td></td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+const ProviderTable = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [columnWidths, setColumnWidths] = useState({
+    codigo: 80,
+    rut: 120,
+    nombre: 250,
+    direccion: 250,
+    telefono: 100,
+    fax: 100,
+    contacto: 100,
+    email: 300
+  });
+  const [resizing, setResizing] = useState(null);
 
-<script>
-function toggleFilter(btn) {
-    let box = btn.nextElementSibling;
-    box.style.display = (box.style.display === "block") ? "none" : "block";
-}
+  const data = [
+    { codigo: 1, rut: '93.626.000-4', nombre: '3M CHILE S A', direccion: 'SANTA ISABEL 1001 PROVIDENCIA', telefono: '228701', fax: 'CARGA_2', contacto: '', email: '' },
+    { codigo: 3, rut: '96.689.310-9', nombre: 'TRANSSANK S A', direccion: 'HUERFANOS 770 PISO 10', telefono: '6386383', fax: '', contacto: '', email: '' },
+    { codigo: 6, rut: '81.378.300-2', nombre: 'ABBOTT LABORATORIES DE CHILE LTDA', direccion: 'AV. EL SALTO 3380, HUECHURABA', telefono: '5576062', fax: '', contacto: '', email: 'MARIA.PAZRUIZ@ABBOTT.COM,SAC_CHILE@ABBOTT.COM,CRISTIAN.VERA@ABBO' },
+    { codigo: 8, rut: '78.634.770-K', nombre: 'ARAYA Y CIA LIMITADA', direccion: 'TOCORNAL 1334', telefono: '5562665', fax: '', contacto: '', email: '' },
+    { codigo: 16, rut: '96.579.800-5', nombre: 'EMPRESA DE SERVICIOS SANITARIOS DE LOS LAGOS S.A', direccion: 'URMENETA 1062', telefono: '266070', fax: '', contacto: '', email: '' },
+    { codigo: 19, rut: '78.411.950-5', nombre: 'ALLERGAN LABORATORIOS LIMITADA', direccion: 'AV. VITACURA 2736 PISO 15 LAS CONDES', telefono: '3414787', fax: '', contacto: '', email: '' },
+    { codigo: 23, rut: '94.747.000-0', nombre: 'AM INTERNACIONAL S A', direccion: '', telefono: '2220358', fax: '', contacto: '', email: 'CONTACTO@AMINTERNACIONAL.CL,HFAUNDEZ@AMINTERNACIONAL.CL,ALEXISE' },
+    { codigo: 29, rut: '89.171.600-1', nombre: 'CABAÑAS DEL LAGO LTDA', direccion: 'KLENNER 195', telefono: '259001', fax: '', contacto: '', email: '' },
+    { codigo: 30, rut: '65.896.100-9', nombre: 'SERVICIOS EQUIFAX CHILE LIMITADA', direccion: 'LINCOYAN 370 - PISO 2 - CONCEPCION', telefono: '6384565', fax: '', contacto: '', email: '' },
+    { codigo: 31, rut: '90.299.000-3', nombre: 'CIA NACIONAL DE TELEFONOS TELEFONICA DEL SUR S A', direccion: 'SAN CARLOS 107', telefono: '0', fax: '', contacto: '', email: '' },
+    { codigo: 34, rut: '78.440.950-3', nombre: 'BOLETIN LABORAL EDICIONES LIMITADA', direccion: 'SERRANO 140 OF. 22', telefono: '6390829', fax: '', contacto: '', email: '' },
+    { codigo: 36, rut: '87.845.500-2', nombre: 'TELEFONICA MOVILES CHILE S A', direccion: 'AVDA. EL BOSQUE SUR 90 LAS CONDES', telefono: '6616000', fax: '', contacto: '', email: '' },
+    { codigo: 44, rut: '91.537.000-4', nombre: 'BAYER S A', direccion: '', telefono: '5208200', fax: '', contacto: '', email: 'GESTIONVENTAS@BAYER.COM,ROBERTO.DUHART@BAYER.COM' },
+    { codigo: 49, rut: '96.519.830-K', nombre: 'BPH S.A.', direccion: 'ERASMO ESCALA 1875', telefono: '6980040', fax: '', contacto: '', email: 'INSUMOS@BPH.CL,INSUMOS@BPH.CL,VENTAS3@BPH.CL' },
+    { codigo: 50, rut: '78.366.970-6', nombre: 'INDUSTRIAL Y COMERCIAL BAXTER DE CHILE LTDA', direccion: 'AV. MEXICO 715, RECOLETA', telefono: '6202100', fax: '', contacto: '', email: 'CENTRO_DE_SERVICIOS@BAXTER.COM,ALEXANDRA_SOTO@BAXTER.COM' },
+    { codigo: 51, rut: '96.659.920-0', nombre: 'BIOMERIEUX CHILE S A', direccion: '', telefono: '226942092', fax: '', contacto: '', email: 'VENTAS@BIOMERIEUX.COM' },
+    { codigo: 52, rut: '79.702.820-7', nombre: 'PRODUCTOS BIOQUIMICOS LIMITADA', direccion: '8 ORIENTE 1459 TALCA', telefono: '71231836', fax: 'CARGA_2', contacto: '', email: '' },
+    { codigo: 61, rut: '91.637.000-8', nombre: 'LABORATORIOS RECALCINE SA', direccion: 'AV. PEDRO DE VALDIVIA 295, PROVIDENCIA', telefono: '2225244', fax: '', contacto: '', email: 'OCMARKETACCESS@ABBOTT.COM, SERGIO.OLIVA@ABBOTT.COM' },
+    { codigo: 63, rut: '79.568.850-1', nombre: 'VALTEK S.A.', direccion: 'AVENIDA MARATHON 1943, ÑUÑOA', telefono: '26541100', fax: '', contacto: '', email: 'GALVAREZ@VALTEK.CL,FPINO@VALTEK.CL,COORDLABORATORIO@CLINICALIRAY.' },
+    { codigo: 65, rut: '96.576.750-9', nombre: 'UNIC COMPANY CHILE S.A.', direccion: 'MARURI 433,INDEPENDENCIA', telefono: '7777764', fax: '', contacto: '', email: '' },
+    { codigo: 67, rut: '96.613.250-7', nombre: 'LABIN CHILE S A', direccion: 'ROMAN DIAZ 82', telefono: '2357578', fax: '', contacto: '', email: 'VENTAS@WIENER-LAB.CL,RRAMIREZ@WIENER-LAB.CL' },
+    { codigo: 68, rut: '86.397.000-8', nombre: 'DIPROMED S A', direccion: 'AVDA. MATTA 649', telefono: '6353804', fax: '', contacto: '', email: 'GCACERES@DIPROMED.CL' },
+    { codigo: 70, rut: '80.621.200-8', nombre: 'MERCK S A', direccion: 'FRANCISCO DE PAULA TAFORÓ 1981-ÑUÑOA', telefono: '3400000', fax: '', contacto: '', email: '' },
+    { codigo: 76, rut: '78.718.650-5', nombre: 'ASISTENCIA ELECTRONICA LTDA.', direccion: 'MARIN 055 PROVIDENCIA', telefono: '6345305', fax: '', contacto: '', email: '' },
+    { codigo: 77, rut: '86.383.300-0', nombre: 'MEDIPLEX S A', direccion: 'JULIO PRADO 1069 - PROVIDENCIA', telefono: '2049674', fax: '', contacto: '', email: 'NATALIA.ESPINOZA@MEDIPLEX.CL' },
+    { codigo: 80, rut: '96.787.750-6', nombre: 'VTR BANDA ANCHA (CHILE) S.A.', direccion: 'GMO,GALLARDO 119', telefono: '319891', fax: '', contacto: '', email: '' },
+    { codigo: 81, rut: '86.316.500-8', nombre: 'IMPORTADORA SURDENT LIMITADA', direccion: 'VARAS 653 OF. 203', telefono: '254853', fax: '', contacto: '', email: '' }
+  ];
 
-function filtrarTabla(input) {
-    let filtro = input.value.toLowerCase();
-    let select = input.previousElementSibling.value;
-    let th = input.closest("th");
-    let index = Array.from(th.parentNode.children).indexOf(th);
-    let filas = document.querySelectorAll("#tabla tbody tr");
-
-    filas.forEach(fila => {
-        let celda = fila.children[index].innerText.toLowerCase();
-        let mostrar = false;
-
-        if (select === "contiene" && celda.includes(filtro)) mostrar = true;
-        if (select === "igual" && celda === filtro) mostrar = true;
-        if (select === "empieza" && celda.startsWith(filtro)) mostrar = true;
-
-        fila.style.display = mostrar ? "" : "none";
+  const filteredData = useMemo(() => {
+    return data.filter(item => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        item.codigo.toString().includes(searchLower) ||
+        item.rut.toLowerCase().includes(searchLower) ||
+        item.nombre.toLowerCase().includes(searchLower) ||
+        item.direccion.toLowerCase().includes(searchLower) ||
+        item.telefono.toLowerCase().includes(searchLower) ||
+        item.email.toLowerCase().includes(searchLower)
+      );
     });
-}
-</script>
+  }, [searchTerm]);
 
-</body>
-</html>
+  const sortedData = useMemo(() => {
+    if (!sortConfig.key) return filteredData;
+
+    return [...filteredData].sort((a, b) => {
+      const aVal = a[sortConfig.key];
+      const bVal = b[sortConfig.key];
+
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [filteredData, sortConfig]);
+
+  const handleSort = (key) => {
+    setSortConfig({
+      key,
+      direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+    });
+  };
+
+  const handleMouseDown = (e, column) => {
+    e.preventDefault();
+    setResizing({ column, startX: e.clientX, startWidth: columnWidths[column] });
+  };
+
+  React.useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!resizing) return;
+      
+      const diff = e.clientX - resizing.startX;
+      const newWidth = Math.max(50, resizing.startWidth + diff);
+      
+      setColumnWidths(prev => ({
+        ...prev,
+        [resizing.column]: newWidth
+      }));
+    };
+
+    const handleMouseUp = () => {
+      setResizing(null);
+    };
+
+    if (resizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [resizing]);
+
+  return (
+    <div className="w-full h-screen bg-gray-50 p-4">
+      <div className="bg-white rounded-lg shadow-lg h-full flex flex-col">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-400 to-blue-500 text-white p-4 rounded-t-lg">
+          <h1 className="text-xl font-bold">SOCIEDAD CLINICA REGIONAL LIRCAY SPA</h1>
+        </div>
+
+        {/* Subheader */}
+        <div className="bg-blue-100 px-4 py-2 border-b">
+          <h2 className="text-sm font-semibold text-blue-900">DATOS PROVEEDORES</h2>
+        </div>
+
+        {/* Search bar */}
+        <div className="p-4 border-b bg-gray-50">
+          <div className="flex items-center gap-4">
+            <label className="font-medium text-gray-700">Descripción:</label>
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+              Exportar
+            </button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="flex-1 overflow-auto">
+          <table className="border-collapse text-sm" style={{ tableLayout: 'fixed' }}>
+            <thead className="bg-gray-100 sticky top-0 z-10">
+              <tr>
+                <th className="border border-gray-300 px-2 py-2 cursor-pointer hover:bg-gray-200 relative" 
+                    style={{ width: `${columnWidths.codigo}px` }}
+                    onClick={() => handleSort('codigo')}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-blue-700">Código</span>
+                    {sortConfig.key === 'codigo' && (
+                      sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                    )}
+                  </div>
+                  <div 
+                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
+                    onMouseDown={(e) => handleMouseDown(e, 'codigo')}
+                  />
+                </th>
+                <th className="border border-gray-300 px-2 py-2 cursor-pointer hover:bg-gray-200 relative" 
+                    style={{ width: `${columnWidths.rut}px` }}
+                    onClick={() => handleSort('rut')}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-blue-700">Rut</span>
+                    {sortConfig.key === 'rut' && (
+                      sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                    )}
+                  </div>
+                  <div 
+                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
+                    onMouseDown={(e) => handleMouseDown(e, 'rut')}
+                  />
+                </th>
+                <th className="border border-gray-300 px-2 py-2 relative" 
+                    style={{ width: `${columnWidths.nombre}px` }}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-blue-700">Nombre</span>
+                  </div>
+                  <div 
+                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
+                    onMouseDown={(e) => handleMouseDown(e, 'nombre')}
+                  />
+                </th>
+                <th className="border border-gray-300 px-2 py-2 relative" 
+                    style={{ width: `${columnWidths.direccion}px` }}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-blue-700">Dirección</span>
+                  </div>
+                  <div 
+                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
+                    onMouseDown={(e) => handleMouseDown(e, 'direccion')}
+                  />
+                </th>
+                <th className="border border-gray-300 px-2 py-2 cursor-pointer hover:bg-gray-200 relative" 
+                    style={{ width: `${columnWidths.telefono}px` }}
+                    onClick={() => handleSort('telefono')}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-blue-700">Teléfono</span>
+                    {sortConfig.key === 'telefono' && (
+                      sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                    )}
+                  </div>
+                  <div 
+                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
+                    onMouseDown={(e) => handleMouseDown(e, 'telefono')}
+                  />
+                </th>
+                <th className="border border-gray-300 px-2 py-2 font-semibold text-blue-700 relative" 
+                    style={{ width: `${columnWidths.fax}px` }}>
+                  Fax
+                  <div 
+                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
+                    onMouseDown={(e) => handleMouseDown(e, 'fax')}
+                  />
+                </th>
+                <th className="border border-gray-300 px-2 py-2 font-semibold text-blue-700 relative" 
+                    style={{ width: `${columnWidths.contacto}px` }}>
+                  Contacto
+                  <div 
+                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
+                    onMouseDown={(e) => handleMouseDown(e, 'contacto')}
+                  />
+                </th>
+                <th className="border border-gray-300 px-2 py-2 relative" 
+                    style={{ width: `${columnWidths.email}px` }}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-blue-700">Email</span>
+                  </div>
+                  <div 
+                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
+                    onMouseDown={(e) => handleMouseDown(e, 'email')}
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedData.map((row, idx) => (
+                <tr key={idx} className="hover:bg-blue-50 transition">
+                  <td className="border border-gray-300 px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths.codigo}px` }}>
+                    <div className="truncate">{row.codigo}</div>
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.rut}px` }}>
+                    <div className="truncate">{row.rut}</div>
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.nombre}px` }}>
+                    <div className="truncate">{row.nombre}</div>
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.direccion}px` }}>
+                    <div className="truncate">{row.direccion}</div>
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths.telefono}px` }}>
+                    <div className="truncate">{row.telefono}</div>
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths.fax}px` }}>
+                    <div className="truncate">{row.fax}</div>
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.contacto}px` }}>
+                    <div className="truncate">{row.contacto}</div>
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.email}px` }}>
+                    <div className="truncate">{row.email}</div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t p-3 bg-gray-50 flex justify-between items-center text-sm text-gray-600">
+          <div>1 a 27 de 10,955</div>
+          <div className="flex gap-2">
+            <button className="px-3 py-1 border rounded hover:bg-gray-100">{'<<'}</button>
+            <button className="px-3 py-1 border rounded hover:bg-gray-100">{'<'}</button>
+            <span className="px-3 py-1">Página 1 de 406</span>
+            <button className="px-3 py-1 border rounded hover:bg-gray-100">{'>'}</button>
+            <button className="px-3 py-1 border rounded hover:bg-gray-100">{'>>'}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProviderTable;
