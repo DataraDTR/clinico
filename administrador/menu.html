@@ -86,96 +86,7 @@
             align-items: flex-start;
             overflow-y: auto;
             position: relative;
-            transition: width 0.3s ease;
             z-index: 1200;
-        }
-
-        .sidebar.collapsed {
-            width: 50px;
-            align-items: center;
-            position: relative;
-            overflow: visible;
-        }
-
-        .sidebar.collapsed h2 {
-            font-size: 14px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .sidebar.collapsed .menu-text {
-            display: none;
-        }
-
-        .sidebar.collapsed .submenu-content a {
-            justify-content: center;
-            padding: 8px;
-            position: relative;
-        }
-
-        .sidebar.collapsed .submenu-content a span.submenu-text {
-            display: none;
-        }
-
-        .sidebar.collapsed .submenu-content a span.first-letter {
-            display: inline-block;
-            font-size: 12px;
-            color: #3A5795;
-            font-weight: bold;
-        }
-
-        .sidebar.collapsed .submenu-content a:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            left: calc(100% + 10px);
-            top: 50%;
-            transform: translateY(-50%);
-            background: #333;
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
-            white-space: nowrap;
-            font-size: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            z-index: 1300;
-        }
-
-        .sidebar.collapsed .submenu-content a:hover::before {
-            content: "";
-            position: absolute;
-            left: calc(100% + 5px);
-            top: 50%;
-            transform: translateY(-50%);
-            border: 5px solid transparent;
-            border-right-color: #333;
-            z-index: 1300;
-        }
-
-        .sidebar.collapsed a:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            left: calc(100% + 10px);
-            top: 50%;
-            transform: translateY(-50%);
-            background: #333;
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
-            white-space: nowrap;
-            font-size: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            z-index: 1300;
-        }
-
-        .sidebar.collapsed a:hover::before {
-            content: "";
-            position: absolute;
-            left: calc(100% + 5px);
-            top: 50%;
-            transform: translateY(-50%);
-            border: 5px solid transparent;
-            border-right-color: #333;
-            z-index: 1300;
         }
 
         .sidebar h2 {
@@ -220,7 +131,7 @@
         }
 
         .back-link {
-            color: #4cc9f0 !important;
+            color: #3A5795 !important;
             font-weight: bold;
         }
 
@@ -270,32 +181,6 @@
             list-style: disc;
             padding-left: 18px;
         }
-
-        .sidebar-toggle {
-            position: sticky;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            background: #ffffff;
-            border-top: 1px solid #ddd;
-            z-index: 1;
-        }
-
-        .sidebar-toggle a {
-            display: block;
-            padding: 10px;
-            color: #3A5795;
-            position: relative;
-        }
-
-        .sidebar-toggle a:hover {
-            background: #ddd;
-        }
-
-        .sidebar.collapsed .sidebar-toggle a {
-            padding: 10px 0;
-        }
     </style>
 </head>
 <body>
@@ -333,9 +218,6 @@
             <div class="submenu" style="display: none;">
                 <a href="#" class="back-link" data-tooltip="Volver"><i class="fas fa-arrow-left"></i> <span class="menu-text">Volver</span></a>
                 <div class="submenu-content"></div>
-            </div>
-            <div class="sidebar-toggle">
-                <a href="#" id="toggle-sidebar" data-tooltip="Contraer menú"><i class="fas fa-angles-left"></i></a>
             </div>
         </div>
 
@@ -447,21 +329,6 @@
                     submenu.style.display = 'none';
                 });
             });
-        });
-
-        // Toggle sidebar
-        document.getElementById('toggle-sidebar').addEventListener('click', (e) => {
-            e.preventDefault();
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('collapsed');
-            const icon = e.currentTarget.querySelector('i');
-            if (sidebar.classList.contains('collapsed')) {
-                icon.className = 'fas fa-angles-right';
-                e.currentTarget.setAttribute('data-tooltip', 'Expandir menú');
-            } else {
-                icon.className = 'fas fa-angles-left';
-                e.currentTarget.setAttribute('data-tooltip', 'Contraer menú');
-            }
         });
 
         // Cerrar sesión desde sidebar (si se selecciona)
