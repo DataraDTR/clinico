@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Empresas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .page-info {
+            font-size: 14px;
+            color: #666;
+        }
+        .page-links {
+            display: flex;
+            gap: 5px;
+        }
+        .page-link {
+            padding: 8px 12px;
+            background: #e9ecef;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #007bff;
+            cursor: pointer;
+        }
+        .page-link:hover, .page-link.active {
+            background: #007bff;
+            color: white;
+        }
+        .page-link.disabled {
+            background: #f8f9fa;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Registro de Empresas</h1>
+    
+    <div class="form-container">
+        <h2>Agregar Nueva Empresa</h2>
+        <form id="empresaForm">
+            <div class="form-group">
+                <label for="nombre">Nombre de la Empresa:</label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="rut">RUT de la Empresa:</label>
+                <input type="text" id="rut" name="rut" placeholder="Ej: 76.123.456-7" required>
+            </div>
+            <button type="submit">Agregar Empresa</button>
+        </form>
+    </div>
+
+    <table id="empresasTable">
+        <thead>
+            <tr>
+                <th>Nombre de la Empresa</th>
+                <th>RUT</th>
+            </tr>
+        </thead>
+        <tbody id="empresasBody">
+            <!-- Los datos se cargarán aquí dinámicamente -->
+        </tbody>
+    </table>
+
+    <div class="pagination" id="pagination">
+        <div>
+            <button id="prevBtn" class="page-link">Anterior</button>
+        </div>
+        <div class="page-info">
+            <span id="pageInfo">Página 1 de 1</span> | 
+            <span id="recordsInfo">0 registros en esta página de 0</span>
+        </div>
+        <div class="page-links" id="pageLinks">
+            <!-- Los enlaces de página se generarán aquí -->
+        </div>
+        <div>
+            <button id="nextBtn" class="page-link">Siguiente</button>
+        </div>
+    </div>
+
+    <script>
+        let empresas = []; // Array para almacenar las empresas
+        let currentPage = 1;
+        const recordsPerPage = 5; // Registros por página
+
+        // Función para renderizar la tabla
+        function renderTable(page) {
+            const start = (page - 1) * recordsPerPage;
+            const end = start + recordsPerPage;
+            const pageEmpresas = empresas.slice(start, end);
+
+            const tbody = document.getElementById('empresasBody');
+            tbody.innerHTML = '';
+
+            pageEmpresas.forEach(empresa => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${empresa.nombre}</td>
+                    <td>${empresa.rut}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Actualizar info de página
+            const totalPages = Math.ceil(empresas.length / recordsPerPage);
+            document.getElementById('pageInfo').textContent = `Página ${page} de ${totalPages}`;
+            const recordsThisPage = pageEmpresas.length;
+            document.getElementById('recordsInfo').textContent = `${recordsThisPage} registros en esta página de ${empresas.length}`;
+
+            // Renderizar enlaces de página
+            renderPageLinks(totalPages, page);
+
+            // Actualizar botones anterior/siguiente
+            document.getElementById('prevBtn').classList.toggle('disabled', page === 1);
+            document.getElementById('nextBtn').classList.toggle('disabled', page === totalPages);
+        }
+
+        // Función para renderizar enlaces de página (1 2 3 ... 7 8 9)
+        function renderPageLinks(totalPages, current) {
+            const pageLinks = document.getElementById('pageLinks');
+            pageLinks.innerHTML = '';
+
+            // Mostrar primeras páginas
+            for (let i = 1; i <= Math.min(3, totalPages); i++) {
+                addPageLink(i, current);
+            }
+
+            // Si hay más páginas, mostrar ...
+            if (totalPages > 6) {
+                if (current > 4 && current < totalPages - 2) {
+                    pageLinks.innerHTML += '<span>...</span>';
+                    for (let i = current - 1; i <= current + 1; i++) {
+                        addPageLink(i, current);
+                    }
+                    pageLinks.innerHTML += '<span>...</span>';
+                } else if (current > 4) {
+                    pageLinks.innerHTML += '<span>...</span>';
+                }
+                // Mostrar últimas páginas
+                for (let i = Math.max(totalPages - 2, 4); i <= totalPages; i++) {
+                    addPageLink(i, current);
+                }
+            } else {
+                // Si son pocas páginas, mostrar todas después de las primeras
+                for (let i = 4; i <= totalPages; i++) {
+                    addPageLink(i, current);
+                }
+            }
+        }
+
+        function addPageLink(pageNum, current) {
+            const link = document.createElement('span');
+            link.className = 'page-link';
+            if (pageNum === current) {
+                link.classList.add('active');
+            }
+            link.textContent = pageNum;
+            link.addEventListener('click', () => {
+                if (pageNum !== current) {
+                    currentPage = pageNum;
+                    renderTable(currentPage);
+                }
+            });
+            document.getElementById('pageLinks').appendChild(link);
+        }
+
+        // Event listeners para botones
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable(currentPage);
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            const totalPages = Math.ceil(empresas.length / recordsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable(currentPage);
+            }
+        });
+
+        // Manejar formulario
+        document.getElementById('empresaForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value.trim();
+            const rut = document.getElementById('rut').value.trim();
+
+            if (nombre && rut) {
+                empresas.push({ nombre, rut });
+                document.getElementById('empresaForm').reset();
+                // Si estamos en la última página o la página actual se ve afectada, ajustar
+                const totalPages = Math.ceil(empresas.length / recordsPerPage);
+                if (currentPage > totalPages) {
+                    currentPage = totalPages;
+                }
+                renderTable(currentPage);
+            }
+        });
+
+        // Inicializar tabla vacía
+        renderTable(1);
+    </script>
+</body>
+</html>
