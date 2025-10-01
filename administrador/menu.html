@@ -11,127 +11,350 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
         }
+
         body {
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #f5f5f5;
+            color: #333;
         }
+
         .header {
-            background-color: #3A5795;
-            color: white;
-            padding: 15px 20px;
+            background: #3A5795;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-size: 14px;
+            color: white;
         }
+
         .header h1 {
-            font-size: 20px;
+            font-size: 18px;
+            color: white;
+        }
+
+        .header .info {
+            font-size: 14px;
+            color: white;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .header .user {
             font-weight: bold;
         }
-        .header .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+
+        .header .date {
+            font-size: 12px;
         }
+
         .header .logout-btn {
             background: none;
             border: none;
             color: white;
             cursor: pointer;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
+
         .header .logout-btn:hover {
             opacity: 0.8;
         }
-        .container {
+
+        .layout {
             display: flex;
-            height: calc(100vh - 60px); /* Ajustar por altura del header */
+            flex: 1;
+            min-height: 0;
         }
+
         .sidebar {
-            width: 250px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #dee2e6;
+            width: 180px;
+            background: #ffffff;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            padding: 15px 10px;
+            align-items: flex-start;
             overflow-y: auto;
-            padding: 20px 0;
+            position: relative;
+            transition: width 0.3s ease;
+            z-index: 1200;
         }
-        .sidebar ul {
-            list-style: none;
+
+        .sidebar.collapsed {
+            width: 50px;
+            align-items: center;
+            position: relative;
+            overflow: visible;
         }
-        .sidebar li {
-            margin-bottom: 5px;
+
+        .sidebar.collapsed h2 {
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 10px;
         }
+
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+
+        .sidebar.collapsed .submenu-content a {
+            justify-content: center;
+            padding: 8px;
+            position: relative;
+        }
+
+        .sidebar.collapsed .submenu-content a span.submenu-text {
+            display: none;
+        }
+
+        .sidebar.collapsed .submenu-content a span.first-letter {
+            display: inline-block;
+            font-size: 12px;
+            color: #4cc9f0;
+            font-weight: bold;
+        }
+
+        .sidebar.collapsed .submenu-content a:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: calc(100% + 10px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1300;
+        }
+
+        .sidebar.collapsed .submenu-content a:hover::before {
+            content: "";
+            position: absolute;
+            left: calc(100% + 5px);
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-right-color: #333;
+            z-index: 1300;
+        }
+
+        .sidebar.collapsed a:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: calc(100% + 10px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1300;
+        }
+
+        .sidebar.collapsed a:hover::before {
+            content: "";
+            position: absolute;
+            left: calc(100% + 5px);
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-right-color: #333;
+            z-index: 1300;
+        }
+
+        .sidebar h2 {
+            margin: 0 auto 5px auto;
+            color: #4cc9f0;
+            font-weight: bold;
+            font-size: 16px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            text-align: center;
+            width: 100%;
+        }
+
         .sidebar a {
+            color: #333;
+            text-decoration: none;
+            margin-bottom: 3px;
             display: flex;
             align-items: center;
-            padding: 12px 20px;
-            text-decoration: none;
-            color: #333;
-            transition: background-color 0.3s;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: 0.3s;
+            width: 100%;
+            text-align: left;
         }
+
+        .sidebar a i {
+            margin-right: 8px;
+            color: #4cc9f0;
+            font-size: 12px;
+        }
+
         .sidebar a:hover {
-            background-color: #e9ecef;
-        }
-        .sidebar i {
-            margin-right: 10px;
-            width: 20px;
-        }
-        .content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background-color: white;
-        }
-        .content h2 {
-            margin-bottom: 20px;
+            background: #ddd;
             color: #333;
         }
-        .welcome-message {
-            text-align: center;
-            color: #666;
-            font-size: 18px;
+
+        .submenu {
+            display: none;
+            width: 100%;
         }
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-            .container {
-                flex-direction: column;
-            }
-            .content {
-                height: calc(100vh - 60px - 200px);
-            }
+
+        .back-link {
+            color: #4cc9f0 !important;
+            font-weight: bold;
+        }
+
+        .submenu-content a {
+            padding-left: 20px;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f0f2f5;
+            transition: margin-left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .content {
+            padding: 15px;
+            flex: 1;
+            max-height: calc(100vh - 60px);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h3 {
+            color: #4cc9f0;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .card p,
+        .card li {
+            color: #555;
+            font-size: 13px;
+        }
+
+        .card ul {
+            list-style: disc;
+            padding-left: 18px;
+        }
+
+        .sidebar-toggle {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            background: #ffffff;
+            border-top: 1px solid #ddd;
+            z-index: 1;
+        }
+
+        .sidebar-toggle a {
+            display: block;
+            padding: 10px;
+            color: #4cc9f0;
+            position: relative;
+        }
+
+        .sidebar-toggle a:hover {
+            background: #ddd;
+        }
+
+        .sidebar.collapsed .sidebar-toggle a {
+            padding: 10px 0;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Datara - Salud</h1>
-        <div class="user-info">
-            <span id="userName">Usuario</span>
+        <div class="info">
+            <div class="user">Bienvenido, <span id="userName">Usuario</span></div>
+            <div class="date" id="currentDate"></div>
             <button class="logout-btn" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Salir
             </button>
         </div>
     </div>
-    <div class="container">
-        <nav class="sidebar">
-            <ul>
-                <li><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="#"><i class="fas fa-users"></i> Usuarios</a></li>
-                <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
-                <li><a href="#"><i class="fas fa-cog"></i> Configuración</a></li>
-                <!-- Agrega más ítems según la categoría si es necesario -->
-            </ul>
-        </nav>
-        <main class="content">
-            <h2>Bienvenido al Menú</h2>
-            <div class="welcome-message">
-                <p>Selecciona una opción del menú lateral para continuar.</p>
-                <!-- Aquí irá el contenido dinámico según la selección -->
+
+    <div class="layout">
+        <div class="sidebar">
+            <h2>Datara Salud</h2>
+            <div class="main-menu">
+                <a href="#" data-submenu="implantes"><i class="fas fa-tooth"></i> <span class="menu-text">Implantes</span></a>
+                <a href="#" data-submenu="consignacion"><i class="fas fa-box"></i> <span class="menu-text">Consignación</span></a>
+                <a href="#" data-submenu="historico"><i class="fas fa-history"></i> <span class="menu-text">Histórico</span></a>
+                <a href="#" data-submenu="laboratorio"><i class="fas fa-flask"></i> <span class="menu-text">Laboratorio</span></a>
+                <a href="#" data-submenu="visualizador"><i class="fas fa-chart-line"></i> <span class="menu-text">Visualizador</span></a>
+                <a href="#" data-submenu="prestacion"><i class="fas fa-briefcase-medical"></i> <span class="menu-text">Prestación</span></a>
+                <a href="#" data-submenu="herramientas"><i class="fas fa-tools"></i> <span class="menu-text">Herramientas</span></a>
+                <a href="#" data-submenu="importacion"><i class="fas fa-file-import"></i> <span class="menu-text">Importación</span></a>
+                <a href="#" data-submenu="apuntes"><i class="fas fa-note-sticky"></i> <span class="menu-text">Apuntes</span></a>
+                <a href="#" data-submenu="migracion"><i class="fas fa-exchange-alt"></i> <span class="menu-text">Migración</span></a>
+                <a href="#" data-submenu="dashboard"><i class="fas fa-tachometer-alt"></i> <span class="menu-text">Dashboard</span></a>
+                <a href="#" data-submenu="archivos"><i class="fas fa-folder"></i> <span class="menu-text">Archivos</span></a>
+                <a href="#" data-submenu="usuarios"><i class="fas fa-users"></i> <span class="menu-text">Usuarios</span></a>
+                <a href="#" data-submenu="configuracion"><i class="fas fa-cog"></i> <span class="menu-text">Configuración</span></a>
+                <a href="#" data-submenu="cerrar-sesion"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Cerrar Sesión</span></a>
             </div>
-        </main>
+            <div class="submenu" style="display: none;">
+                <a href="#" class="back-link" data-tooltip="Volver"><i class="fas fa-arrow-left"></i> <span class="menu-text">Volver</span></a>
+                <div class="submenu-content"></div>
+            </div>
+            <div class="sidebar-toggle">
+                <a href="#" id="toggle-sidebar" data-tooltip="Contraer menú"><i class="fas fa-angles-left"></i></a>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="content">
+                <div class="card">
+                    <h3>Estadísticas</h3>
+                    <p>CPU: 15% | Memoria: 3.2GB | Almacenamiento: 120GB</p>
+                </div>
+                <div class="card">
+                    <h3>Actividad Reciente</h3>
+                    <ul>
+                        <li>Archivo subido: Informe.pdf</li>
+                        <li>Usuario creado: juan@example.com</li>
+                        <li>Actualización del sistema realizada</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase SDKs -->
@@ -177,6 +400,75 @@
                 console.error('Error al cerrar sesión:', error);
             }
         };
+    </script>
+
+    <script>
+        // Actualizar fecha actual
+        function updateDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-ES', options);
+        }
+        updateDate();
+
+        // Manejo de submenús
+        document.querySelectorAll('.main-menu a[data-submenu]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const submenuId = link.getAttribute('data-submenu');
+                const submenu = document.querySelector('.submenu');
+                const submenuContent = document.querySelector('.submenu-content');
+                const mainMenu = document.querySelector('.main-menu');
+
+                // Ocultar main-menu y mostrar submenu
+                mainMenu.style.display = 'none';
+                submenu.style.display = 'block';
+
+                // Cargar contenido del submenú (aquí puedes agregar lógica dinámica)
+                submenuContent.innerHTML = ''; // Limpiar
+                // Ejemplo: agregar enlaces ficticios
+                const subItems = [
+                    { text: 'Opción 1', icon: 'fas fa-list' },
+                    { text: 'Opción 2', icon: 'fas fa-edit' },
+                    { text: 'Opción 3', icon: 'fas fa-trash' }
+                ];
+                subItems.forEach(item => {
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    a.innerHTML = `<i class="${item.icon}"></i> <span class="menu-text submenu-text">${item.text}</span>`;
+                    a.setAttribute('data-tooltip', item.text);
+                    submenuContent.appendChild(a);
+                });
+
+                // Manejo de back-link
+                document.querySelector('.back-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    mainMenu.style.display = 'block';
+                    submenu.style.display = 'none';
+                });
+            });
+        });
+
+        // Toggle sidebar
+        document.getElementById('toggle-sidebar').addEventListener('click', (e) => {
+            e.preventDefault();
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+            const icon = e.currentTarget.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.className = 'fas fa-angles-right';
+                e.currentTarget.setAttribute('data-tooltip', 'Expandir menú');
+            } else {
+                icon.className = 'fas fa-angles-left';
+                e.currentTarget.setAttribute('data-tooltip', 'Contraer menú');
+            }
+        });
+
+        // Cerrar sesión desde sidebar (si se selecciona)
+        document.querySelector('a[data-submenu="cerrar-sesion"]').addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
     </script>
 </body>
 </html>
