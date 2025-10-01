@@ -208,8 +208,8 @@
                 const user = userCredential.user;
 
                 if (user) {
-                    // Redirigir basado en la categoría
-                    const redirectPath = `/${category}/menu.html`;
+                    // Redirigir basado en la categoría (convertir a minúsculas para coincidir con carpetas)
+                    const redirectPath = `/${category.toLowerCase()}/menu.html`;
                     window.location.href = redirectPath;
                 }
             } catch (error) {
