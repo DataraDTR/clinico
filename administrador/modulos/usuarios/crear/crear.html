@@ -11,51 +11,69 @@
         <h1>Crear Usuario</h1>
         <div id="content-crear-usuario">
             <form id="form-crear-usuario">
-                <label for="crear-fullName">Nombre completo:</label>
-                <input type="text" id="crear-fullName" required>
+                <div class="form-group">
+                    <label for="crear-fullName">Nombre completo:</label>
+                    <input type="text" id="crear-fullName" required>
+                </div>
 
-                <label for="crear-username">Nombre de usuario:</label>
-                <input type="text" id="crear-username" required>
+                <div class="form-group">
+                    <label for="crear-username">Nombre de usuario:</label>
+                    <input type="text" id="crear-username" required>
+                </div>
 
-                <label for="crear-birthDate">Fecha de nacimiento:</label>
-                <input type="date" id="crear-birthDate" required>
+                <div class="form-group">
+                    <label for="crear-birthDate">Fecha de nacimiento:</label>
+                    <input type="date" id="crear-birthDate" required>
+                </div>
 
-                <label for="crear-email">Correo electrónico:</label>
-                <input type="email" id="crear-email" required>
+                <div class="form-group">
+                    <label for="crear-email">Correo electrónico:</label>
+                    <input type="email" id="crear-email" required>
+                </div>
 
-                <label for="crear-sex">Sexo:</label>
-                <select id="crear-sex" required>
-                    <option value="">Seleccione...</option>
-                    <option value="masculino">Masculino</option>
-                    <option value="femenino">Femenino</option>
-                    <option value="otro">Otro</option>
-                </select>
+                <div class="form-group">
+                    <label for="crear-sex">Sexo:</label>
+                    <select id="crear-sex" required>
+                        <option value="">Seleccione...</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
 
-                <label for="crear-module">Módulo:</label>
-                <select id="crear-module" required>
-                    <option value="">Seleccione...</option>
-                    <option value="Salud">Salud</option>
-                    <option value="Album">Album</option>
-                    <option value="Personal">Personal</option>
-                </select>
+                <div class="form-group">
+                    <label for="crear-module">Módulo:</label>
+                    <select id="crear-module" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Salud">Salud</option>
+                        <option value="Album">Album</option>
+                        <option value="Personal">Personal</option>
+                    </select>
+                </div>
 
-                <label for="crear-category">Categoría:</label>
-                <select id="crear-category" required>
-                    <option value="">Seleccione...</option>
-                    <option value="Administrador">Administrador</option>
-                    <option value="Coordinadora">Coordinadora</option>
-                    <option value="Corporativa">Corporativa</option>
-                    <option value="Operador">Operador</option>
-                    <option value="Laboratorio">Laboratorio</option>
-                </select>
+                <div class="form-group">
+                    <label for="crear-category">Categoría:</label>
+                    <select id="crear-category" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Administrador">Administrador</option>
+                        <option value="Coordinadora">Coordinadora</option>
+                        <option value="Corporativa">Corporativa</option>
+                        <option value="Operador">Operador</option>
+                        <option value="Laboratorio">Laboratorio</option>
+                    </select>
+                </div>
 
-                <label for="crear-password">Contraseña:</label>
-                <input type="password" id="crear-password" required minlength="6">
+                <div class="form-group">
+                    <label for="crear-password">Contraseña:</label>
+                    <input type="password" id="crear-password" required minlength="6">
+                </div>
 
-                <label for="crear-repeatPassword">Repetir contraseña:</label>
-                <input type="password" id="crear-repeatPassword" required minlength="6">
+                <div class="form-group">
+                    <label for="crear-repeatPassword">Repetir contraseña:</label>
+                    <input type="password" id="crear-repeatPassword" required minlength="6">
+                </div>
 
-                <button type="submit">Crear Usuario</button>
+                <button type="submit" class="btn-crear">Crear Usuario</button>
             </form>
             <div id="message-crear"></div>
         </div>
