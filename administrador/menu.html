@@ -380,7 +380,7 @@
         // Verificar autenticación al cargar
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                window.location.href = '../index.html'; // Redirigir a login si no autenticado
+                window.location.replace('../index.html'); // Redirigir a login si no autenticado (usar replace para evitar back)
                 return;
             }
 
@@ -395,7 +395,7 @@
         window.logout = async () => {
             try {
                 await signOut(auth);
-                window.location.href = '../index.html';
+                window.location.replace('../index.html'); // Usar replace para reemplazar la entrada en el historial
             } catch (error) {
                 console.error('Error al cerrar sesión:', error);
             }
