@@ -6,6 +6,7 @@ body {
     height: 100vh;
     background: #f0f2f5;
     font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden; /* Evita scroll horizontal en el body */
 }
 
 #outer-container-crear {
@@ -15,6 +16,8 @@ body {
     padding: 10px;
     background: #f0f2f5;
     overflow-y: auto;
+    overflow-x: hidden; /* Evita scroll horizontal en el contenedor principal */
+    width: 100%; /* Asegura que ocupe todo el ancho disponible */
 }
 
 #content-crear-usuario {
@@ -28,6 +31,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden; /* Evita scroll horizontal en el contenido */
 }
 
 #content-crear-usuario h1 {
@@ -87,6 +91,73 @@ body {
     background-color: #2e4a7a;
 }
 
+#credential-card {
+    background: #f8f9fa;
+    border: 2px solid #3A5795;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+    justify-content: center;
+}
+
+.company-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.card-header h2 {
+    color: #3A5795;
+    font-size: 18px;
+    margin: 0;
+    text-align: center;
+}
+
+.card-body {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.user-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
+.user-info {
+    flex: 1;
+    text-align: left;
+}
+
+.user-info h3 {
+    color: #333;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.user-info p {
+    color: #555;
+    font-size: 14px;
+    margin: 5px 0;
+    line-height: 1.4;
+}
+
 #message-crear {
     margin-top: 10px;
     padding: 10px;
@@ -119,5 +190,15 @@ body {
         grid-column: 1;
         grid-row: auto;
         max-width: 100%;
+    }
+
+    .card-body {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .user-info {
+        text-align: center;
     }
 }

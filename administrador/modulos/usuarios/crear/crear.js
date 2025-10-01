@@ -22,6 +22,42 @@ const db = getFirestore(app);
 const form = document.getElementById('form-crear-usuario');
 const message = document.getElementById('message-crear');
 
+// Event listeners para actualizar la tarjeta en tiempo real
+document.getElementById('crear-fullName').addEventListener('input', updateCard);
+document.getElementById('crear-username').addEventListener('input', updateCard);
+document.getElementById('crear-birthDate').addEventListener('change', updateCard);
+document.getElementById('crear-email').addEventListener('input', updateCard);
+document.getElementById('crear-sex').addEventListener('change', updateCard);
+document.getElementById('crear-module').addEventListener('change', updateCard);
+document.getElementById('crear-category').addEventListener('change', updateCard);
+
+function updateCard() {
+    const fullName = document.getElementById('crear-fullName').value || 'Nombre Completo';
+    const username = document.getElementById('crear-username').value || 'Usuario';
+    const birthDate = document.getElementById('crear-birthDate').value || 'Fecha de Nacimiento';
+    const email = document.getElementById('crear-email').value || 'Correo Electrónico';
+    const sex = document.getElementById('crear-sex').value || 'otro'; // Default a 'otro'
+    const module = document.getElementById('crear-module').value || 'Módulo';
+    const category = document.getElementById('crear-category').value || 'Categoría';
+
+    // Actualizar icono basado en sexo
+    const iconMap = {
+        'masculino': '../img/icono-hombre.png',
+        'femenino': '../img/icono-mujer.png',
+        'otro': '../img/icono-otro.png'
+    };
+    document.getElementById('user-icon').src = iconMap[sex] || '../img/icono-otro.png';
+
+    // Actualizar textos en la tarjeta
+    document.getElementById('card-fullName').textContent = fullName;
+    document.getElementById('card-username').textContent = username;
+    document.getElementById('card-email').textContent = email;
+    document.getElementById('card-birthDate').textContent = birthDate;
+    document.getElementById('card-sex').textContent = sex.charAt(0).toUpperCase() + sex.slice(1);
+    document.getElementById('card-module').textContent = module;
+    document.getElementById('card-category').textContent = category;
+}
+
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -59,6 +95,7 @@ form.addEventListener('submit', async (e) => {
 
         showMessage('Usuario creado exitosamente.', 'success');
         form.reset();
+        updateCard(); // Resetear la tarjeta también
     } catch (error) {
         console.error('Error:', error);
         showMessage('Error al crear usuario: ' + error.message, 'error');
@@ -73,3 +110,6 @@ function showMessage(text, type) {
         message.style.display = 'none';
     }, 5000);
 }
+
+// Inicializar tarjeta con valores por defecto
+updateCard();
