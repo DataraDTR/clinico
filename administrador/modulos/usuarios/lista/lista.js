@@ -86,13 +86,27 @@ function renderUserCard(user) {
         <div class="card-body">
             <img src="${userIconSrc}" alt="Icono de usuario" class="user-icon">
             <div class="user-info">
-                <h3 class="editable" data-field="fullName">${user.fullName}</h3>
-                <p class="editable" data-field="username"><strong>Usuario:</strong> ${user.username}</p>
-                <p class="editable" data-field="email"><strong>Email:</strong> ${user.email}</p>
-                <p class="editable" data-field="birthDate"><strong>Fecha Nacimiento:</strong> ${user.birthDate}</p>
-                <p class="editable" data-field="sex"><strong>Sexo:</strong> ${user.sex.charAt(0).toUpperCase() + user.sex.slice(1)}</p>
-                <p class="editable" data-field="module"><strong>Módulo:</strong> ${user.module}</p>
-                <p class="editable" data-field="category"><strong>Categoría:</strong> ${user.category}</p>
+                <div class="editable-field" data-field="fullName">
+                    <h3>${user.fullName}</h3>
+                </div>
+                <div class="editable-field" data-field="username">
+                    <p><strong>Usuario:</strong> ${user.username}</p>
+                </div>
+                <div class="editable-field" data-field="email">
+                    <p><strong>Email:</strong> ${user.email}</p>
+                </div>
+                <div class="editable-field" data-field="birthDate">
+                    <p><strong>Fecha Nacimiento:</strong> ${user.birthDate}</p>
+                </div>
+                <div class="editable-field" data-field="sex">
+                    <p><strong>Sexo:</strong> ${user.sex.charAt(0).toUpperCase() + user.sex.slice(1)}</p>
+                </div>
+                <div class="editable-field" data-field="module">
+                    <p><strong>Módulo:</strong> ${user.module}</p>
+                </div>
+                <div class="editable-field" data-field="category">
+                    <p><strong>Categoría:</strong> ${user.category}</p>
+                </div>
             </div>
         </div>
         <div class="buttons-container">
@@ -112,7 +126,7 @@ function renderUserCard(user) {
 
     editBtn.addEventListener('click', () => enterEditMode(card, user));
 
-    saveBtn.addEventListener('click', () => saveEdits(card, user));
+    saveBtn.addEventListener('click', () => saveEdits(card));
 
     cancelBtn.addEventListener('click', () => cancelEdit(card, user));
 
@@ -122,7 +136,7 @@ function renderUserCard(user) {
 // Entrar en modo edición
 function enterEditMode(card, user) {
     card.classList.add('editing');
-    const editableFields = card.querySelectorAll('.editable');
+    const editableFields = card.querySelectorAll('.editable-field');
     const editBtn = card.querySelector('.edit-btn');
     const saveCancel = card.querySelector('.save-cancel-buttons');
 
@@ -130,65 +144,67 @@ function enterEditMode(card, user) {
     saveCancel.style.display = 'flex';
 
     editableFields.forEach(field => {
-        const text = field.textContent.trim();
         const fieldName = field.dataset.field;
-        const originalValue = user[fieldName] || text;
+        const originalValue = user[fieldName];
+        const labelText = field.querySelector('strong') ? field.querySelector('strong').textContent : '';
 
-        if (fieldName === 'sex') {
-            const select = document.createElement('select');
-            select.innerHTML = `
-                <option value="masculino" ${originalValue === 'masculino' ? 'selected' : ''}>Masculino</option>
-                <option value="femenino" ${originalValue === 'femenino' ? 'selected' : ''}>Femenino</option>
-                <option value="otro" ${originalValue === 'otro' ? 'selected' : ''}>Otro</option>
-            `;
-            select.dataset.originalValue = originalValue;
-            field.innerHTML = '';
-            field.appendChild(select);
-        } else if (fieldName === 'module') {
-            const select = document.createElement('select');
-            select.innerHTML = `
-                <option value="Salud" ${originalValue === 'Salud' ? 'selected' : ''}>Salud</option>
-                <option value="Album" ${originalValue === 'Album' ? 'selected' : ''}>Album</option>
-                <option value="Personal" ${originalValue === 'Personal' ? 'selected' : ''}>Personal</option>
-            `;
-            select.dataset.originalValue = originalValue;
-            field.innerHTML = '';
-            field.appendChild(select);
-        } else if (fieldName === 'category') {
-            const select = document.createElement('select');
-            select.innerHTML = `
-                <option value="Administrador" ${originalValue === 'Administrador' ? 'selected' : ''}>Administrador</option>
-                <option value="Coordinadora" ${originalValue === 'Coordinadora' ? 'selected' : ''}>Coordinadora</option>
-                <option value="Corporativa" ${originalValue === 'Corporativa' ? 'selected' : ''}>Corporativa</option>
-                <option value="Operador" ${originalValue === 'Operador' ? 'selected' : ''}>Operador</option>
-                <option value="Laboratorio" ${originalValue === 'Laboratorio' ? 'selected' : ''}>Laboratorio</option>
-            `;
-            select.dataset.originalValue = originalValue;
-            field.innerHTML = '';
-            field.appendChild(select);
-        } else {
-            const input = document.createElement('input');
-            input.type = fieldName === 'email' ? 'email' : (fieldName === 'birthDate' ? 'date' : 'text');
-            input.value = originalValue;
-            input.dataset.originalValue = originalValue;
-            input.autocomplete = 'off';
-            field.innerHTML = '';
-            field.appendChild(input);
-        }
+        field.innerHTML = `
+            <div class="label">${labelText}</div>
+            <div class="input-container">
+                ${createInputForField(fieldName, originalValue)}
+            </div>
+        `;
     });
 }
 
-// Guardar ediciones
-async function saveEdits(card, originalUser) {
-    const updates = {};
-    const editableFields = card.querySelectorAll('.editable');
+// Crear input o select para el campo
+function createInputForField(fieldName, value) {
+    if (fieldName === 'sex') {
+        return `
+            <select class="edit-input">
+                <option value="masculino" ${value === 'masculino' ? 'selected' : ''}>Masculino</option>
+                <option value="femenino" ${value === 'femenino' ? 'selected' : ''}>Femenino</option>
+                <option value="otro" ${value === 'otro' ? 'selected' : ''}>Otro</option>
+            </select>
+        `;
+    } else if (fieldName === 'module') {
+        return `
+            <select class="edit-input">
+                <option value="Salud" ${value === 'Salud' ? 'selected' : ''}>Salud</option>
+                <option value="Album" ${value === 'Album' ? 'selected' : ''}>Album</option>
+                <option value="Personal" ${value === 'Personal' ? 'selected' : ''}>Personal</option>
+            </select>
+        `;
+    } else if (fieldName === 'category') {
+        return `
+            <select class="edit-input">
+                <option value="Administrador" ${value === 'Administrador' ? 'selected' : ''}>Administrador</option>
+                <option value="Coordinadora" ${value === 'Coordinadora' ? 'selected' : ''}>Coordinadora</option>
+                <option value="Corporativa" ${value === 'Corporativa' ? 'selected' : ''}>Corporativa</option>
+                <option value="Operador" ${value === 'Operador' ? 'selected' : ''}>Operador</option>
+                <option value="Laboratorio" ${value === 'Laboratorio' ? 'selected' : ''}>Laboratorio</option>
+            </select>
+        `;
+    } else if (fieldName === 'fullName') {
+        return `<input type="text" class="edit-input" value="${value}" autocomplete="off">`;
+    } else if (fieldName === 'birthDate') {
+        return `<input type="date" class="edit-input" value="${value}" autocomplete="off">`;
+    } else if (fieldName === 'email') {
+        return `<input type="email" class="edit-input" value="${value}" autocomplete="off">`;
+    } else if (fieldName === 'username') {
+        return `<input type="text" class="edit-input" value="${value}" autocomplete="off">`;
+    }
+    return `<input type="text" class="edit-input" value="${value}" autocomplete="off">`;
+}
 
-    editableFields.forEach(field => {
-        const inputOrSelect = field.querySelector('input, select');
-        if (inputOrSelect) {
-            const fieldName = field.dataset.field;
-            updates[fieldName] = inputOrSelect.value;
-        }
+// Guardar ediciones
+async function saveEdits(card) {
+    const updates = {};
+    const editableFields = card.querySelectorAll('.editable-field .edit-input');
+
+    editableFields.forEach(input => {
+        const fieldName = input.closest('.editable-field').dataset.field;
+        updates[fieldName] = input.value;
     });
 
     try {
@@ -206,9 +222,9 @@ async function saveEdits(card, originalUser) {
 }
 
 // Cancelar edición
-function cancelEdit(card, originalUser) {
+function cancelEdit(card, user) {
     card.classList.remove('editing');
-    const editableFields = card.querySelectorAll('.editable');
+    const editableFields = card.querySelectorAll('.editable-field');
     const editBtn = card.querySelector('.edit-btn');
     const saveCancel = card.querySelector('.save-cancel-buttons');
 
@@ -217,10 +233,14 @@ function cancelEdit(card, originalUser) {
 
     editableFields.forEach(field => {
         const fieldName = field.dataset.field;
-        const originalValue = originalUser[fieldName];
-        field.innerHTML = fieldName === 'fullName' 
-            ? originalValue 
-            : `<strong>${getLabel(fieldName)}:</strong> ${originalValue}`;
+        const originalValue = user[fieldName];
+        const labelText = getLabel(fieldName);
+
+        if (fieldName === 'fullName') {
+            field.innerHTML = `<h3>${originalValue}</h3>`;
+        } else {
+            field.innerHTML = `<p><strong>${labelText}:</strong> ${originalValue}</p>`;
+        }
     });
 }
 

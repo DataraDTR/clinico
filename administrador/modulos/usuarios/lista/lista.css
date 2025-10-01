@@ -177,17 +177,21 @@ body {
     margin-top: 2px;
 }
 
-.editing .user-info p,
-.editing .user-info h3 {
-    display: none;
+.editing .user-info .label {
+    display: inline;
+    font-weight: bold;
+    color: #333;
 }
 
-.editing .edit-btn {
-    display: none;
-}
-
-.editing .save-cancel-buttons {
+.editing .user-info .input-container {
     display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: center;
     gap: 5px;
     margin-top: 5px;
 }
@@ -218,10 +222,6 @@ body {
 
 .cancel-btn:hover {
     background: #c82333;
-}
-
-.save-cancel-buttons {
-    display: none;
 }
 
 /* No hay mensaje en esta página, pero por consistencia */
@@ -266,12 +266,6 @@ body {
     .user-info h3,
     .user-info p {
         white-space: normal;
-    }
-
-    .editing .user-info input,
-    .editing .user-info select {
-        width: 100%;
-        margin-top: 2px;
     }
 
     #outer-container-lista {
