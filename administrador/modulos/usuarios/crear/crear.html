@@ -8,54 +8,58 @@
 </head>
 <body>
     <h1>Crear Usuario</h1>
-    <form id="registerForm">
-        <label for="fullName">Nombre completo:</label>
-        <input type="text" id="fullName" required>
+    <div id="outer-container-crear">
+        <div id="content-crear-usuario">
+            <form id="form-crear-usuario">
+                <label for="crear-fullName">Nombre completo:</label>
+                <input type="text" id="crear-fullName" required>
 
-        <label for="username">Nombre de usuario:</label>
-        <input type="text" id="username" required>
+                <label for="crear-username">Nombre de usuario:</label>
+                <input type="text" id="crear-username" required>
 
-        <label for="birthDate">Fecha de nacimiento:</label>
-        <input type="date" id="birthDate" required>
+                <label for="crear-birthDate">Fecha de nacimiento:</label>
+                <input type="date" id="crear-birthDate" required>
 
-        <label for="email">Correo electrónico:</label>
-        <input type="email" id="email" required>
+                <label for="crear-email">Correo electrónico:</label>
+                <input type="email" id="crear-email" required>
 
-        <label for="sex">Sexo:</label>
-        <select id="sex" required>
-            <option value="">Seleccione...</option>
-            <option value="masculino">Masculino</option>
-            <option value="femenino">Femenino</option>
-            <option value="otro">Otro</option>
-        </select>
+                <label for="crear-sex">Sexo:</label>
+                <select id="crear-sex" required>
+                    <option value="">Seleccione...</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="femenino">Femenino</option>
+                    <option value="otro">Otro</option>
+                </select>
 
-        <label for="module">Módulo:</label>
-        <select id="module" required>
-            <option value="">Seleccione...</option>
-            <option value="Salud">Salud</option>
-            <option value="Album">Album</option>
-            <option value="Personal">Personal</option>
-        </select>
+                <label for="crear-module">Módulo:</label>
+                <select id="crear-module" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Salud">Salud</option>
+                    <option value="Album">Album</option>
+                    <option value="Personal">Personal</option>
+                </select>
 
-        <label for="category">Categoría:</label>
-        <select id="category" required>
-            <option value="">Seleccione...</option>
-            <option value="Administrador">Administrador</option>
-            <option value="Coordinadora">Coordinadora</option>
-            <option value="Corporativa">Corporativa</option>
-            <option value="Operador">Operador</option>
-            <option value="Laboratorio">Laboratorio</option>
-        </select>
+                <label for="crear-category">Categoría:</label>
+                <select id="crear-category" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Coordinadora">Coordinadora</option>
+                    <option value="Corporativa">Corporativa</option>
+                    <option value="Operador">Operador</option>
+                    <option value="Laboratorio">Laboratorio</option>
+                </select>
 
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" required minlength="6">
+                <label for="crear-password">Contraseña:</label>
+                <input type="password" id="crear-password" required minlength="6">
 
-        <label for="repeatPassword">Repetir contraseña:</label>
-        <input type="password" id="repeatPassword" required minlength="6">
+                <label for="crear-repeatPassword">Repetir contraseña:</label>
+                <input type="password" id="crear-repeatPassword" required minlength="6">
 
-        <button type="submit">Crear Usuario</button>
-    </form>
-    <div id="message"></div>
+                <button type="submit">Crear Usuario</button>
+            </form>
+            <div id="message-crear"></div>
+        </div>
+    </div>
 
     <script type="module" src="crear.js"></script>
 </body>

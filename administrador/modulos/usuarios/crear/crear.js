@@ -19,21 +19,21 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const form = document.getElementById('registerForm');
-const message = document.getElementById('message');
+const form = document.getElementById('form-crear-usuario');
+const message = document.getElementById('message-crear');
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const fullName = document.getElementById('fullName').value;
-    const username = document.getElementById('username').value;
-    const birthDate = document.getElementById('birthDate').value;
-    const email = document.getElementById('email').value;
-    const sex = document.getElementById('sex').value;
-    const module = document.getElementById('module').value;
-    const category = document.getElementById('category').value;
-    const password = document.getElementById('password').value;
-    const repeatPassword = document.getElementById('repeatPassword').value;
+    const fullName = document.getElementById('crear-fullName').value;
+    const username = document.getElementById('crear-username').value;
+    const birthDate = document.getElementById('crear-birthDate').value;
+    const email = document.getElementById('crear-email').value;
+    const sex = document.getElementById('crear-sex').value;
+    const module = document.getElementById('crear-module').value;
+    const category = document.getElementById('crear-category').value;
+    const password = document.getElementById('crear-password').value;
+    const repeatPassword = document.getElementById('crear-repeatPassword').value;
 
     if (password !== repeatPassword) {
         showMessage('Las contraseñas no coinciden.', 'error');
