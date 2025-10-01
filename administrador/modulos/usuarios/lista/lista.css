@@ -166,25 +166,30 @@ body {
     background: #2e4a7a;
 }
 
-.editing .user-info input {
+.editing .user-info input,
+.editing .user-info select {
     width: 100%;
     padding: 2px;
     border: 1px solid #3A5795;
     border-radius: 2px;
     font-size: 11px;
     box-sizing: border-box;
+    margin-top: 2px;
 }
 
-.editing .user-info p {
+.editing .user-info p,
+.editing .user-info h3 {
     display: none;
 }
 
 .editing .edit-btn {
-    background: #28a745;
+    display: none;
 }
 
-.editing .edit-btn:hover {
-    background: #218838;
+.editing .save-cancel-buttons {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
 }
 
 .save-btn {
@@ -195,7 +200,6 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-size: 10px;
-    margin-left: 5px;
 }
 
 .save-btn:hover {
@@ -210,11 +214,14 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-size: 10px;
-    margin-left: 5px;
 }
 
 .cancel-btn:hover {
     background: #c82333;
+}
+
+.save-cancel-buttons {
+    display: none;
 }
 
 /* No hay mensaje en esta página, pero por consistencia */
@@ -259,6 +266,12 @@ body {
     .user-info h3,
     .user-info p {
         white-space: normal;
+    }
+
+    .editing .user-info input,
+    .editing .user-info select {
+        width: 100%;
+        margin-top: 2px;
     }
 
     #outer-container-lista {

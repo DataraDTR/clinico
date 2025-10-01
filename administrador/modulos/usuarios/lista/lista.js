@@ -95,67 +95,146 @@ function renderUserCard(user) {
                 <p class="editable" data-field="category"><strong>Categoría:</strong> ${user.category}</p>
             </div>
         </div>
-        <button class="edit-btn">Editar</button>
+        <div class="buttons-container">
+            <button class="edit-btn">Editar</button>
+            <div class="save-cancel-buttons">
+                <button class="save-btn">Guardar</button>
+                <button class="cancel-btn">Cancelar</button>
+            </div>
+        </div>
     `;
 
     // Event listener para el botón editar
     const editBtn = card.querySelector('.edit-btn');
-    editBtn.addEventListener('click', () => toggleEditMode(card, user));
+    const saveBtn = card.querySelector('.save-btn');
+    const cancelBtn = card.querySelector('.cancel-btn');
+    const buttonsContainer = card.querySelector('.buttons-container');
+
+    editBtn.addEventListener('click', () => enterEditMode(card, user));
+
+    saveBtn.addEventListener('click', () => saveEdits(card, user));
+
+    cancelBtn.addEventListener('click', () => cancelEdit(card, user));
 
     usersList.appendChild(card);
 }
 
-// Alternar modo edición
-function toggleEditMode(card, originalUser) {
-    const userInfo = card.querySelector('.user-info');
+// Entrar en modo edición
+function enterEditMode(card, user) {
+    card.classList.add('editing');
+    const editableFields = card.querySelectorAll('.editable');
     const editBtn = card.querySelector('.edit-btn');
-    const editableFields = userInfo.querySelectorAll('.editable');
+    const saveCancel = card.querySelector('.save-cancel-buttons');
 
-    if (card.classList.contains('editing')) {
-        // Guardar cambios
-        const updates = {};
-        editableFields.forEach(field => {
-            const input = field.querySelector('input');
-            if (input) {
-                const fieldName = field.dataset.field;
-                updates[fieldName] = input.value;
-                field.innerHTML = input.dataset.originalValue; // Restaurar texto original temporalmente
-            }
-        });
+    editBtn.style.display = 'none';
+    saveCancel.style.display = 'flex';
 
-        // Actualizar en Firestore
-        updateDoc(doc(db, 'users', card.dataset.userId), updates)
-            .then(() => {
-                card.classList.remove('editing');
-                editBtn.textContent = 'Editar';
-                editBtn.classList.remove('save-btn');
-                loadUsers(searchInput.value); // Recargar para actualizar todas las tarjetas
-            })
-            .catch((error) => {
-                console.error('Error al actualizar usuario:', error);
-                alert('Error al actualizar usuario.');
-            });
-    } else {
-        // Modo edición
-        card.classList.add('editing');
-        editBtn.textContent = 'Guardar';
-        editBtn.classList.add('save-btn');
+    editableFields.forEach(field => {
+        const text = field.textContent.trim();
+        const fieldName = field.dataset.field;
+        const originalValue = user[fieldName] || text;
 
-        editableFields.forEach(field => {
-            const text = field.textContent.trim();
-            const fieldName = field.dataset.field;
-            const originalValue = originalUser[fieldName] || text;
-
+        if (fieldName === 'sex') {
+            const select = document.createElement('select');
+            select.innerHTML = `
+                <option value="masculino" ${originalValue === 'masculino' ? 'selected' : ''}>Masculino</option>
+                <option value="femenino" ${originalValue === 'femenino' ? 'selected' : ''}>Femenino</option>
+                <option value="otro" ${originalValue === 'otro' ? 'selected' : ''}>Otro</option>
+            `;
+            select.dataset.originalValue = originalValue;
+            field.innerHTML = '';
+            field.appendChild(select);
+        } else if (fieldName === 'module') {
+            const select = document.createElement('select');
+            select.innerHTML = `
+                <option value="Salud" ${originalValue === 'Salud' ? 'selected' : ''}>Salud</option>
+                <option value="Album" ${originalValue === 'Album' ? 'selected' : ''}>Album</option>
+                <option value="Personal" ${originalValue === 'Personal' ? 'selected' : ''}>Personal</option>
+            `;
+            select.dataset.originalValue = originalValue;
+            field.innerHTML = '';
+            field.appendChild(select);
+        } else if (fieldName === 'category') {
+            const select = document.createElement('select');
+            select.innerHTML = `
+                <option value="Administrador" ${originalValue === 'Administrador' ? 'selected' : ''}>Administrador</option>
+                <option value="Coordinadora" ${originalValue === 'Coordinadora' ? 'selected' : ''}>Coordinadora</option>
+                <option value="Corporativa" ${originalValue === 'Corporativa' ? 'selected' : ''}>Corporativa</option>
+                <option value="Operador" ${originalValue === 'Operador' ? 'selected' : ''}>Operador</option>
+                <option value="Laboratorio" ${originalValue === 'Laboratorio' ? 'selected' : ''}>Laboratorio</option>
+            `;
+            select.dataset.originalValue = originalValue;
+            field.innerHTML = '';
+            field.appendChild(select);
+        } else {
             const input = document.createElement('input');
             input.type = fieldName === 'email' ? 'email' : (fieldName === 'birthDate' ? 'date' : 'text');
             input.value = originalValue;
             input.dataset.originalValue = originalValue;
             input.autocomplete = 'off';
-
             field.innerHTML = '';
             field.appendChild(input);
-        });
+        }
+    });
+}
+
+// Guardar ediciones
+async function saveEdits(card, originalUser) {
+    const updates = {};
+    const editableFields = card.querySelectorAll('.editable');
+
+    editableFields.forEach(field => {
+        const inputOrSelect = field.querySelector('input, select');
+        if (inputOrSelect) {
+            const fieldName = field.dataset.field;
+            updates[fieldName] = inputOrSelect.value;
+        }
+    });
+
+    try {
+        await updateDoc(doc(db, 'users', card.dataset.userId), updates);
+        card.classList.remove('editing');
+        const editBtn = card.querySelector('.edit-btn');
+        const saveCancel = card.querySelector('.save-cancel-buttons');
+        editBtn.style.display = 'block';
+        saveCancel.style.display = 'none';
+        loadUsers(searchInput.value); // Recargar para actualizar
+    } catch (error) {
+        console.error('Error al actualizar usuario:', error);
+        alert('Error al actualizar usuario.');
     }
+}
+
+// Cancelar edición
+function cancelEdit(card, originalUser) {
+    card.classList.remove('editing');
+    const editableFields = card.querySelectorAll('.editable');
+    const editBtn = card.querySelector('.edit-btn');
+    const saveCancel = card.querySelector('.save-cancel-buttons');
+
+    editBtn.style.display = 'block';
+    saveCancel.style.display = 'none';
+
+    editableFields.forEach(field => {
+        const fieldName = field.dataset.field;
+        const originalValue = originalUser[fieldName];
+        field.innerHTML = fieldName === 'fullName' 
+            ? originalValue 
+            : `<strong>${getLabel(fieldName)}:</strong> ${originalValue}`;
+    });
+}
+
+// Función auxiliar para obtener labels
+function getLabel(fieldName) {
+    const labels = {
+        'username': 'Usuario',
+        'email': 'Email',
+        'birthDate': 'Fecha Nacimiento',
+        'sex': 'Sexo',
+        'module': 'Módulo',
+        'category': 'Categoría'
+    };
+    return labels[fieldName] || fieldName;
 }
 
 // Event listener para búsqueda en tiempo real
