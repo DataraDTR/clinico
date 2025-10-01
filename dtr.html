@@ -382,6 +382,30 @@
             });
         }
 
+        function updateSingleColumn(columnName, width) {
+            const columns = ['codigo', 'rut', 'nombre', 'direccion', 'telefono', 'fax', 'contacto', 'email'];
+            const columnIndex = columns.indexOf(columnName);
+            
+            // Update header
+            const header = document.querySelector(`th[data-column="${columnName}"]`);
+            if (header) {
+                header.style.width = width + 'px';
+                header.style.minWidth = width + 'px';
+                header.style.maxWidth = width + 'px';
+            }
+            
+            // Update all cells in that column
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(function(row) {
+                const cell = row.querySelectorAll('td')[columnIndex];
+                if (cell) {
+                    cell.style.width = width + 'px';
+                    cell.style.minWidth = width + 'px';
+                    cell.style.maxWidth = width + 'px';
+                }
+            });
+        }
+
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
@@ -451,8 +475,7 @@
             const newWidth = Math.max(50, startWidth + diff);
             columnWidths[currentColumn] = newWidth;
             
-            updateColumnWidths();
-            renderTable();
+            updateSingleColumn(currentColumn, newWidth);
         });
 
         document.addEventListener('mouseup', function() {
