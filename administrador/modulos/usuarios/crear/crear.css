@@ -6,6 +6,7 @@ body {
     height: 100vh;
     background: #f0f2f5;
     font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden; /* Evita scroll horizontal en el body */
 }
 
 #outer-container-crear {
@@ -15,6 +16,8 @@ body {
     padding: 15px;
     background: #f0f2f5;
     overflow-y: auto;
+    overflow-x: hidden; /* Evita scroll horizontal en el contenedor principal */
+    width: 100%; /* Asegura que ocupe todo el ancho disponible */
 }
 
 #content-crear-usuario {
@@ -28,6 +31,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden; /* Evita scroll horizontal en el contenido */
 }
 
 #content-crear-usuario h1 {
@@ -42,11 +46,13 @@ body {
     grid-template-columns: repeat(4, 1fr);
     gap: 15px;
     margin-bottom: 20px;
+    width: 100%; /* Asegura que el form ocupe todo el ancho */
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
+    min-width: 0; /* Permite que se ajuste sin desbordar */
 }
 
 .form-group label {
@@ -94,6 +100,7 @@ body {
     display: none;
     font-size: 14px;
     text-align: center;
+    width: 100%; /* Asegura que ocupe el ancho disponible */
 }
 
 #message-crear.error {
@@ -119,5 +126,9 @@ body {
         grid-column: 1;
         grid-row: auto;
         max-width: 100%;
+    }
+
+    #outer-container-crear {
+        padding: 10px; /* Reduce padding en móviles para más espacio */
     }
 }
