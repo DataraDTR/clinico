@@ -42,11 +42,11 @@ function updateCard() {
 
     // Actualizar icono basado en sexo
     const iconMap = {
-        'masculino': '../img/icono-hombre.png',
-        'femenino': '../img/icono-mujer.png',
-        'otro': '../img/icono-otro.png'
+        'masculino': '../../../../img/icono-hombre.png',
+        'femenino': '../../../../img/icono-mujer.png',
+        'otro': '../../../../img/icono-otro.png'
     };
-    document.getElementById('user-icon').src = iconMap[sex] || '../img/icono-otro.png';
+    document.getElementById('user-icon').src = iconMap[sex] || '../../../../img/icono-otro.png';
 
     // Actualizar textos en la tarjeta
     document.getElementById('card-fullName').textContent = fullName;
