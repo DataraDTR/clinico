@@ -7,68 +7,50 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            margin: 0;
             padding: 20px;
             background-color: #f4f4f4;
         }
-        h1, h2 {
-            text-align: center;
-        }
-        form {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
             margin-bottom: 20px;
         }
-        label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 20px;
         }
-        input {
-            width: 100%;
+        .form-row input {
+            flex: 1;
             padding: 8px;
-            margin-top: 5px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box;
         }
-        button {
-            width: 100%;
-            padding: 10px;
+        .form-row button {
+            padding: 8px 16px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
-            margin-top: 20px;
             cursor: pointer;
+            white-space: nowrap;
         }
-        button:hover {
+        .form-row button:hover {
             background-color: #0056b3;
-        }
-        #message {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            display: none;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
         }
         table {
             width: 100%;
-            background: white;
             border-collapse: collapse;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         th, td {
             padding: 12px;
@@ -78,15 +60,27 @@
         th {
             background-color: #f2f2f2;
         }
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        .actions button {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-edit { background-color: #ffc107; color: #000; }
+        .btn-delete { background-color: #dc3545; color: white; }
+        .btn-history { background-color: #17a2b8; color: white; }
         .pagination {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 20px;
             padding: 10px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: #f8f9fa;
+            border-radius: 4px;
         }
         .pagination-info {
             font-size: 14px;
@@ -128,50 +122,74 @@
             padding: 5px;
             cursor: default;
         }
+        #message {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .actions {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Registro de Empresas</h1>
-    
-    <form id="companyForm">
-        <label for="companyName">Nombre de la empresa:</label>
-        <input type="text" id="companyName" required>
+    <div class="container">
+        <h1>Registro de Empresas</h1>
+        
+        <div id="message"></div>
 
-        <label for="companyRut">RUT de la empresa:</label>
-        <input type="text" id="companyRut" required placeholder="Ej: 12.345.678-9">
+        <form id="companyForm" class="form-row">
+            <input type="text" id="companyName" placeholder="Nombre de la empresa" required>
+            <input type="text" id="companyRut" placeholder="RUT de la empresa (Ej: 12.345.678-9)" required>
+            <button type="submit">Registrar</button>
+        </form>
 
-        <button type="submit">Registrar Empresa</button>
-    </form>
-    <div id="message"></div>
+        <table id="companiesTable">
+            <thead>
+                <tr>
+                    <th>Nombre de la empresa</th>
+                    <th>RUT de la empresa</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="companiesBody">
+                <!-- Datos se cargarán aquí -->
+            </tbody>
+        </table>
 
-    <h2>Listado de Empresas</h2>
-    <table id="companiesTable">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>RUT</th>
-            </tr>
-        </thead>
-        <tbody id="companiesBody">
-            <!-- Datos se cargarán aquí -->
-        </tbody>
-    </table>
-
-    <div class="pagination" id="pagination">
-        <div class="pagination-info">
-            <!-- Info se actualizará dinámicamente -->
-        </div>
-        <div class="pagination-controls">
-            <button id="prevPage">Anterior</button>
-            <div class="page-numbers" id="pageNumbers"></div>
-            <button id="nextPage">Siguiente</button>
+        <div class="pagination" id="pagination">
+            <div class="pagination-info">
+                <!-- Info se actualizará dinámicamente -->
+            </div>
+            <div class="pagination-controls">
+                <button id="prevPage">Anterior</button>
+                <div class="page-numbers" id="pageNumbers"></div>
+                <button id="nextPage">Siguiente</button>
+            </div>
         </div>
     </div>
 
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, startAfter, endBefore } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, startAfter, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
@@ -191,7 +209,6 @@
         let currentPage = 1;
         let allCompanies = [];
         let lastVisible = null;
-        let firstVisible = null;
 
         const form = document.getElementById('companyForm');
         const message = document.getElementById('message');
@@ -222,7 +239,6 @@
                 // Recargar lista
                 allCompanies = [];
                 lastVisible = null;
-                firstVisible = null;
                 currentPage = 1;
                 loadCompanies();
             } catch (error) {
@@ -249,12 +265,9 @@
 
                 if (querySnapshot.docs.length > 0) {
                     lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-                    if (currentPage === 1) {
-                        firstVisible = querySnapshot.docs[0];
-                    }
                 }
 
-                // Para obtener total, fetch all once or estimate; here fetch all for simplicity
+                // Cargar todas para paginación
                 if (allCompanies.length === 0) {
                     const allQuery = query(collection(db, 'companies'), orderBy('createdAt'));
                     const allSnapshot = await getDocs(allQuery);
@@ -279,6 +292,11 @@
                 row.innerHTML = `
                     <td>${company.name}</td>
                     <td>${company.rut}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editCompany('${company.id}')">Editar</button>
+                        <button class="btn-delete" onclick="deleteCompany('${company.id}')">Eliminar</button>
+                        <button class="btn-history" onclick="viewHistory('${company.id}')">Historial</button>
+                    </td>
                 `;
                 companiesBody.appendChild(row);
             });
@@ -301,27 +319,17 @@
             // Números de página
             pageNumbers.innerHTML = '';
             for (let i = startPage; i <= endPage; i++) {
-                if (i > startPage + 1 && i < endPage && endPage - startPage > 3) {
-                    if (!pageNumbers.lastElementChild || pageNumbers.lastElementChild.textContent !== '...') {
-                        const dots = document.createElement('span');
-                        dots.textContent = '...';
-                        dots.className = 'dots';
-                        pageNumbers.appendChild(dots);
-                    }
-                    continue;
-                }
                 const btn = document.createElement('button');
                 btn.textContent = i;
                 btn.className = i === currentPage ? 'active' : '';
                 btn.addEventListener('click', () => goToPage(i));
                 pageNumbers.appendChild(btn);
-            }
-
-            if (endPage < totalPages && endPage - startPage <= 3) {
-                const dots = document.createElement('span');
-                dots.textContent = '...';
-                dots.className = 'dots';
-                pageNumbers.appendChild(dots);
+                if (i < endPage && endPage - startPage > 3) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.className = 'dots';
+                    pageNumbers.appendChild(dots);
+                }
             }
         }
 
@@ -344,6 +352,34 @@
             loadCompanies();
         }
 
+        // Funciones para acciones
+        window.editCompany = async (id) => {
+            // Implementar edición (ej: prompt o modal)
+            const newName = prompt('Nuevo nombre:');
+            const newRut = prompt('Nuevo RUT:');
+            if (newName && newRut) {
+                // Aquí actualizar en Firestore (usa updateDoc)
+                alert('Edición implementada como placeholder. Usa updateDoc para real.');
+            }
+        };
+
+        window.deleteCompany = async (id) => {
+            if (confirm('¿Eliminar esta empresa?')) {
+                try {
+                    await deleteDoc(doc(db, 'companies', id));
+                    showMessage('Empresa eliminada.', 'success');
+                    loadCompanies();
+                } catch (error) {
+                    showMessage('Error al eliminar: ' + error.message, 'error');
+                }
+            }
+        };
+
+        window.viewHistory = (id) => {
+            // Placeholder para historial
+            alert(`Historial de empresa ${id} - Implementar consulta a subcolección si existe.`);
+        };
+
         function showMessage(text, type) {
             message.textContent = text;
             message.className = type;
@@ -352,7 +388,6 @@
                 message.style.display = 'none';
             }, 5000);
         }
-
     </script>
 </body>
 </html>
