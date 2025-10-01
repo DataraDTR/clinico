@@ -86,10 +86,22 @@
         </select>
 
         <label for="module">Módulo:</label>
-        <input type="text" id="module" required>
+        <select id="module" required>
+            <option value="">Seleccione...</option>
+            <option value="Salud">Salud</option>
+            <option value="Album">Album</option>
+            <option value="Personal">Personal</option>
+        </select>
 
         <label for="category">Categoría:</label>
-        <input type="text" id="category" required>
+        <select id="category" required>
+            <option value="">Seleccione...</option>
+            <option value="Administrador">Administrador</option>
+            <option value="Coordinadora">Coordinadora</option>
+            <option value="Corporativa">Corporativa</option>
+            <option value="Operador">Operador</option>
+            <option value="Laboratorio">Laboratorio</option>
+        </select>
 
         <label for="password">Contraseña:</label>
         <input type="password" id="password" required minlength="6">
