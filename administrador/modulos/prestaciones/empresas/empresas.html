@@ -12,46 +12,63 @@
             padding: 20px;
             background-color: #f4f4f4;
         }
-        .form-container {
+        h1, h2 {
+            text-align: center;
+        }
+        form {
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-top: 10px;
             font-weight: bold;
         }
-        input[type="text"] {
+        input {
             width: 100%;
             padding: 8px;
+            margin-top: 5px;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
         }
         button {
+            width: 100%;
+            padding: 10px;
             background-color: #007bff;
             color: white;
-            padding: 10px 20px;
             border: none;
             border-radius: 4px;
+            margin-top: 20px;
             cursor: pointer;
         }
         button:hover {
             background-color: #0056b3;
         }
+        #message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
         table {
             width: 100%;
-            border-collapse: collapse;
             background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-collapse: collapse;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         th, td {
             padding: 12px;
@@ -59,8 +76,7 @@
             border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: #f8f9fa;
-            font-weight: bold;
+            background-color: #f2f2f2;
         }
         .pagination {
             display: flex;
@@ -70,204 +86,274 @@
             padding: 10px;
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .page-info {
+        .pagination-info {
             font-size: 14px;
-            color: #666;
         }
-        .page-links {
+        .pagination-controls button {
+            padding: 8px 12px;
+            margin: 0 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .pagination-controls button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        .pagination-controls button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .page-numbers {
             display: flex;
             gap: 5px;
         }
-        .page-link {
-            padding: 8px 12px;
-            background: #e9ecef;
+        .page-numbers button {
+            padding: 5px 10px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            text-decoration: none;
-            color: #007bff;
+            background: white;
             cursor: pointer;
         }
-        .page-link:hover, .page-link.active {
-            background: #007bff;
+        .page-numbers button.active {
+            background-color: #007bff;
             color: white;
         }
-        .page-link.disabled {
-            background: #f8f9fa;
-            color: #ccc;
-            cursor: not-allowed;
+        .page-numbers button:hover {
+            background-color: #f0f0f0;
+        }
+        .page-numbers .dots {
+            padding: 5px;
+            cursor: default;
         }
     </style>
 </head>
 <body>
     <h1>Registro de Empresas</h1>
     
-    <div class="form-container">
-        <h2>Agregar Nueva Empresa</h2>
-        <form id="empresaForm">
-            <div class="form-group">
-                <label for="nombre">Nombre de la Empresa:</label>
-                <input type="text" id="nombre" name="nombre" required>
-            </div>
-            <div class="form-group">
-                <label for="rut">RUT de la Empresa:</label>
-                <input type="text" id="rut" name="rut" placeholder="Ej: 76.123.456-7" required>
-            </div>
-            <button type="submit">Agregar Empresa</button>
-        </form>
-    </div>
+    <form id="companyForm">
+        <label for="companyName">Nombre de la empresa:</label>
+        <input type="text" id="companyName" required>
 
-    <table id="empresasTable">
+        <label for="companyRut">RUT de la empresa:</label>
+        <input type="text" id="companyRut" required placeholder="Ej: 12.345.678-9">
+
+        <button type="submit">Registrar Empresa</button>
+    </form>
+    <div id="message"></div>
+
+    <h2>Listado de Empresas</h2>
+    <table id="companiesTable">
         <thead>
             <tr>
-                <th>Nombre de la Empresa</th>
+                <th>Nombre</th>
                 <th>RUT</th>
             </tr>
         </thead>
-        <tbody id="empresasBody">
-            <!-- Los datos se cargarán aquí dinámicamente -->
+        <tbody id="companiesBody">
+            <!-- Datos se cargarán aquí -->
         </tbody>
     </table>
 
     <div class="pagination" id="pagination">
-        <div>
-            <button id="prevBtn" class="page-link">Anterior</button>
+        <div class="pagination-info">
+            <!-- Info se actualizará dinámicamente -->
         </div>
-        <div class="page-info">
-            <span id="pageInfo">Página 1 de 1</span> | 
-            <span id="recordsInfo">0 registros en esta página de 0</span>
-        </div>
-        <div class="page-links" id="pageLinks">
-            <!-- Los enlaces de página se generarán aquí -->
-        </div>
-        <div>
-            <button id="nextBtn" class="page-link">Siguiente</button>
+        <div class="pagination-controls">
+            <button id="prevPage">Anterior</button>
+            <div class="page-numbers" id="pageNumbers"></div>
+            <button id="nextPage">Siguiente</button>
         </div>
     </div>
 
-    <script>
-        let empresas = []; // Array para almacenar las empresas
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, startAfter, endBefore } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
+            authDomain: "datara-salud.firebaseapp.com",
+            projectId: "datara-salud",
+            storageBucket: "datara-salud.firebasestorage.app",
+            messagingSenderId: "198886910481",
+            appId: "1:198886910481:web:abbc345203a423a6329fb0",
+            measurementId: "G-MLYVTZPPLD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Configuración de paginación
+        const PAGE_SIZE = 10;
         let currentPage = 1;
-        const recordsPerPage = 5; // Registros por página
+        let allCompanies = [];
+        let lastVisible = null;
+        let firstVisible = null;
 
-        // Función para renderizar la tabla
-        function renderTable(page) {
-            const start = (page - 1) * recordsPerPage;
-            const end = start + recordsPerPage;
-            const pageEmpresas = empresas.slice(start, end);
+        const form = document.getElementById('companyForm');
+        const message = document.getElementById('message');
+        const companiesBody = document.getElementById('companiesBody');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const pageNumbers = document.getElementById('pageNumbers');
+        const paginationInfo = document.querySelector('.pagination-info');
 
-            const tbody = document.getElementById('empresasBody');
-            tbody.innerHTML = '';
+        // Cargar empresas iniciales
+        loadCompanies();
 
-            pageEmpresas.forEach(empresa => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('companyName').value;
+            const rut = document.getElementById('companyRut').value;
+
+            try {
+                await addDoc(collection(db, 'companies'), {
+                    name: name,
+                    rut: rut,
+                    createdAt: new Date()
+                });
+
+                showMessage('Empresa registrada exitosamente.', 'success');
+                form.reset();
+                // Recargar lista
+                allCompanies = [];
+                lastVisible = null;
+                firstVisible = null;
+                currentPage = 1;
+                loadCompanies();
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error al registrar: ' + error.message, 'error');
+            }
+        });
+
+        async function loadCompanies() {
+            try {
+                let q;
+                if (currentPage === 1) {
+                    q = query(collection(db, 'companies'), orderBy('createdAt'), limit(PAGE_SIZE));
+                    lastVisible = null;
+                } else {
+                    q = query(collection(db, 'companies'), orderBy('createdAt'), startAfter(lastVisible), limit(PAGE_SIZE));
+                }
+
+                const querySnapshot = await getDocs(q);
+                const companies = [];
+                querySnapshot.forEach((doc) => {
+                    companies.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (querySnapshot.docs.length > 0) {
+                    lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+                    if (currentPage === 1) {
+                        firstVisible = querySnapshot.docs[0];
+                    }
+                }
+
+                // Para obtener total, fetch all once or estimate; here fetch all for simplicity
+                if (allCompanies.length === 0) {
+                    const allQuery = query(collection(db, 'companies'), orderBy('createdAt'));
+                    const allSnapshot = await getDocs(allQuery);
+                    allCompanies = [];
+                    allSnapshot.forEach((doc) => {
+                        allCompanies.push({ id: doc.id, ...doc.data() });
+                    });
+                }
+
+                displayCompanies(companies);
+                updatePagination(allCompanies.length);
+            } catch (error) {
+                console.error('Error loading companies:', error);
+                showMessage('Error al cargar empresas.', 'error');
+            }
+        }
+
+        function displayCompanies(companies) {
+            companiesBody.innerHTML = '';
+            companies.forEach(company => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${empresa.nombre}</td>
-                    <td>${empresa.rut}</td>
+                    <td>${company.name}</td>
+                    <td>${company.rut}</td>
                 `;
-                tbody.appendChild(row);
+                companiesBody.appendChild(row);
             });
-
-            // Actualizar info de página
-            const totalPages = Math.ceil(empresas.length / recordsPerPage);
-            document.getElementById('pageInfo').textContent = `Página ${page} de ${totalPages}`;
-            const recordsThisPage = pageEmpresas.length;
-            document.getElementById('recordsInfo').textContent = `${recordsThisPage} registros en esta página de ${empresas.length}`;
-
-            // Renderizar enlaces de página
-            renderPageLinks(totalPages, page);
-
-            // Actualizar botones anterior/siguiente
-            document.getElementById('prevBtn').classList.toggle('disabled', page === 1);
-            document.getElementById('nextBtn').classList.toggle('disabled', page === totalPages);
         }
 
-        // Función para renderizar enlaces de página (1 2 3 ... 7 8 9)
-        function renderPageLinks(totalPages, current) {
-            const pageLinks = document.getElementById('pageLinks');
-            pageLinks.innerHTML = '';
+        function updatePagination(total) {
+            const totalPages = Math.ceil(total / PAGE_SIZE);
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + 4);
 
-            // Mostrar primeras páginas
-            for (let i = 1; i <= Math.min(3, totalPages); i++) {
-                addPageLink(i, current);
-            }
+            // Info
+            const startRecord = (currentPage - 1) * PAGE_SIZE + 1;
+            const endRecord = Math.min(currentPage * PAGE_SIZE, total);
+            paginationInfo.textContent = `Página ${currentPage} de ${totalPages} | ${endRecord - startRecord + 1} registros en esta página de ${total}`;
 
-            // Si hay más páginas, mostrar ...
-            if (totalPages > 6) {
-                if (current > 4 && current < totalPages - 2) {
-                    pageLinks.innerHTML += '<span>...</span>';
-                    for (let i = current - 1; i <= current + 1; i++) {
-                        addPageLink(i, current);
+            // Controles
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages;
+
+            // Números de página
+            pageNumbers.innerHTML = '';
+            for (let i = startPage; i <= endPage; i++) {
+                if (i > startPage + 1 && i < endPage && endPage - startPage > 3) {
+                    if (!pageNumbers.lastElementChild || pageNumbers.lastElementChild.textContent !== '...') {
+                        const dots = document.createElement('span');
+                        dots.textContent = '...';
+                        dots.className = 'dots';
+                        pageNumbers.appendChild(dots);
                     }
-                    pageLinks.innerHTML += '<span>...</span>';
-                } else if (current > 4) {
-                    pageLinks.innerHTML += '<span>...</span>';
+                    continue;
                 }
-                // Mostrar últimas páginas
-                for (let i = Math.max(totalPages - 2, 4); i <= totalPages; i++) {
-                    addPageLink(i, current);
-                }
-            } else {
-                // Si son pocas páginas, mostrar todas después de las primeras
-                for (let i = 4; i <= totalPages; i++) {
-                    addPageLink(i, current);
-                }
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = i === currentPage ? 'active' : '';
+                btn.addEventListener('click', () => goToPage(i));
+                pageNumbers.appendChild(btn);
+            }
+
+            if (endPage < totalPages && endPage - startPage <= 3) {
+                const dots = document.createElement('span');
+                dots.textContent = '...';
+                dots.className = 'dots';
+                pageNumbers.appendChild(dots);
             }
         }
 
-        function addPageLink(pageNum, current) {
-            const link = document.createElement('span');
-            link.className = 'page-link';
-            if (pageNum === current) {
-                link.classList.add('active');
-            }
-            link.textContent = pageNum;
-            link.addEventListener('click', () => {
-                if (pageNum !== current) {
-                    currentPage = pageNum;
-                    renderTable(currentPage);
-                }
-            });
-            document.getElementById('pageLinks').appendChild(link);
-        }
-
-        // Event listeners para botones
-        document.getElementById('prevBtn').addEventListener('click', () => {
+        prevPageBtn.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
-                renderTable(currentPage);
+                loadCompanies();
             }
         });
 
-        document.getElementById('nextBtn').addEventListener('click', () => {
-            const totalPages = Math.ceil(empresas.length / recordsPerPage);
-            if (currentPage < totalPages) {
+        nextPageBtn.addEventListener('click', () => {
+            if (currentPage < Math.ceil(allCompanies.length / PAGE_SIZE)) {
                 currentPage++;
-                renderTable(currentPage);
+                loadCompanies();
             }
         });
 
-        // Manejar formulario
-        document.getElementById('empresaForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const nombre = document.getElementById('nombre').value.trim();
-            const rut = document.getElementById('rut').value.trim();
+        function goToPage(page) {
+            currentPage = page;
+            loadCompanies();
+        }
 
-            if (nombre && rut) {
-                empresas.push({ nombre, rut });
-                document.getElementById('empresaForm').reset();
-                // Si estamos en la última página o la página actual se ve afectada, ajustar
-                const totalPages = Math.ceil(empresas.length / recordsPerPage);
-                if (currentPage > totalPages) {
-                    currentPage = totalPages;
-                }
-                renderTable(currentPage);
-            }
-        });
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = type;
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000);
+        }
 
-        // Inicializar tabla vacía
-        renderTable(1);
+        // Reglas de Firestore: Asegúrate de permitir writes en 'companies' (ej: allow write: if true; para testing)
     </script>
 </body>
 </html>
