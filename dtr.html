@@ -1,293 +1,449 @@
-import React, { useState, useMemo } from 'react';
-import { Search, ChevronDown, ChevronUp } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos Proveedores</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const ProviderTable = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [columnWidths, setColumnWidths] = useState({
-    codigo: 80,
-    rut: 120,
-    nombre: 250,
-    direccion: 250,
-    telefono: 100,
-    fax: 100,
-    contacto: 100,
-    email: 300
-  });
-  const [resizing, setResizing] = useState(null);
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            padding: 20px;
+        }
 
-  const data = [
-    { codigo: 1, rut: '93.626.000-4', nombre: '3M CHILE S A', direccion: 'SANTA ISABEL 1001 PROVIDENCIA', telefono: '228701', fax: 'CARGA_2', contacto: '', email: '' },
-    { codigo: 3, rut: '96.689.310-9', nombre: 'TRANSSANK S A', direccion: 'HUERFANOS 770 PISO 10', telefono: '6386383', fax: '', contacto: '', email: '' },
-    { codigo: 6, rut: '81.378.300-2', nombre: 'ABBOTT LABORATORIES DE CHILE LTDA', direccion: 'AV. EL SALTO 3380, HUECHURABA', telefono: '5576062', fax: '', contacto: '', email: 'MARIA.PAZRUIZ@ABBOTT.COM,SAC_CHILE@ABBOTT.COM,CRISTIAN.VERA@ABBO' },
-    { codigo: 8, rut: '78.634.770-K', nombre: 'ARAYA Y CIA LIMITADA', direccion: 'TOCORNAL 1334', telefono: '5562665', fax: '', contacto: '', email: '' },
-    { codigo: 16, rut: '96.579.800-5', nombre: 'EMPRESA DE SERVICIOS SANITARIOS DE LOS LAGOS S.A', direccion: 'URMENETA 1062', telefono: '266070', fax: '', contacto: '', email: '' },
-    { codigo: 19, rut: '78.411.950-5', nombre: 'ALLERGAN LABORATORIOS LIMITADA', direccion: 'AV. VITACURA 2736 PISO 15 LAS CONDES', telefono: '3414787', fax: '', contacto: '', email: '' },
-    { codigo: 23, rut: '94.747.000-0', nombre: 'AM INTERNACIONAL S A', direccion: '', telefono: '2220358', fax: '', contacto: '', email: 'CONTACTO@AMINTERNACIONAL.CL,HFAUNDEZ@AMINTERNACIONAL.CL,ALEXISE' },
-    { codigo: 29, rut: '89.171.600-1', nombre: 'CABAÑAS DEL LAGO LTDA', direccion: 'KLENNER 195', telefono: '259001', fax: '', contacto: '', email: '' },
-    { codigo: 30, rut: '65.896.100-9', nombre: 'SERVICIOS EQUIFAX CHILE LIMITADA', direccion: 'LINCOYAN 370 - PISO 2 - CONCEPCION', telefono: '6384565', fax: '', contacto: '', email: '' },
-    { codigo: 31, rut: '90.299.000-3', nombre: 'CIA NACIONAL DE TELEFONOS TELEFONICA DEL SUR S A', direccion: 'SAN CARLOS 107', telefono: '0', fax: '', contacto: '', email: '' },
-    { codigo: 34, rut: '78.440.950-3', nombre: 'BOLETIN LABORAL EDICIONES LIMITADA', direccion: 'SERRANO 140 OF. 22', telefono: '6390829', fax: '', contacto: '', email: '' },
-    { codigo: 36, rut: '87.845.500-2', nombre: 'TELEFONICA MOVILES CHILE S A', direccion: 'AVDA. EL BOSQUE SUR 90 LAS CONDES', telefono: '6616000', fax: '', contacto: '', email: '' },
-    { codigo: 44, rut: '91.537.000-4', nombre: 'BAYER S A', direccion: '', telefono: '5208200', fax: '', contacto: '', email: 'GESTIONVENTAS@BAYER.COM,ROBERTO.DUHART@BAYER.COM' },
-    { codigo: 49, rut: '96.519.830-K', nombre: 'BPH S.A.', direccion: 'ERASMO ESCALA 1875', telefono: '6980040', fax: '', contacto: '', email: 'INSUMOS@BPH.CL,INSUMOS@BPH.CL,VENTAS3@BPH.CL' },
-    { codigo: 50, rut: '78.366.970-6', nombre: 'INDUSTRIAL Y COMERCIAL BAXTER DE CHILE LTDA', direccion: 'AV. MEXICO 715, RECOLETA', telefono: '6202100', fax: '', contacto: '', email: 'CENTRO_DE_SERVICIOS@BAXTER.COM,ALEXANDRA_SOTO@BAXTER.COM' },
-    { codigo: 51, rut: '96.659.920-0', nombre: 'BIOMERIEUX CHILE S A', direccion: '', telefono: '226942092', fax: '', contacto: '', email: 'VENTAS@BIOMERIEUX.COM' },
-    { codigo: 52, rut: '79.702.820-7', nombre: 'PRODUCTOS BIOQUIMICOS LIMITADA', direccion: '8 ORIENTE 1459 TALCA', telefono: '71231836', fax: 'CARGA_2', contacto: '', email: '' },
-    { codigo: 61, rut: '91.637.000-8', nombre: 'LABORATORIOS RECALCINE SA', direccion: 'AV. PEDRO DE VALDIVIA 295, PROVIDENCIA', telefono: '2225244', fax: '', contacto: '', email: 'OCMARKETACCESS@ABBOTT.COM, SERGIO.OLIVA@ABBOTT.COM' },
-    { codigo: 63, rut: '79.568.850-1', nombre: 'VALTEK S.A.', direccion: 'AVENIDA MARATHON 1943, ÑUÑOA', telefono: '26541100', fax: '', contacto: '', email: 'GALVAREZ@VALTEK.CL,FPINO@VALTEK.CL,COORDLABORATORIO@CLINICALIRAY.' },
-    { codigo: 65, rut: '96.576.750-9', nombre: 'UNIC COMPANY CHILE S.A.', direccion: 'MARURI 433,INDEPENDENCIA', telefono: '7777764', fax: '', contacto: '', email: '' },
-    { codigo: 67, rut: '96.613.250-7', nombre: 'LABIN CHILE S A', direccion: 'ROMAN DIAZ 82', telefono: '2357578', fax: '', contacto: '', email: 'VENTAS@WIENER-LAB.CL,RRAMIREZ@WIENER-LAB.CL' },
-    { codigo: 68, rut: '86.397.000-8', nombre: 'DIPROMED S A', direccion: 'AVDA. MATTA 649', telefono: '6353804', fax: '', contacto: '', email: 'GCACERES@DIPROMED.CL' },
-    { codigo: 70, rut: '80.621.200-8', nombre: 'MERCK S A', direccion: 'FRANCISCO DE PAULA TAFORÓ 1981-ÑUÑOA', telefono: '3400000', fax: '', contacto: '', email: '' },
-    { codigo: 76, rut: '78.718.650-5', nombre: 'ASISTENCIA ELECTRONICA LTDA.', direccion: 'MARIN 055 PROVIDENCIA', telefono: '6345305', fax: '', contacto: '', email: '' },
-    { codigo: 77, rut: '86.383.300-0', nombre: 'MEDIPLEX S A', direccion: 'JULIO PRADO 1069 - PROVIDENCIA', telefono: '2049674', fax: '', contacto: '', email: 'NATALIA.ESPINOZA@MEDIPLEX.CL' },
-    { codigo: 80, rut: '96.787.750-6', nombre: 'VTR BANDA ANCHA (CHILE) S.A.', direccion: 'GMO,GALLARDO 119', telefono: '319891', fax: '', contacto: '', email: '' },
-    { codigo: 81, rut: '86.316.500-8', nombre: 'IMPORTADORA SURDENT LIMITADA', direccion: 'VARAS 653 OF. 203', telefono: '254853', fax: '', contacto: '', email: '' }
-  ];
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: 95vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-  const filteredData = useMemo(() => {
-    return data.filter(item => {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        item.codigo.toString().includes(searchLower) ||
-        item.rut.toLowerCase().includes(searchLower) ||
-        item.nombre.toLowerCase().includes(searchLower) ||
-        item.direccion.toLowerCase().includes(searchLower) ||
-        item.telefono.toLowerCase().includes(searchLower) ||
-        item.email.toLowerCase().includes(searchLower)
-      );
-    });
-  }, [searchTerm]);
+        .header {
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            color: white;
+            padding: 16px;
+            border-radius: 8px 8px 0 0;
+        }
 
-  const sortedData = useMemo(() => {
-    if (!sortConfig.key) return filteredData;
+        .header h1 {
+            font-size: 20px;
+            font-weight: bold;
+        }
 
-    return [...filteredData].sort((a, b) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
+        .subheader {
+            background-color: #dbeafe;
+            padding: 8px 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
 
-      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [filteredData, sortConfig]);
+        .subheader h2 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
 
-  const handleSort = (key) => {
-    setSortConfig({
-      key,
-      direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
-    });
-  };
+        .search-bar {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
 
-  const handleMouseDown = (e, column) => {
-    e.preventDefault();
-    setResizing({ column, startX: e.clientX, startWidth: columnWidths[column] });
-  };
+        .search-bar label {
+            font-weight: 500;
+            color: #374151;
+        }
 
-  React.useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!resizing) return;
-      
-      const diff = e.clientX - resizing.startX;
-      const newWidth = Math.max(50, resizing.startWidth + diff);
-      
-      setColumnWidths(prev => ({
-        ...prev,
-        [resizing.column]: newWidth
-      }));
-    };
+        .search-input-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
 
-    const handleMouseUp = () => {
-      setResizing(null);
-    };
+        .search-input {
+            width: 100%;
+            padding: 8px 8px 8px 36px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            outline: none;
+        }
 
-    if (resizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
+        .search-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
 
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [resizing]);
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
 
-  return (
-    <div className="w-full h-screen bg-gray-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg h-full flex flex-col">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-400 to-blue-500 text-white p-4 rounded-t-lg">
-          <h1 className="text-xl font-bold">SOCIEDAD CLINICA REGIONAL LIRCAY SPA</h1>
+        .export-btn {
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .export-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            table-layout: fixed;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #f3f4f6;
+        }
+
+        th {
+            border: 1px solid #d1d5db;
+            padding: 8px;
+            font-weight: 600;
+            color: #1e40af;
+            position: relative;
+            user-select: none;
+        }
+
+        th.sortable {
+            cursor: pointer;
+        }
+
+        th.sortable:hover {
+            background-color: #e5e7eb;
+        }
+
+        .resize-handle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            cursor: col-resize;
+            user-select: none;
+        }
+
+        .resize-handle:hover {
+            background-color: #60a5fa;
+        }
+
+        .sort-icon {
+            display: inline-block;
+            margin-left: 4px;
+            font-size: 10px;
+        }
+
+        td {
+            border: 1px solid #d1d5db;
+            padding: 6px 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        tbody tr:hover {
+            background-color: #eff6ff;
+        }
+
+        td.center {
+            text-align: center;
+        }
+
+        .footer {
+            border-top: 1px solid #e5e7eb;
+            padding: 12px 16px;
+            background-color: #f9fafb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .pagination button {
+            padding: 4px 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
+            background-color: #f3f4f6;
+        }
+
+        .pagination span {
+            padding: 4px 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SOCIEDAD CLINICA REGIONAL LIRCAY SPA</h1>
         </div>
 
-        {/* Subheader */}
-        <div className="bg-blue-100 px-4 py-2 border-b">
-          <h2 className="text-sm font-semibold text-blue-900">DATOS PROVEEDORES</h2>
+        <div class="subheader">
+            <h2>DATOS PROVEEDORES</h2>
         </div>
 
-        {/* Search bar */}
-        <div className="p-4 border-b bg-gray-50">
-          <div className="flex items-center gap-4">
-            <label className="font-medium text-gray-700">Descripción:</label>
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+        <div class="search-bar">
+            <label>Descripción:</label>
+            <div class="search-input-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="Buscar...">
             </div>
-            <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-              Exportar
-            </button>
-          </div>
+            <button class="export-btn">Exportar</button>
         </div>
 
-        {/* Table */}
-        <div className="flex-1 overflow-auto">
-          <table className="border-collapse text-sm" style={{ tableLayout: 'fixed' }}>
-            <thead className="bg-gray-100 sticky top-0 z-10">
-              <tr>
-                <th className="border border-gray-300 px-2 py-2 cursor-pointer hover:bg-gray-200 relative" 
-                    style={{ width: `${columnWidths.codigo}px` }}
-                    onClick={() => handleSort('codigo')}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-blue-700">Código</span>
-                    {sortConfig.key === 'codigo' && (
-                      sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
-                    )}
-                  </div>
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
-                    onMouseDown={(e) => handleMouseDown(e, 'codigo')}
-                  />
-                </th>
-                <th className="border border-gray-300 px-2 py-2 cursor-pointer hover:bg-gray-200 relative" 
-                    style={{ width: `${columnWidths.rut}px` }}
-                    onClick={() => handleSort('rut')}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-blue-700">Rut</span>
-                    {sortConfig.key === 'rut' && (
-                      sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
-                    )}
-                  </div>
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
-                    onMouseDown={(e) => handleMouseDown(e, 'rut')}
-                  />
-                </th>
-                <th className="border border-gray-300 px-2 py-2 relative" 
-                    style={{ width: `${columnWidths.nombre}px` }}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-blue-700">Nombre</span>
-                  </div>
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
-                    onMouseDown={(e) => handleMouseDown(e, 'nombre')}
-                  />
-                </th>
-                <th className="border border-gray-300 px-2 py-2 relative" 
-                    style={{ width: `${columnWidths.direccion}px` }}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-blue-700">Dirección</span>
-                  </div>
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
-                    onMouseDown={(e) => handleMouseDown(e, 'direccion')}
-                  />
-                </th>
-                <th className="border border-gray-300 px-2 py-2 cursor-pointer hover:bg-gray-200 relative" 
-                    style={{ width: `${columnWidths.telefono}px` }}
-                    onClick={() => handleSort('telefono')}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-blue-700">Teléfono</span>
-                    {sortConfig.key === 'telefono' && (
-                      sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
-                    )}
-                  </div>
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
-                    onMouseDown={(e) => handleMouseDown(e, 'telefono')}
-                  />
-                </th>
-                <th className="border border-gray-300 px-2 py-2 font-semibold text-blue-700 relative" 
-                    style={{ width: `${columnWidths.fax}px` }}>
-                  Fax
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
-                    onMouseDown={(e) => handleMouseDown(e, 'fax')}
-                  />
-                </th>
-                <th className="border border-gray-300 px-2 py-2 font-semibold text-blue-700 relative" 
-                    style={{ width: `${columnWidths.contacto}px` }}>
-                  Contacto
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
-                    onMouseDown={(e) => handleMouseDown(e, 'contacto')}
-                  />
-                </th>
-                <th className="border border-gray-300 px-2 py-2 relative" 
-                    style={{ width: `${columnWidths.email}px` }}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-blue-700">Email</span>
-                  </div>
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
-                    onMouseDown={(e) => handleMouseDown(e, 'email')}
-                  />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedData.map((row, idx) => (
-                <tr key={idx} className="hover:bg-blue-50 transition">
-                  <td className="border border-gray-300 px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths.codigo}px` }}>
-                    <div className="truncate">{row.codigo}</div>
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.rut}px` }}>
-                    <div className="truncate">{row.rut}</div>
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.nombre}px` }}>
-                    <div className="truncate">{row.nombre}</div>
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.direccion}px` }}>
-                    <div className="truncate">{row.direccion}</div>
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths.telefono}px` }}>
-                    <div className="truncate">{row.telefono}</div>
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1 text-center overflow-hidden" style={{ width: `${columnWidths.fax}px` }}>
-                    <div className="truncate">{row.fax}</div>
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.contacto}px` }}>
-                    <div className="truncate">{row.contacto}</div>
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1 overflow-hidden" style={{ width: `${columnWidths.email}px` }}>
-                    <div className="truncate">{row.email}</div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="codigo" style="width: 80px;">
+                            Código<span class="sort-icon"></span>
+                            <div class="resize-handle" data-column="codigo"></div>
+                        </th>
+                        <th class="sortable" data-column="rut" style="width: 120px;">
+                            Rut<span class="sort-icon"></span>
+                            <div class="resize-handle" data-column="rut"></div>
+                        </th>
+                        <th data-column="nombre" style="width: 250px;">
+                            Nombre
+                            <div class="resize-handle" data-column="nombre"></div>
+                        </th>
+                        <th data-column="direccion" style="width: 250px;">
+                            Dirección
+                            <div class="resize-handle" data-column="direccion"></div>
+                        </th>
+                        <th class="sortable" data-column="telefono" style="width: 100px;">
+                            Teléfono<span class="sort-icon"></span>
+                            <div class="resize-handle" data-column="telefono"></div>
+                        </th>
+                        <th data-column="fax" style="width: 100px;">
+                            Fax
+                            <div class="resize-handle" data-column="fax"></div>
+                        </th>
+                        <th data-column="contacto" style="width: 100px;">
+                            Contacto
+                            <div class="resize-handle" data-column="contacto"></div>
+                        </th>
+                        <th data-column="email" style="width: 300px;">
+                            Email
+                            <div class="resize-handle" data-column="email"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
         </div>
 
-        {/* Footer */}
-        <div className="border-t p-3 bg-gray-50 flex justify-between items-center text-sm text-gray-600">
-          <div>1 a 27 de 10,955</div>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border rounded hover:bg-gray-100">{'<<'}</button>
-            <button className="px-3 py-1 border rounded hover:bg-gray-100">{'<'}</button>
-            <span className="px-3 py-1">Página 1 de 406</span>
-            <button className="px-3 py-1 border rounded hover:bg-gray-100">{'>'}</button>
-            <button className="px-3 py-1 border rounded hover:bg-gray-100">{'>>'}</button>
-          </div>
+        <div class="footer">
+            <div>1 a 27 de 10,955</div>
+            <div class="pagination">
+                <button>«</button>
+                <button>‹</button>
+                <span>Página 1 de 406</span>
+                <button>›</button>
+                <button>»</button>
+            </div>
         </div>
-      </div>
     </div>
-  );
-};
 
-export default ProviderTable;
+    <script>
+        const data = [
+            { codigo: 1, rut: '93.626.000-4', nombre: '3M CHILE S A', direccion: 'SANTA ISABEL 1001 PROVIDENCIA', telefono: '228701', fax: 'CARGA_2', contacto: '', email: '' },
+            { codigo: 3, rut: '96.689.310-9', nombre: 'TRANSSANK S A', direccion: 'HUERFANOS 770 PISO 10', telefono: '6386383', fax: '', contacto: '', email: '' },
+            { codigo: 6, rut: '81.378.300-2', nombre: 'ABBOTT LABORATORIES DE CHILE LTDA', direccion: 'AV. EL SALTO 3380, HUECHURABA', telefono: '5576062', fax: '', contacto: '', email: 'MARIA.PAZRUIZ@ABBOTT.COM,SAC_CHILE@ABBOTT.COM,CRISTIAN.VERA@ABBO' },
+            { codigo: 8, rut: '78.634.770-K', nombre: 'ARAYA Y CIA LIMITADA', direccion: 'TOCORNAL 1334', telefono: '5562665', fax: '', contacto: '', email: '' },
+            { codigo: 16, rut: '96.579.800-5', nombre: 'EMPRESA DE SERVICIOS SANITARIOS DE LOS LAGOS S.A', direccion: 'URMENETA 1062', telefono: '266070', fax: '', contacto: '', email: '' },
+            { codigo: 19, rut: '78.411.950-5', nombre: 'ALLERGAN LABORATORIOS LIMITADA', direccion: 'AV. VITACURA 2736 PISO 15 LAS CONDES', telefono: '3414787', fax: '', contacto: '', email: '' },
+            { codigo: 23, rut: '94.747.000-0', nombre: 'AM INTERNACIONAL S A', direccion: '', telefono: '2220358', fax: '', contacto: '', email: 'CONTACTO@AMINTERNACIONAL.CL,HFAUNDEZ@AMINTERNACIONAL.CL,ALEXISE' },
+            { codigo: 29, rut: '89.171.600-1', nombre: 'CABAÑAS DEL LAGO LTDA', direccion: 'KLENNER 195', telefono: '259001', fax: '', contacto: '', email: '' },
+            { codigo: 30, rut: '65.896.100-9', nombre: 'SERVICIOS EQUIFAX CHILE LIMITADA', direccion: 'LINCOYAN 370 - PISO 2 - CONCEPCION', telefono: '6384565', fax: '', contacto: '', email: '' },
+            { codigo: 31, rut: '90.299.000-3', nombre: 'CIA NACIONAL DE TELEFONOS TELEFONICA DEL SUR S A', direccion: 'SAN CARLOS 107', telefono: '0', fax: '', contacto: '', email: '' },
+            { codigo: 34, rut: '78.440.950-3', nombre: 'BOLETIN LABORAL EDICIONES LIMITADA', direccion: 'SERRANO 140 OF. 22', telefono: '6390829', fax: '', contacto: '', email: '' },
+            { codigo: 36, rut: '87.845.500-2', nombre: 'TELEFONICA MOVILES CHILE S A', direccion: 'AVDA. EL BOSQUE SUR 90 LAS CONDES', telefono: '6616000', fax: '', contacto: '', email: '' },
+            { codigo: 44, rut: '91.537.000-4', nombre: 'BAYER S A', direccion: '', telefono: '5208200', fax: '', contacto: '', email: 'GESTIONVENTAS@BAYER.COM,ROBERTO.DUHART@BAYER.COM' },
+            { codigo: 49, rut: '96.519.830-K', nombre: 'BPH S.A.', direccion: 'ERASMO ESCALA 1875', telefono: '6980040', fax: '', contacto: '', email: 'INSUMOS@BPH.CL,INSUMOS@BPH.CL,VENTAS3@BPH.CL' },
+            { codigo: 50, rut: '78.366.970-6', nombre: 'INDUSTRIAL Y COMERCIAL BAXTER DE CHILE LTDA', direccion: 'AV. MEXICO 715, RECOLETA', telefono: '6202100', fax: '', contacto: '', email: 'CENTRO_DE_SERVICIOS@BAXTER.COM,ALEXANDRA_SOTO@BAXTER.COM' },
+            { codigo: 51, rut: '96.659.920-0', nombre: 'BIOMERIEUX CHILE S A', direccion: '', telefono: '226942092', fax: '', contacto: '', email: 'VENTAS@BIOMERIEUX.COM' },
+            { codigo: 52, rut: '79.702.820-7', nombre: 'PRODUCTOS BIOQUIMICOS LIMITADA', direccion: '8 ORIENTE 1459 TALCA', telefono: '71231836', fax: 'CARGA_2', contacto: '', email: '' },
+            { codigo: 61, rut: '91.637.000-8', nombre: 'LABORATORIOS RECALCINE SA', direccion: 'AV. PEDRO DE VALDIVIA 295, PROVIDENCIA', telefono: '2225244', fax: '', contacto: '', email: 'OCMARKETACCESS@ABBOTT.COM, SERGIO.OLIVA@ABBOTT.COM' },
+            { codigo: 63, rut: '79.568.850-1', nombre: 'VALTEK S.A.', direccion: 'AVENIDA MARATHON 1943, ÑUÑOA', telefono: '26541100', fax: '', contacto: '', email: 'GALVAREZ@VALTEK.CL,FPINO@VALTEK.CL,COORDLABORATORIO@CLINICALIRAY.' },
+            { codigo: 65, rut: '96.576.750-9', nombre: 'UNIC COMPANY CHILE S.A.', direccion: 'MARURI 433,INDEPENDENCIA', telefono: '7777764', fax: '', contacto: '', email: '' },
+            { codigo: 67, rut: '96.613.250-7', nombre: 'LABIN CHILE S A', direccion: 'ROMAN DIAZ 82', telefono: '2357578', fax: '', contacto: '', email: 'VENTAS@WIENER-LAB.CL,RRAMIREZ@WIENER-LAB.CL' },
+            { codigo: 68, rut: '86.397.000-8', nombre: 'DIPROMED S A', direccion: 'AVDA. MATTA 649', telefono: '6353804', fax: '', contacto: '', email: 'GCACERES@DIPROMED.CL' },
+            { codigo: 70, rut: '80.621.200-8', nombre: 'MERCK S A', direccion: 'FRANCISCO DE PAULA TAFORÓ 1981-ÑUÑOA', telefono: '3400000', fax: '', contacto: '', email: '' },
+            { codigo: 76, rut: '78.718.650-5', nombre: 'ASISTENCIA ELECTRONICA LTDA.', direccion: 'MARIN 055 PROVIDENCIA', telefono: '6345305', fax: '', contacto: '', email: '' },
+            { codigo: 77, rut: '86.383.300-0', nombre: 'MEDIPLEX S A', direccion: 'JULIO PRADO 1069 - PROVIDENCIA', telefono: '2049674', fax: '', contacto: '', email: 'NATALIA.ESPINOZA@MEDIPLEX.CL' },
+            { codigo: 80, rut: '96.787.750-6', nombre: 'VTR BANDA ANCHA (CHILE) S.A.', direccion: 'GMO,GALLARDO 119', telefono: '319891', fax: '', contacto: '', email: '' },
+            { codigo: 81, rut: '86.316.500-8', nombre: 'IMPORTADORA SURDENT LIMITADA', direccion: 'VARAS 653 OF. 203', telefono: '254853', fax: '', contacto: '', email: '' }
+        ];
+
+        let filteredData = [...data];
+        let sortConfig = { key: null, direction: 'asc' };
+        let columnWidths = {
+            codigo: 80,
+            rut: 120,
+            nombre: 250,
+            direccion: 250,
+            telefono: 100,
+            fax: 100,
+            contacto: 100,
+            email: 300
+        };
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach(function(row) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="center" style="width: ${columnWidths.codigo}px;">${row.codigo}</td>
+                    <td style="width: ${columnWidths.rut}px;">${row.rut}</td>
+                    <td style="width: ${columnWidths.nombre}px;">${row.nombre}</td>
+                    <td style="width: ${columnWidths.direccion}px;">${row.direccion}</td>
+                    <td class="center" style="width: ${columnWidths.telefono}px;">${row.telefono}</td>
+                    <td class="center" style="width: ${columnWidths.fax}px;">${row.fax}</td>
+                    <td style="width: ${columnWidths.contacto}px;">${row.contacto}</td>
+                    <td style="width: ${columnWidths.email}px;">${row.email}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateColumnWidths();
+        }
+
+        function updateColumnWidths() {
+            const headers = document.querySelectorAll('th');
+            headers.forEach(function(th) {
+                const column = th.dataset.column;
+                if (column) {
+                    th.style.width = columnWidths[column] + 'px';
+                }
+            });
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            filteredData = data.filter(function(row) {
+                return Object.values(row).some(function(value) {
+                    return value.toString().toLowerCase().includes(searchTerm);
+                });
+            });
+            renderTable();
+        });
+
+        // Sort functionality
+        document.querySelectorAll('.sortable').forEach(function(th) {
+            th.addEventListener('click', function(e) {
+                if (e.target.classList.contains('resize-handle')) return;
+                
+                const column = th.dataset.column;
+                const direction = sortConfig.key === column && sortConfig.direction === 'asc' ? 'desc' : 'asc';
+                sortConfig = { key: column, direction: direction };
+
+                filteredData.sort(function(a, b) {
+                    let aVal = a[column];
+                    let bVal = b[column];
+                    
+                    if (column === 'codigo' || column === 'telefono') {
+                        aVal = parseInt(aVal) || 0;
+                        bVal = parseInt(bVal) || 0;
+                    }
+
+                    if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                // Update sort icons
+                document.querySelectorAll('.sort-icon').forEach(function(icon) {
+                    icon.textContent = '';
+                });
+                th.querySelector('.sort-icon').textContent = direction === 'asc' ? '▲' : '▼';
+
+                renderTable();
+            });
+        });
+
+        // Column resize functionality
+        let isResizing = false;
+        let currentColumn = null;
+        let startX = 0;
+        let startWidth = 0;
+
+        document.querySelectorAll('.resize-handle').forEach(function(handle) {
+            handle.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isResizing = true;
+                currentColumn = handle.dataset.column;
+                startX = e.pageX;
+                startWidth = columnWidths[currentColumn];
+                document.body.style.cursor = 'col-resize';
+            });
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isResizing) return;
+            
+            const diff = e.pageX - startX;
+            const newWidth = Math.max(50, startWidth + diff);
+            columnWidths[currentColumn] = newWidth;
+            
+            updateColumnWidths();
+            renderTable();
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isResizing) {
+                isResizing = false;
+                currentColumn = null;
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        // Initial render
+        renderTable();
+    </script>
+</body>
+</html>
