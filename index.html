@@ -19,9 +19,9 @@
             font-weight: bold;
         }
         .login-panel {
-            width: 400px; /* Increased width from 300px to 400px */
+            width: 500px;
             margin: 50px auto;
-            padding: 20px;
+            padding: 30px;
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: white;
@@ -30,6 +30,7 @@
         .login-panel h2 {
             margin-bottom: 20px;
             font-size: 24px;
+            font-weight: normal;
         }
         .form-group {
             margin-bottom: 15px;
@@ -38,8 +39,8 @@
         .form-group label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
-            font-size: 14px; /* Reduced font size from default to 14px */
+            font-size: 14px;
+            font-weight: normal;
         }
         .form-group input {
             width: 100%;
@@ -51,23 +52,26 @@
         .btn-conectar {
             width: 100%;
             padding: 10px;
-            background-color: #3A5795;
+            background-color: #0d83d1; /* Adjusted to a more contrasting blue */
             color: white;
             border: none;
             border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
+            text-align: center;
+            text-shadow: none; /* Ensure no shadow effect */
         }
         .btn-conectar:hover {
-            background-color: #2f4577;
+            background-color: #0c72b1; /* Slightly darker for hover effect */
         }
         .change-link {
             margin-top: 10px;
-            text-align: center;
+            text-align: left;
         }
         .change-link a {
             color: #3A5795;
             text-decoration: none;
+            font-size: 12px;
         }
         .change-link a:hover {
             text-decoration: underline;
@@ -89,7 +93,7 @@
                 <input type="password" id="password" name="password" placeholder="Clave">
             </div>
             <div class="form-group">
-                <input type="submit" value="Conectar" class="btn-conectar">
+                <input type="submit" value="Ingresar" class="btn-conectar">
             </div>
             <div class="change-link">
                 <a href="#">Cambiar Clave</a>
