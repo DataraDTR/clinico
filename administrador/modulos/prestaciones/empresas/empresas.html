@@ -29,6 +29,7 @@
             overflow-y: auto;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative; /* Para posicionar elementos absolutos */
         }
         .empresas-title {
             text-align: start;
@@ -191,6 +192,63 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+        /* Estilos para loading */
+        .empresas-loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            text-align: center;
+        }
+        .empresas-loading.show {
+            display: block;
+        }
+        .empresas-loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Estilos para toast en superior derecha */
+        .empresas-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 4px;
+            border: 1px solid #c3e6cb;
+            font-size: 12px;
+            z-index: 1001;
+            max-width: 300px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .empresas-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .empresas-toast.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
         @media (max-width: 768px) {
             .empresas-fields-container {
                 flex-direction: column;
@@ -206,6 +264,12 @@
             }
             .empresas-actions {
                 flex-direction: column;
+            }
+            .empresas-toast {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
             }
         }
     </style>
@@ -263,6 +327,15 @@
                 <button id="nextBtn">Siguiente</button>
             </div>
         </div>
+
+        <!-- Loading overlay -->
+        <div id="empresas-loading" class="empresas-loading">
+            <div class="empresas-loading-spinner"></div>
+            <div>Cargando...</div>
+        </div>
+
+        <!-- Toast para mensajes emergentes -->
+        <div id="empresas-toast" class="empresas-toast"></div>
     </div>
 
     <script type="module">
@@ -290,7 +363,8 @@
         let searchRut = '';
 
         const form = document.getElementById('empresaForm');
-        const message = document.getElementById('empresas-message');
+        const loading = document.getElementById('empresas-loading');
+        const toast = document.getElementById('empresas-toast');
         const empresasBody = document.getElementById('empresasBody');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
@@ -298,6 +372,24 @@
         const paginationInfo = document.getElementById('paginationInfo');
         const buscarNombreInput = document.getElementById('buscarNombre');
         const buscarRutInput = document.getElementById('buscarRut');
+
+        // Funciones para loading y toast
+        function showLoading() {
+            loading.classList.add('show');
+        }
+
+        function hideLoading() {
+            loading.classList.remove('show');
+        }
+
+        function showToast(text, type = 'success') {
+            toast.textContent = text;
+            toast.className = `empresas-toast ${type}`;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
 
         // Verificar autenticación al cargar
         onAuthStateChanged(auth, async (user) => {
@@ -337,7 +429,7 @@
                 console.log('Empresas cargadas:', empresas.length);
             } catch (error) {
                 console.error("Error loading empresas:", error);
-                showMessage('Error al cargar las empresas: ' + error.message, 'error');
+                showToast('Error al cargar las empresas: ' + error.message, 'error');
             }
         }
 
@@ -348,6 +440,7 @@
             const rut = document.getElementById('rut').value.trim();
 
             if (nombre && rut) {
+                showLoading();
                 try {
                     console.log('Registrando empresa...');
                     await addDoc(collection(db, "empresas"), {
@@ -355,15 +448,17 @@
                         rut,
                         createdAt: new Date()
                     });
-                    showMessage('Empresa registrada exitosamente.', 'success');
+                    hideLoading();
+                    showToast(`Se ha registrado con éxito la empresa ${nombre}`, 'success');
                     form.reset();
                     await loadEmpresas(); // Recargar desde Firebase
                 } catch (error) {
+                    hideLoading();
                     console.error("Error adding empresa:", error);
-                    showMessage('Error al registrar la empresa: ' + error.message, 'error');
+                    showToast('Error al registrar la empresa: ' + error.message, 'error');
                 }
             } else {
-                showMessage('Por favor, completa todos los campos.', 'error');
+                showToast('Por favor, completa todos los campos.', 'error');
             }
         });
 
@@ -388,8 +483,8 @@
                     <td>${empresa.nombre}</td>
                     <td>${empresa.rut}</td>
                     <td class="empresas-actions">
-                        <button class="empresas-btn-edit" onclick="editEmpresa('${empresa.id}')">Editar</button>
-                        <button class="empresas-btn-delete" onclick="deleteEmpresa('${empresa.id}')">Eliminar</button>
+                        <button class="empresas-btn-edit" onclick="editEmpresa('${empresa.id}', '${empresa.nombre}')">Editar</button>
+                        <button class="empresas-btn-delete" onclick="deleteEmpresa('${empresa.id}', '${empresa.nombre}')">Eliminar</button>
                         <button class="empresas-btn-history" onclick="viewHistory('${empresa.id}')">Historial</button>
                     </td>
                 `;
@@ -453,7 +548,7 @@
         }
 
         // Funciones para acciones
-        window.editEmpresa = async (id) => {
+        window.editEmpresa = async (id, nombre) => {
             const empresa = empresas.find(e => e.id === id);
             if (empresa) {
                 const newName = prompt('Nuevo nombre:', empresa.nombre);
@@ -462,34 +557,40 @@
                     const trimmedName = newName.trim();
                     const trimmedRut = newRut.trim();
                     if (trimmedName && trimmedRut) {
+                        showLoading();
                         try {
                             await updateDoc(doc(db, "empresas", id), {
                                 nombre: trimmedName,
                                 rut: trimmedRut,
                                 createdAt: new Date()
                             });
-                            showMessage('Empresa actualizada exitosamente.', 'success');
+                            hideLoading();
+                            showToast(`Se ha editado con éxito la empresa ${trimmedName}`, 'success');
                             await loadEmpresas(); // Recargar
                         } catch (error) {
+                            hideLoading();
                             console.error("Error updating empresa:", error);
-                            showMessage('Error al actualizar la empresa: ' + error.message, 'error');
+                            showToast('Error al editar la empresa: ' + error.message, 'error');
                         }
                     } else {
-                        showMessage('Por favor, completa todos los campos.', 'error');
+                        showToast('Por favor, completa todos los campos.', 'error');
                     }
                 }
             }
         };
 
-        window.deleteEmpresa = async (id) => {
+        window.deleteEmpresa = async (id, nombre) => {
             if (confirm('¿Eliminar esta empresa?')) {
+                showLoading();
                 try {
                     await deleteDoc(doc(db, "empresas", id));
-                    showMessage('Empresa eliminada.', 'success');
+                    hideLoading();
+                    showToast(`Se ha eliminado con éxito la empresa ${nombre}`, 'success');
                     await loadEmpresas(); // Recargar
                 } catch (error) {
+                    hideLoading();
                     console.error("Error deleting empresa:", error);
-                    showMessage('Error al eliminar la empresa: ' + error.message, 'error');
+                    showToast('Error al eliminar la empresa: ' + error.message, 'error');
                 }
             }
         };
@@ -498,15 +599,6 @@
             // Placeholder para historial (puedes expandir con un array de cambios por empresa)
             alert(`Historial de empresa ${id}: No hay cambios previos implementados.`);
         };
-
-        function showMessage(text, type) {
-            message.textContent = text;
-            message.className = `empresas-message-${type}`;
-            message.style.display = 'block';
-            setTimeout(() => {
-                message.style.display = 'none';
-            }, 5000);
-        }
     </script>
 </body>
 </html>
