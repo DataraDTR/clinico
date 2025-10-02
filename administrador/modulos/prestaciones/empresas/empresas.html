@@ -18,63 +18,63 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             overflow: hidden;
-            font-size: 12px; /* Tamaño base más pequeño para todas las letras */
+            font-size: 12px;
         }
         .empresas-main-container {
             width: 100%;
             height: 100%;
             background: white;
-            padding: 5px 20px 20px 20px; /* Reducido padding-top para acercar el título al borde superior */
+            padding: 5px 20px 20px 20px;
             box-sizing: border-box;
             overflow-y: auto;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            position: relative; /* Para posicionar elementos absolutos */
+            position: relative;
         }
         .empresas-title {
             text-align: start;
-            margin: 0 0 15px 0; /* Eliminado margen superior y reducido inferior */
-            font-size: 18px; /* Título más pequeño */
+            margin: 0 0 15px 0;
+            font-size: 18px;
         }
         .empresas-fields-container {
             display: flex;
             justify-content: space-between;
-            gap: 10px; /* Reducido drásticamente para minimizar espacio perdido entre secciones */
+            gap: 10px;
             margin-bottom: 20px;
         }
         .empresas-left-section, .empresas-right-section {
             display: flex;
-            flex-direction: row; /* Asegurar horizontal */
-            align-items: flex-end; /* Alinea los inputs al fondo */
-            gap: 20px; /* Aumentado para más separación entre campos dentro de cada sección */
-            flex: 1; /* Cada sección ocupa espacio igual */
+            flex-direction: row;
+            align-items: flex-end;
+            gap: 20px;
+            flex: 1;
         }
         .empresas-form-group {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 4px; /* Aumentado ligeramente el espacio entre label e input */
-            flex: 1; /* Para que los grupos se expandan uniformemente */
-            min-width: 0; /* Permite que se encoja si es necesario */
-            max-width: 300px; /* Aumentado ligeramente para mejor uso del espacio */
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+            max-width: 300px;
         }
         .empresas-label {
-            font-size: 10px; /* Labels más pequeños para ahorrar espacio */
+            font-size: 10px;
             font-weight: bold;
             color: #333;
             white-space: nowrap;
         }
         #nombre, #rut, #buscarNombre, #buscarRut {
-            width: 100%; /* Inputs ocupan todo el ancho del grupo (ahora más estrecho) */
+            width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 11px;
-            box-sizing: border-box; /* Asegura que padding no aumente el ancho */
+            box-sizing: border-box;
         }
         #nombre:focus, #rut:focus, #buscarNombre:focus, #buscarRut:focus {
-            box-shadow: 0 0 12px rgba(0, 123, 255, 0.5); /* Brillo azul solo en focus */
-            outline: none; /* Remover outline por defecto */
+            box-shadow: 0 0 12px rgba(0, 123, 255, 0.5);
+            outline: none;
         }
         .empresas-register-btn {
             padding: 8px 16px;
@@ -84,31 +84,34 @@
             border-radius: 4px;
             cursor: pointer;
             white-space: nowrap;
-            font-size: 12px; /* Tamaño más pequeño para el botón */
-            flex-shrink: 0; /* Botón no se encoje */
-            align-self: flex-end; /* Alinea el botón al final verticalmente */
-            box-shadow: 0 2px 4px rgba(0,123,255,0.25); /* Sombra para estilo */
-            transition: background-color 0.3s ease; /* Transición suave */
+            font-size: 12px;
+            flex-shrink: 0;
+            align-self: flex-end;
+            box-shadow: 0 2px 4px rgba(0,123,255,0.25);
+            transition: background-color 0.3s ease;
         }
         .empresas-register-btn:hover {
             background-color: #0056b3;
-            transform: translateY(-1px); /* Efecto lift al hover */
+            transform: translateY(-1px);
         }
         .empresas-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            font-size: 11px; /* Tabla con fuente más pequeña */
-            border: 1px solid #ddd; /* Borde exterior de la tabla */
+            font-size: 11px;
+            border: 1px solid #ddd;
         }
         .empresas-table th, .empresas-table td {
-            padding: 8px; /* Padding reducido para más compacto */
+            padding: 4px;
             text-align: left;
-            border: 1px solid #ddd; /* Bordes horizontales y verticales para cada celda */
+            border: 1px solid #ddd;
         }
         .empresas-table th {
             background-color: #f2f2f2;
-            font-size: 11px; /* Encabezados más pequeños */
+            font-size: 11px;
+        }
+        .empresas-table tbody tr:hover {
+            background-color: #f8f9fa;
         }
         .empresas-actions {
             display: flex;
@@ -119,7 +122,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 10px; /* Botones de acciones más pequeños */
+            font-size: 10px;
         }
         .empresas-btn-edit { background-color: #ffc107; color: #000; }
         .empresas-btn-delete { background-color: #dc3545; color: white; }
@@ -133,10 +136,10 @@
             border-radius: 4px;
         }
         .empresas-pagination-info {
-            font-size: 11px; /* Info de paginación más pequeña */
+            font-size: 11px;
         }
         .empresas-pagination-controls button {
-            padding: 6px 10px; /* Padding reducido */
+            padding: 6px 10px;
             margin: 0 5px;
             background-color: #007bff;
             color: white;
@@ -157,7 +160,7 @@
             gap: 5px;
         }
         .empresas-page-numbers button {
-            padding: 4px 8px; /* Padding reducido */
+            padding: 4px 8px;
             border: 1px solid #ddd;
             background: white;
             cursor: pointer;
@@ -177,10 +180,10 @@
         }
         #empresas-message {
             margin-bottom: 20px;
-            padding: 8px; /* Padding reducido */
+            padding: 8px;
             border-radius: 4px;
             display: none;
-            font-size: 11px; /* Mensajes más pequeños */
+            font-size: 11px;
         }
         .empresas-message-error {
             background-color: #f8d7da;
@@ -192,33 +195,32 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        /* Estilos para loading mejorado y más profesional, contenedor pequeño */
         .empresas-loading {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 120px; /* Ancho fijo pequeño */
-            height: 80px; /* Altura fija pequeña */
-            background: rgba(255, 255, 255, 0.95); /* Fondo blanco semi-transparente */
+            width: 120px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2); /* Sombra más profesional */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             padding: 16px;
-            backdrop-filter: blur(8px); /* Desenfoque solo en el contenedor */
+            backdrop-filter: blur(8px);
         }
         .empresas-loading.show {
             display: flex;
         }
         .empresas-loading-spinner {
-            width: 32px; /* Spinner más pequeño para el contenedor compacto */
+            width: 32px;
             height: 32px;
-            border: 3px solid #e3f2fd; /* Borde claro azul */
-            border-top: 3px solid #007bff; /* Línea superior azul */
+            border: 3px solid #e3f2fd;
+            border-top: 3px solid #007bff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 8px;
@@ -233,7 +235,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Estilos para toast en superior derecha */
         .empresas-toast {
             position: fixed;
             top: 20px;
@@ -246,7 +247,7 @@
             font-size: 12px;
             z-index: 1001;
             max-width: 300px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Sombra más suave */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             opacity: 0;
             transform: translateX(100%);
             transition: opacity 0.3s ease, transform 0.3s ease;
@@ -271,7 +272,7 @@
                 gap: 15px;
             }
             .empresas-form-group {
-                max-width: none; /* En móvil, campos ocupan todo el ancho */
+                max-width: none;
             }
             .empresas-actions {
                 flex-direction: column;
@@ -333,13 +334,11 @@
                 </tr>
             </thead>
             <tbody id="empresasBody">
-                <!-- Datos se cargarán aquí -->
             </tbody>
         </table>
 
         <div class="empresas-pagination" id="pagination">
             <div class="empresas-pagination-info" id="paginationInfo">
-                <!-- Info se actualizará dinámicamente -->
             </div>
             <div class="empresas-pagination-controls">
                 <button id="prevBtn">Anterior</button>
@@ -348,13 +347,11 @@
             </div>
         </div>
 
-        <!-- Loading overlay mejorado, contenedor pequeño -->
         <div id="empresas-loading" class="empresas-loading">
             <div class="empresas-loading-spinner"></div>
             <div class="empresas-loading-text">Procesando...</div>
         </div>
 
-        <!-- Toast para mensajes emergentes -->
         <div id="empresas-toast" class="empresas-toast"></div>
     </div>
 
@@ -376,13 +373,12 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let empresas = []; // Array local para cache
+        let empresas = [];
         let currentPage = 1;
         const PAGE_SIZE = 10;
         let searchNombre = '';
         let searchRut = '';
 
-        // Esperar a que el DOM esté listo
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('empresaForm');
             const loading = document.getElementById('empresas-loading');
@@ -395,7 +391,6 @@
             const buscarNombreInput = document.getElementById('buscarNombre');
             const buscarRutInput = document.getElementById('buscarRut');
 
-            // Funciones para loading y toast
             window.showLoading = function() {
                 if (loading) loading.classList.add('show');
             };
@@ -415,18 +410,14 @@
                 }
             }
 
-            // Verificar autenticación al cargar
             onAuthStateChanged(auth, async (user) => {
                 if (!user) {
-                    console.log('Usuario no autenticado, redirigiendo...');
-                    window.location.replace('../index.html'); // O el path correcto a login
+                    window.location.replace('../index.html');
                     return;
                 }
-                console.log('Usuario autenticado:', user.uid); // Log para debug
-                await loadEmpresas(); // Cargar datos solo si autenticado
+                await loadEmpresas();
             });
 
-            // Eventos para búsqueda en tiempo real
             if (buscarNombreInput) {
                 buscarNombreInput.addEventListener('input', (e) => {
                     searchNombre = e.target.value.trim();
@@ -443,11 +434,9 @@
                 });
             }
 
-            // Cargar tabla inicial desde Firebase
             async function loadEmpresas() {
                 showLoading();
                 try {
-                    console.log('Cargando empresas desde Firebase...');
                     const querySnapshot = await getDocs(collection(db, "empresas"));
                     empresas = [];
                     querySnapshot.forEach((doc) => {
@@ -455,11 +444,9 @@
                     });
                     empresas.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                     renderTable();
-                    console.log('Empresas cargadas:', empresas.length);
                     hideLoading();
                 } catch (error) {
                     hideLoading();
-                    console.error("Error loading empresas:", error);
                     showToast('Error al cargar las empresas: ' + error.message, 'error');
                 }
             }
@@ -474,7 +461,6 @@
                     if (nombre && rut) {
                         showLoading();
                         try {
-                            console.log('Registrando empresa...');
                             await addDoc(collection(db, "empresas"), {
                                 nombre,
                                 rut,
@@ -483,10 +469,9 @@
                             hideLoading();
                             showToast(`Se ha registrado con éxito la empresa ${nombre}`, 'success');
                             form.reset();
-                            await loadEmpresas(); // Recargar desde Firebase
+                            await loadEmpresas();
                         } catch (error) {
                             hideLoading();
-                            console.error("Error adding empresa:", error);
                             showToast('Error al registrar la empresa: ' + error.message, 'error');
                         }
                     } else {
@@ -534,17 +519,14 @@
                 const startPage = Math.max(1, currentPage - 2);
                 const endPage = Math.min(totalPages, startPage + 4);
 
-                // Info de paginación
                 const startRecord = (currentPage - 1) * PAGE_SIZE + 1;
                 const endRecord = Math.min(currentPage * PAGE_SIZE, total);
                 const recordsThisPage = endRecord - startRecord + 1;
                 if (paginationInfo) paginationInfo.textContent = `Página ${currentPage} de ${totalPages} | ${recordsThisPage} registros en esta página de ${total}`;
 
-                // Botones anterior/siguiente
                 if (prevBtn) prevBtn.disabled = currentPage === 1;
                 if (nextBtn) nextBtn.disabled = currentPage === totalPages;
 
-                // Números de página
                 if (pageNumbers) {
                     pageNumbers.innerHTML = '';
                     for (let i = startPage; i <= endPage; i++) {
@@ -588,7 +570,6 @@
                 });
             }
 
-            // Funciones para acciones
             window.editEmpresa = async (id, nombre) => {
                 const empresa = empresas.find(e => e.id === id);
                 if (empresa) {
@@ -607,10 +588,9 @@
                                 });
                                 hideLoading();
                                 showToast(`Se ha editado con éxito la empresa ${trimmedName}`, 'success');
-                                await loadEmpresas(); // Recargar
+                                await loadEmpresas();
                             } catch (error) {
                                 hideLoading();
-                                console.error("Error updating empresa:", error);
                                 showToast('Error al editar la empresa: ' + error.message, 'error');
                             }
                         } else {
@@ -627,17 +607,15 @@
                         await deleteDoc(doc(db, "empresas", id));
                         hideLoading();
                         showToast(`Se ha eliminado con éxito la empresa ${nombre}`, 'success');
-                        await loadEmpresas(); // Recargar
+                        await loadEmpresas();
                     } catch (error) {
                         hideLoading();
-                        console.error("Error deleting empresa:", error);
                         showToast('Error al eliminar la empresa: ' + error.message, 'error');
                     }
                 }
             };
 
             window.viewHistory = (id) => {
-                // Placeholder para historial (puedes expandir con un array de cambios por empresa)
                 alert(`Historial de empresa ${id}: No hay cambios previos implementados.`);
             };
         });
