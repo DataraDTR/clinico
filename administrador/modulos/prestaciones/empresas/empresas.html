@@ -29,11 +29,17 @@
             margin: 0 0 15px 0; /* Eliminado margen superior y reducido inferior */
             font-size: 18px; /* Título más pequeño */
         }
-        .empresas-form-row {
+        .empresas-fields-container {
             display: flex;
-            gap: 15px; /* Espacio aumentado entre los elementos */
-            align-items: flex-end;
+            justify-content: space-between;
+            gap: 30px; /* Separación entre secciones izquierda y derecha */
             margin-bottom: 20px;
+        }
+        .empresas-left-section, .empresas-right-section {
+            display: flex;
+            align-items: flex-end; /* Alinea los inputs al fondo */
+            gap: 15px; /* Separación entre campos dentro de cada sección */
+            flex: 1; /* Cada sección ocupa espacio igual */
         }
         .empresas-form-group {
             display: flex;
@@ -70,13 +76,6 @@
         }
         .empresas-form-row button:hover {
             background-color: #0056b3;
-        }
-        .empresas-divider-vertical {
-            height: 100%;
-            border-left: 1px solid #ddd;
-            align-self: stretch;
-            margin: 0 10px;
-            flex-shrink: 0;
         }
         .empresas-table {
             width: 100%;
@@ -176,16 +175,14 @@
             border: 1px solid #c3e6cb;
         }
         @media (max-width: 768px) {
-            .empresas-form-row {
+            .empresas-fields-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .empresas-left-section, .empresas-right-section {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 15px;
-            }
-            .empresas-divider-vertical {
-                display: none; /* Ocultar separador en móvil */
-            }
-            .empresas-form-group {
-                flex: none; /* En móvil, grupos no se expandan */
             }
             .empresas-actions {
                 flex-direction: column;
@@ -199,24 +196,27 @@
         
         <div id="empresas-message"></div>
 
-        <form id="empresaForm" class="empresas-form-row">
-            <div class="empresas-form-group">
-                <label for="nombre" class="empresas-label">Nombre de la empresa:</label>
-                <input type="text" id="nombre" placeholder="Nombre de la empresa" required>
+        <form id="empresaForm" class="empresas-fields-container">
+            <div class="empresas-left-section">
+                <div class="empresas-form-group">
+                    <label for="nombre" class="empresas-label">Nombre de la empresa:</label>
+                    <input type="text" id="nombre" placeholder="Nombre de la empresa" required>
+                </div>
+                <div class="empresas-form-group">
+                    <label for="rut" class="empresas-label">RUT de la empresa:</label>
+                    <input type="text" id="rut" placeholder="RUT de la empresa (Ej: 76.123.456-7)" required>
+                </div>
+                <button type="submit">Registrar</button>
             </div>
-            <div class="empresas-form-group">
-                <label for="rut" class="empresas-label">RUT de la empresa:</label>
-                <input type="text" id="rut" placeholder="RUT de la empresa (Ej: 76.123.456-7)" required>
-            </div>
-            <button type="submit">Registrar</button>
-            <div class="empresas-divider-vertical">|</div>
-            <div class="empresas-form-group">
-                <label for="buscarNombre" class="empresas-label">Buscar empresa:</label>
-                <input type="text" id="buscarNombre" placeholder="Buscar por nombre">
-            </div>
-            <div class="empresas-form-group">
-                <label for="buscarRut" class="empresas-label">Buscar RUT:</label>
-                <input type="text" id="buscarRut" placeholder="Buscar por RUT">
+            <div class="empresas-right-section">
+                <div class="empresas-form-group">
+                    <label for="buscarNombre" class="empresas-label">Buscar empresa:</label>
+                    <input type="text" id="buscarNombre" placeholder="Buscar por nombre">
+                </div>
+                <div class="empresas-form-group">
+                    <label for="buscarRut" class="empresas-label">Buscar RUT:</label>
+                    <input type="text" id="buscarRut" placeholder="Buscar por RUT">
+                </div>
             </div>
         </form>
 
