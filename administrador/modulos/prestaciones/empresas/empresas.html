@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Empresas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
@@ -118,11 +119,16 @@
             gap: 5px;
         }
         .empresas-actions button {
-            padding: 4px 8px;
+            padding: 4px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 12px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .empresas-btn-edit { background-color: #ffc107; color: #000; }
         .empresas-btn-delete { background-color: #dc3545; color: white; }
@@ -502,9 +508,9 @@
                             <td>${empresa.nombre}</td>
                             <td>${empresa.rut}</td>
                             <td class="empresas-actions">
-                                <button class="empresas-btn-edit" onclick="editEmpresa('${empresa.id}', '${empresa.nombre}')">Editar</button>
-                                <button class="empresas-btn-delete" onclick="deleteEmpresa('${empresa.id}', '${empresa.nombre}')">Eliminar</button>
-                                <button class="empresas-btn-history" onclick="viewHistory('${empresa.id}')">Historial</button>
+                                <button title="Editar" class="empresas-btn-edit" onclick="editEmpresa('${empresa.id}', '${empresa.nombre}')"><i class="fas fa-edit"></i></button>
+                                <button title="Eliminar" class="empresas-btn-delete" onclick="deleteEmpresa('${empresa.id}', '${empresa.nombre}')"><i class="fas fa-trash"></i></button>
+                                <button title="Ver Historial" class="empresas-btn-history" onclick="viewHistory('${empresa.id}')"><i class="fas fa-history"></i></button>
                             </td>
                         `;
                         empresasBody.appendChild(row);
