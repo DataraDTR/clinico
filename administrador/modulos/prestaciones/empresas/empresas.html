@@ -12,12 +12,13 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             overflow: hidden;
+            font-size: 12px; /* Tamaño base más pequeño para todas las letras */
         }
         .empresas-main-container {
             width: 100%;
             height: 100%;
             background: white;
-            padding: 20px;
+            padding: 5px 20px 20px 20px; /* Reducido padding-top para acercar el título al borde superior */
             box-sizing: border-box;
             overflow-y: auto;
             border-radius: 8px;
@@ -25,7 +26,8 @@
         }
         .empresas-title {
             text-align: center;
-            margin-bottom: 20px;
+            margin: 0 0 15px 0; /* Eliminado margen superior y reducido inferior */
+            font-size: 18px; /* Título más pequeño */
         }
         .empresas-form-row {
             display: flex;
@@ -33,8 +35,14 @@
             align-items: end;
             margin-bottom: 20px;
         }
-        .empresas-form-row input {
-            flex: 1;
+        #nombre {
+            width: 100px; /* Ancho fijo para el campo de nombre */
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #rut {
+            width: 50px; /* Ancho fijo para el campo de RUT */
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -47,6 +55,7 @@
             border-radius: 4px;
             cursor: pointer;
             white-space: nowrap;
+            font-size: 12px; /* Tamaño más pequeño para el botón */
         }
         .empresas-form-row button:hover {
             background-color: #0056b3;
@@ -55,14 +64,16 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            font-size: 11px; /* Tabla con fuente más pequeña */
         }
         .empresas-table th, .empresas-table td {
-            padding: 12px;
+            padding: 8px; /* Padding reducido para más compacto */
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
         .empresas-table th {
             background-color: #f2f2f2;
+            font-size: 11px; /* Encabezados más pequeños */
         }
         .empresas-actions {
             display: flex;
@@ -73,7 +84,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 10px; /* Botones de acciones más pequeños */
         }
         .empresas-btn-edit { background-color: #ffc107; color: #000; }
         .empresas-btn-delete { background-color: #dc3545; color: white; }
@@ -87,16 +98,17 @@
             border-radius: 4px;
         }
         .empresas-pagination-info {
-            font-size: 14px;
+            font-size: 11px; /* Info de paginación más pequeña */
         }
         .empresas-pagination-controls button {
-            padding: 8px 12px;
+            padding: 6px 10px; /* Padding reducido */
             margin: 0 5px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 11px;
         }
         .empresas-pagination-controls button:hover:not(:disabled) {
             background-color: #0056b3;
@@ -110,10 +122,11 @@
             gap: 5px;
         }
         .empresas-page-numbers button {
-            padding: 5px 10px;
+            padding: 4px 8px; /* Padding reducido */
             border: 1px solid #ddd;
             background: white;
             cursor: pointer;
+            font-size: 11px;
         }
         .empresas-page-numbers button.active {
             background-color: #007bff;
@@ -125,12 +138,14 @@
         .empresas-page-numbers .empresas-dots {
             padding: 5px;
             cursor: default;
+            font-size: 11px;
         }
         #empresas-message {
             margin-bottom: 20px;
-            padding: 10px;
+            padding: 8px; /* Padding reducido */
             border-radius: 4px;
             display: none;
+            font-size: 11px; /* Mensajes más pequeños */
         }
         .empresas-message-error {
             background-color: #f8d7da;
@@ -146,6 +161,9 @@
             .empresas-form-row {
                 flex-direction: column;
                 align-items: stretch;
+            }
+            #nombre, #rut {
+                width: 100%; /* En móvil, campos ocupan todo el ancho */
             }
             .empresas-actions {
                 flex-direction: column;
