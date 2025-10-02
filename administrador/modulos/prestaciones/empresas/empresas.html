@@ -32,52 +32,31 @@
         .empresas-form-row {
             display: flex;
             gap: 10px;
-            align-items: end;
+            align-items: flex-end;
             margin-bottom: 20px;
         }
         .empresas-form-group {
             display: flex;
-            align-items: center;
-            gap: 5px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px; /* Espacio mínimo entre label e input */
+            flex: 1; /* Para que los grupos se expandan uniformemente */
+            min-width: 0; /* Permite que se encoja si es necesario */
         }
         .empresas-label {
-            font-size: 11px;
+            font-size: 10px; /* Labels más pequeños para ahorrar espacio */
             font-weight: bold;
             color: #333;
             white-space: nowrap;
-            min-width: 120px; /* Ancho fijo para labels */
         }
-        #nombre {
-            width: 300px; /* Ancho fijo para el campo de nombre */
+        #nombre, #rut, #buscarNombre, #buscarRut {
+            width: 100%; /* Inputs ocupan todo el ancho del grupo */
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            font-size: 11px;
         }
-        #rut {
-            width: 200px; /* Ancho fijo para el campo de RUT */
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .empresas-search-row {
-            display: flex;
-            gap: 10px;
-            align-items: end;
-            margin-bottom: 20px;
-        }
-        #buscarNombre {
-            width: 300px; /* Ancho similar al de nombre */
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        #buscarRut {
-            width: 200px; /* Ancho similar al de RUT */
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .empresas-form-row button, .empresas-search-row button {
+        .empresas-form-row button {
             padding: 8px 16px;
             background-color: #007bff;
             color: white;
@@ -86,14 +65,10 @@
             cursor: pointer;
             white-space: nowrap;
             font-size: 12px; /* Tamaño más pequeño para el botón */
+            flex-shrink: 0; /* Botón no se encoje */
         }
-        .empresas-form-row button:hover, .empresas-search-row button:hover {
+        .empresas-form-row button:hover {
             background-color: #0056b3;
-        }
-        .empresas-divider {
-            border: none;
-            border-top: 1px solid #ddd;
-            margin: 20px 0;
         }
         .empresas-table {
             width: 100%;
@@ -193,21 +168,12 @@
             border: 1px solid #c3e6cb;
         }
         @media (max-width: 768px) {
-            .empresas-form-row, .empresas-search-row {
+            .empresas-form-row {
                 flex-direction: column;
                 align-items: stretch;
-            }
-            #nombre, #rut, #buscarNombre, #buscarRut {
-                width: 100%; /* En móvil, campos ocupan todo el ancho */
             }
             .empresas-form-group {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 5px;
-            }
-            .empresas-label {
-                min-width: auto;
-                text-align: left;
+                flex: none; /* En móvil, grupos no se expanden */
             }
             .empresas-actions {
                 flex-direction: column;
@@ -230,12 +196,6 @@
                 <label for="rut" class="empresas-label">RUT de la empresa:</label>
                 <input type="text" id="rut" placeholder="RUT de la empresa (Ej: 76.123.456-7)" required>
             </div>
-            <button type="submit">Registrar</button>
-        </form>
-
-        <hr class="empresas-divider">
-
-        <div class="empresas-search-row">
             <div class="empresas-form-group">
                 <label for="buscarNombre" class="empresas-label">Buscar empresa:</label>
                 <input type="text" id="buscarNombre" placeholder="Buscar por nombre">
@@ -244,7 +204,8 @@
                 <label for="buscarRut" class="empresas-label">Buscar RUT:</label>
                 <input type="text" id="buscarRut" placeholder="Buscar por RUT">
             </div>
-        </div>
+            <button type="submit">Registrar</button>
+        </form>
 
         <table id="empresasTable" class="empresas-table">
             <thead>
