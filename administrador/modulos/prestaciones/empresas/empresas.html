@@ -6,8 +6,9 @@
     <title>Registro de Empresas</title>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
         import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
-        window.firebaseModules = { initializeApp, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy };
+        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy };
     </script>
     <style>
         html, body {
@@ -265,7 +266,7 @@
     </div>
 
     <script type="module">
-        const { initializeApp } = window.firebaseModules;
+        const { initializeApp, getAuth, onAuthStateChanged } = window.firebaseModules;
         const { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } = window.firebaseModules;
 
         const firebaseConfig = {
@@ -279,6 +280,7 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
         let empresas = []; // Array local para cache
@@ -297,6 +299,17 @@
         const buscarNombreInput = document.getElementById('buscarNombre');
         const buscarRutInput = document.getElementById('buscarRut');
 
+        // Verificar autenticación al cargar
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                console.log('Usuario no autenticado, redirigiendo...');
+                window.location.replace('../index.html'); // O el path correcto a login
+                return;
+            }
+            console.log('Usuario autenticado:', user.uid); // Log para debug
+            await loadEmpresas(); // Cargar datos solo si autenticado
+        });
+
         // Eventos para búsqueda en tiempo real
         buscarNombreInput.addEventListener('input', (e) => {
             searchNombre = e.target.value.trim();
@@ -313,6 +326,7 @@
         // Cargar tabla inicial desde Firebase
         async function loadEmpresas() {
             try {
+                console.log('Cargando empresas desde Firebase...');
                 const querySnapshot = await getDocs(collection(db, "empresas"));
                 empresas = [];
                 querySnapshot.forEach((doc) => {
@@ -320,14 +334,12 @@
                 });
                 empresas.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 renderTable();
+                console.log('Empresas cargadas:', empresas.length);
             } catch (error) {
                 console.error("Error loading empresas:", error);
-                showMessage('Error al cargar las empresas.', 'error');
+                showMessage('Error al cargar las empresas: ' + error.message, 'error');
             }
         }
-
-        // Llamar al cargar
-        loadEmpresas();
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -337,6 +349,7 @@
 
             if (nombre && rut) {
                 try {
+                    console.log('Registrando empresa...');
                     await addDoc(collection(db, "empresas"), {
                         nombre,
                         rut,
@@ -344,10 +357,10 @@
                     });
                     showMessage('Empresa registrada exitosamente.', 'success');
                     form.reset();
-                    loadEmpresas(); // Recargar desde Firebase
+                    await loadEmpresas(); // Recargar desde Firebase
                 } catch (error) {
                     console.error("Error adding empresa:", error);
-                    showMessage('Error al registrar la empresa.', 'error');
+                    showMessage('Error al registrar la empresa: ' + error.message, 'error');
                 }
             } else {
                 showMessage('Por favor, completa todos los campos.', 'error');
@@ -456,10 +469,10 @@
                                 createdAt: new Date()
                             });
                             showMessage('Empresa actualizada exitosamente.', 'success');
-                            loadEmpresas(); // Recargar
+                            await loadEmpresas(); // Recargar
                         } catch (error) {
                             console.error("Error updating empresa:", error);
-                            showMessage('Error al actualizar la empresa.', 'error');
+                            showMessage('Error al actualizar la empresa: ' + error.message, 'error');
                         }
                     } else {
                         showMessage('Por favor, completa todos los campos.', 'error');
@@ -473,10 +486,10 @@
                 try {
                     await deleteDoc(doc(db, "empresas", id));
                     showMessage('Empresa eliminada.', 'success');
-                    loadEmpresas(); // Recargar
+                    await loadEmpresas(); // Recargar
                 } catch (error) {
                     console.error("Error deleting empresa:", error);
-                    showMessage('Error al eliminar la empresa.', 'error');
+                    showMessage('Error al eliminar la empresa: ' + error.message, 'error');
                 }
             }
         };
