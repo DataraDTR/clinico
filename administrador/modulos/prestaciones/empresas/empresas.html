@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Empresas</title>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+        window.firebaseModules = { initializeApp, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy };
+    </script>
     <style>
         html, body {
             margin: 0;
@@ -259,10 +264,26 @@
         </div>
     </div>
 
-    <script>
-        let empresas = []; // Array para almacenar las empresas
+    <script type="module">
+        const { initializeApp } = window.firebaseModules;
+        const { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } = window.firebaseModules;
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
+            authDomain: "datara-salud.firebaseapp.com",
+            projectId: "datara-salud",
+            storageBucket: "datara-salud.firebasestorage.app",
+            messagingSenderId: "198886910481",
+            appId: "1:198886910481:web:abbc345203a423a6329fb0",
+            measurementId: "G-MLYVTZPPLD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let empresas = []; // Array local para cache
         let currentPage = 1;
-        const PAGE_SIZE = 10; // Registros por página, como en el ejemplo
+        const PAGE_SIZE = 10;
         let searchNombre = '';
         let searchRut = '';
 
@@ -279,35 +300,55 @@
         // Eventos para búsqueda en tiempo real
         buscarNombreInput.addEventListener('input', (e) => {
             searchNombre = e.target.value.trim();
-            currentPage = 1; // Resetear a página 1 al buscar
+            currentPage = 1;
             renderTable();
         });
 
         buscarRutInput.addEventListener('input', (e) => {
             searchRut = e.target.value.trim();
-            currentPage = 1; // Resetear a página 1 al buscar
+            currentPage = 1;
             renderTable();
         });
 
-        // Cargar tabla inicial
-        renderTable();
+        // Cargar tabla inicial desde Firebase
+        async function loadEmpresas() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "empresas"));
+                empresas = [];
+                querySnapshot.forEach((doc) => {
+                    empresas.push({ id: doc.id, ...doc.data() });
+                });
+                empresas.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                renderTable();
+            } catch (error) {
+                console.error("Error loading empresas:", error);
+                showMessage('Error al cargar las empresas.', 'error');
+            }
+        }
 
-        form.addEventListener('submit', (e) => {
+        // Llamar al cargar
+        loadEmpresas();
+
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const nombre = document.getElementById('nombre').value.trim();
             const rut = document.getElementById('rut').value.trim();
 
             if (nombre && rut) {
-                empresas.push({ id: Date.now().toString(), nombre, rut, createdAt: new Date() });
-                showMessage('Empresa registrada exitosamente.', 'success');
-                form.reset();
-                // Ajustar página si es necesario
-                const totalPages = Math.ceil(getFilteredEmpresas().length / PAGE_SIZE);
-                if (currentPage > totalPages) {
-                    currentPage = totalPages;
+                try {
+                    await addDoc(collection(db, "empresas"), {
+                        nombre,
+                        rut,
+                        createdAt: new Date()
+                    });
+                    showMessage('Empresa registrada exitosamente.', 'success');
+                    form.reset();
+                    loadEmpresas(); // Recargar desde Firebase
+                } catch (error) {
+                    console.error("Error adding empresa:", error);
+                    showMessage('Error al registrar la empresa.', 'error');
                 }
-                renderTable();
             } else {
                 showMessage('Por favor, completa todos los campos.', 'error');
             }
@@ -399,7 +440,7 @@
         }
 
         // Funciones para acciones
-        window.editEmpresa = (id) => {
+        window.editEmpresa = async (id) => {
             const empresa = empresas.find(e => e.id === id);
             if (empresa) {
                 const newName = prompt('Nuevo nombre:', empresa.nombre);
@@ -408,11 +449,18 @@
                     const trimmedName = newName.trim();
                     const trimmedRut = newRut.trim();
                     if (trimmedName && trimmedRut) {
-                        empresa.nombre = trimmedName;
-                        empresa.rut = trimmedRut;
-                        empresa.createdAt = new Date(); // Actualizar fecha
-                        showMessage('Empresa actualizada exitosamente.', 'success');
-                        renderTable();
+                        try {
+                            await updateDoc(doc(db, "empresas", id), {
+                                nombre: trimmedName,
+                                rut: trimmedRut,
+                                createdAt: new Date()
+                            });
+                            showMessage('Empresa actualizada exitosamente.', 'success');
+                            loadEmpresas(); // Recargar
+                        } catch (error) {
+                            console.error("Error updating empresa:", error);
+                            showMessage('Error al actualizar la empresa.', 'error');
+                        }
                     } else {
                         showMessage('Por favor, completa todos los campos.', 'error');
                     }
@@ -420,16 +468,16 @@
             }
         };
 
-        window.deleteEmpresa = (id) => {
+        window.deleteEmpresa = async (id) => {
             if (confirm('¿Eliminar esta empresa?')) {
-                empresas = empresas.filter(e => e.id !== id);
-                showMessage('Empresa eliminada.', 'success');
-                // Ajustar página si es necesario
-                const totalPages = Math.ceil(getFilteredEmpresas().length / PAGE_SIZE);
-                if (currentPage > totalPages) {
-                    currentPage = totalPages || 1;
+                try {
+                    await deleteDoc(doc(db, "empresas", id));
+                    showMessage('Empresa eliminada.', 'success');
+                    loadEmpresas(); // Recargar
+                } catch (error) {
+                    console.error("Error deleting empresa:", error);
+                    showMessage('Error al eliminar la empresa.', 'error');
                 }
-                renderTable();
             }
         };
 
