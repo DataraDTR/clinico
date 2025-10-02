@@ -267,6 +267,84 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1002;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+        .modal-form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        .modal-form-group label {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .modal-form-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .modal-btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .modal-btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .modal-btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .delete-modal-text {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
         @media (max-width: 768px) {
             .empresas-fields-container {
                 flex-direction: column;
@@ -297,6 +375,10 @@
             .empresas-loading-spinner {
                 width: 28px;
                 height: 28px;
+            }
+            .modal-content {
+                width: 90%;
+                margin: 20% auto;
             }
         }
     </style>
@@ -361,6 +443,40 @@
         <div id="empresas-toast" class="empresas-toast"></div>
     </div>
 
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeEditModal">&times;</span>
+            <h2>Editar Empresa</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="modal-form-group">
+                    <label for="editNombre">Nombre de la empresa:</label>
+                    <input type="text" id="editNombre" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="editRut">RUT de la empresa:</label>
+                    <input type="text" id="editRut" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" id="cancelEdit">Cancelar</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeDeleteModal">&times;</span>
+            <h2>Eliminar Empresa</h2>
+            <p class="delete-modal-text" id="deleteText"></p>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn modal-btn-secondary" id="cancelDelete">No</button>
+                <button type="button" class="modal-btn modal-btn-danger" id="confirmDelete">Sí</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         const { initializeApp, getAuth, onAuthStateChanged } = window.firebaseModules;
         const { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } = window.firebaseModules;
@@ -397,6 +513,20 @@
             const buscarNombreInput = document.getElementById('buscarNombre');
             const buscarRutInput = document.getElementById('buscarRut');
 
+            const editModal = document.getElementById('editModal');
+            const deleteModal = document.getElementById('deleteModal');
+            const closeEditModal = document.getElementById('closeEditModal');
+            const cancelEdit = document.getElementById('cancelEdit');
+            const editForm = document.getElementById('editForm');
+            const closeDeleteModal = document.getElementById('closeDeleteModal');
+            const cancelDelete = document.getElementById('cancelDelete');
+            const confirmDelete = document.getElementById('confirmDelete');
+            const deleteText = document.getElementById('deleteText');
+
+            let currentEditId = null;
+            let currentDeleteId = null;
+            let currentDeleteNombre = null;
+
             window.showLoading = function() {
                 if (loading) loading.classList.add('show');
             };
@@ -415,6 +545,88 @@
                     }, 5000);
                 }
             }
+
+            function openEditModal(id, nombre, rut) {
+                currentEditId = id;
+                document.getElementById('editNombre').value = nombre;
+                document.getElementById('editRut').value = rut;
+                editModal.style.display = 'block';
+            }
+
+            function closeEditModal() {
+                editModal.style.display = 'none';
+                currentEditId = null;
+                editForm.reset();
+            }
+
+            function openDeleteModal(id, nombre) {
+                currentDeleteId = id;
+                currentDeleteNombre = nombre;
+                deleteText.textContent = `¿Desea eliminar la empresa "${nombre}"?`;
+                deleteModal.style.display = 'block';
+            }
+
+            function closeDeleteModal() {
+                deleteModal.style.display = 'none';
+                currentDeleteId = null;
+                currentDeleteNombre = null;
+            }
+
+            closeEditModal.addEventListener('click', closeEditModal);
+            cancelEdit.addEventListener('click', closeEditModal);
+            window.addEventListener('click', (e) => {
+                if (e.target === editModal) closeEditModal();
+            });
+
+            closeDeleteModal.addEventListener('click', closeDeleteModal);
+            cancelDelete.addEventListener('click', closeDeleteModal);
+            window.addEventListener('click', (e) => {
+                if (e.target === deleteModal) closeDeleteModal();
+            });
+
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentEditId) return;
+
+                const nombre = document.getElementById('editNombre').value.trim();
+                const rut = document.getElementById('editRut').value.trim();
+
+                if (nombre && rut) {
+                    showLoading();
+                    try {
+                        await updateDoc(doc(db, "empresas", currentEditId), {
+                            nombre,
+                            rut,
+                            createdAt: new Date()
+                        });
+                        hideLoading();
+                        showToast(`Se ha editado con éxito la empresa ${nombre}`, 'success');
+                        closeEditModal();
+                        await loadEmpresas();
+                    } catch (error) {
+                        hideLoading();
+                        showToast('Error al editar la empresa: ' + error.message, 'error');
+                    }
+                } else {
+                    showToast('Por favor, completa todos los campos.', 'error');
+                }
+            });
+
+            confirmDelete.addEventListener('click', async () => {
+                if (!currentDeleteId || !currentDeleteNombre) return;
+
+                showLoading();
+                try {
+                    await deleteDoc(doc(db, "empresas", currentDeleteId));
+                    hideLoading();
+                    showToast(`Se ha eliminado con éxito la empresa ${currentDeleteNombre}`, 'success');
+                    closeDeleteModal();
+                    await loadEmpresas();
+                } catch (error) {
+                    hideLoading();
+                    showToast('Error al eliminar la empresa: ' + error.message, 'error');
+                }
+            });
 
             onAuthStateChanged(auth, async (user) => {
                 if (!user) {
@@ -508,8 +720,8 @@
                             <td>${empresa.nombre}</td>
                             <td>${empresa.rut}</td>
                             <td class="empresas-actions">
-                                <button title="Editar" class="empresas-btn-edit" onclick="editEmpresa('${empresa.id}', '${empresa.nombre}')"><i class="fas fa-edit"></i></button>
-                                <button title="Eliminar" class="empresas-btn-delete" onclick="deleteEmpresa('${empresa.id}', '${empresa.nombre}')"><i class="fas fa-trash"></i></button>
+                                <button title="Editar" class="empresas-btn-edit" onclick="openEditModal('${empresa.id}', '${empresa.nombre}', '${empresa.rut}')"><i class="fas fa-edit"></i></button>
+                                <button title="Eliminar" class="empresas-btn-delete" onclick="openDeleteModal('${empresa.id}', '${empresa.nombre}')"><i class="fas fa-trash"></i></button>
                                 <button title="Ver Historial" class="empresas-btn-history" onclick="viewHistory('${empresa.id}')"><i class="fas fa-history"></i></button>
                             </td>
                         `;
@@ -576,51 +788,8 @@
                 });
             }
 
-            window.editEmpresa = async (id, nombre) => {
-                const empresa = empresas.find(e => e.id === id);
-                if (empresa) {
-                    const newName = prompt('Nuevo nombre:', empresa.nombre);
-                    const newRut = prompt('Nuevo RUT:', empresa.rut);
-                    if (newName !== null && newRut !== null) {
-                        const trimmedName = newName.trim();
-                        const trimmedRut = newRut.trim();
-                        if (trimmedName && trimmedRut) {
-                            showLoading();
-                            try {
-                                await updateDoc(doc(db, "empresas", id), {
-                                    nombre: trimmedName,
-                                    rut: trimmedRut,
-                                    createdAt: new Date()
-                                });
-                                hideLoading();
-                                showToast(`Se ha editado con éxito la empresa ${trimmedName}`, 'success');
-                                await loadEmpresas();
-                            } catch (error) {
-                                hideLoading();
-                                showToast('Error al editar la empresa: ' + error.message, 'error');
-                            }
-                        } else {
-                            showToast('Por favor, completa todos los campos.', 'error');
-                        }
-                    }
-                }
-            };
-
-            window.deleteEmpresa = async (id, nombre) => {
-                if (confirm('¿Eliminar esta empresa?')) {
-                    showLoading();
-                    try {
-                        await deleteDoc(doc(db, "empresas", id));
-                        hideLoading();
-                        showToast(`Se ha eliminado con éxito la empresa ${nombre}`, 'success');
-                        await loadEmpresas();
-                    } catch (error) {
-                        hideLoading();
-                        showToast('Error al eliminar la empresa: ' + error.message, 'error');
-                    }
-                }
-            };
-
+            window.openEditModal = openEditModal;
+            window.openDeleteModal = openDeleteModal;
             window.viewHistory = (id) => {
                 alert(`Historial de empresa ${id}: No hay cambios previos implementados.`);
             };
