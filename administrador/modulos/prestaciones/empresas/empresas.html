@@ -192,37 +192,42 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        /* Estilos para loading mejorado y más profesional */
+        /* Estilos para loading mejorado y más profesional, contenedor pequeño */
         .empresas-loading {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9); /* Fondo blanco semi-transparente para un look más limpio */
-            backdrop-filter: blur(4px); /* Efecto de desenfoque para modernidad */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px; /* Ancho fijo pequeño */
+            height: 80px; /* Altura fija pequeña */
+            background: rgba(255, 255, 255, 0.95); /* Fondo blanco semi-transparente */
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2); /* Sombra más profesional */
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
+            padding: 16px;
+            backdrop-filter: blur(8px); /* Desenfoque solo en el contenedor */
         }
         .empresas-loading.show {
             display: flex;
-            flex-direction: column;
         }
         .empresas-loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e3f2fd; /* Borde claro azul */
-            border-top: 4px solid #007bff; /* Línea superior azul */
+            width: 32px; /* Spinner más pequeño para el contenedor compacto */
+            height: 32px;
+            border: 3px solid #e3f2fd; /* Borde claro azul */
+            border-top: 3px solid #007bff; /* Línea superior azul */
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
         }
         .empresas-loading-text {
-            font-size: 14px;
+            font-size: 12px;
             color: #333;
             font-weight: 500;
+            text-align: center;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -276,6 +281,15 @@
                 right: 10px;
                 left: 10px;
                 max-width: none;
+            }
+            .empresas-loading {
+                width: 100px;
+                height: 70px;
+                padding: 12px;
+            }
+            .empresas-loading-spinner {
+                width: 28px;
+                height: 28px;
             }
         }
     </style>
@@ -334,7 +348,7 @@
             </div>
         </div>
 
-        <!-- Loading overlay mejorado -->
+        <!-- Loading overlay mejorado, contenedor pequeño */
         <div id="empresas-loading" class="empresas-loading">
             <div class="empresas-loading-spinner"></div>
             <div class="empresas-loading-text">Procesando...</div>
