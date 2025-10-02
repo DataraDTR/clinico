@@ -114,10 +114,8 @@
         table {
             border-collapse: collapse;
             font-size: 13px;
-            /* 👇 Cambios clave para redimensionamiento independiente */
-            table-layout: fixed;
-            width: 1300px; /* Suma exacta: 80+120+250+250+100+100+100+300 = 1300px */
-            min-width: 100%;
+            table-layout: fixed; /* ✅ Clave para redimensionamiento independiente */
+            width: auto; /* ✅ Deja que el ancho lo definan las columnas */
         }
 
         thead {
