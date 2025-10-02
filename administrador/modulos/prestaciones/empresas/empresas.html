@@ -5,37 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Empresas</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        html, body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
             background-color: #f4f4f4;
+            overflow: hidden;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        .empresas-main-container {
+            width: 100%;
+            height: 100%;
             background: white;
             padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        h1 {
+        .empresas-title {
             text-align: center;
             margin-bottom: 20px;
         }
-        .form-row {
+        .empresas-form-row {
             display: flex;
             gap: 10px;
             align-items: end;
             margin-bottom: 20px;
         }
-        .form-row input {
+        .empresas-form-row input {
             flex: 1;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        .form-row button {
+        .empresas-form-row button {
             padding: 8px 16px;
             background-color: #007bff;
             color: white;
@@ -44,37 +48,37 @@
             cursor: pointer;
             white-space: nowrap;
         }
-        .form-row button:hover {
+        .empresas-form-row button:hover {
             background-color: #0056b3;
         }
-        table {
+        .empresas-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        th, td {
+        .empresas-table th, .empresas-table td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
-        th {
+        .empresas-table th {
             background-color: #f2f2f2;
         }
-        .actions {
+        .empresas-actions {
             display: flex;
             gap: 5px;
         }
-        .actions button {
+        .empresas-actions button {
             padding: 4px 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
         }
-        .btn-edit { background-color: #ffc107; color: #000; }
-        .btn-delete { background-color: #dc3545; color: white; }
-        .btn-history { background-color: #17a2b8; color: white; }
-        .pagination {
+        .empresas-btn-edit { background-color: #ffc107; color: #000; }
+        .empresas-btn-delete { background-color: #dc3545; color: white; }
+        .empresas-btn-history { background-color: #17a2b8; color: white; }
+        .empresas-pagination {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -82,10 +86,10 @@
             background: #f8f9fa;
             border-radius: 4px;
         }
-        .pagination-info {
+        .empresas-pagination-info {
             font-size: 14px;
         }
-        .pagination-controls button {
+        .empresas-pagination-controls button {
             padding: 8px 12px;
             margin: 0 5px;
             background-color: #007bff;
@@ -94,74 +98,74 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        .pagination-controls button:hover:not(:disabled) {
+        .empresas-pagination-controls button:hover:not(:disabled) {
             background-color: #0056b3;
         }
-        .pagination-controls button:disabled {
+        .empresas-pagination-controls button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
-        .page-numbers {
+        .empresas-page-numbers {
             display: flex;
             gap: 5px;
         }
-        .page-numbers button {
+        .empresas-page-numbers button {
             padding: 5px 10px;
             border: 1px solid #ddd;
             background: white;
             cursor: pointer;
         }
-        .page-numbers button.active {
+        .empresas-page-numbers button.active {
             background-color: #007bff;
             color: white;
         }
-        .page-numbers button:hover {
+        .empresas-page-numbers button:hover {
             background-color: #f0f0f0;
         }
-        .page-numbers .dots {
+        .empresas-page-numbers .empresas-dots {
             padding: 5px;
             cursor: default;
         }
-        #message {
+        #empresas-message {
             margin-bottom: 20px;
             padding: 10px;
             border-radius: 4px;
             display: none;
         }
-        .error {
+        .empresas-message-error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        .success {
+        .empresas-message-success {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
         @media (max-width: 768px) {
-            .form-row {
+            .empresas-form-row {
                 flex-direction: column;
                 align-items: stretch;
             }
-            .actions {
+            .empresas-actions {
                 flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Registro de Empresas</h1>
+    <div class="empresas-main-container">
+        <h1 class="empresas-title">Registro de Empresas</h1>
         
-        <div id="message"></div>
+        <div id="empresas-message"></div>
 
-        <form id="empresaForm" class="form-row">
+        <form id="empresaForm" class="empresas-form-row">
             <input type="text" id="nombre" placeholder="Nombre de la empresa" required>
             <input type="text" id="rut" placeholder="RUT de la empresa (Ej: 76.123.456-7)" required>
             <button type="submit">Registrar</button>
         </form>
 
-        <table id="empresasTable">
+        <table id="empresasTable" class="empresas-table">
             <thead>
                 <tr>
                     <th>Nombre de la empresa</th>
@@ -174,13 +178,13 @@
             </tbody>
         </table>
 
-        <div class="pagination" id="pagination">
-            <div class="pagination-info" id="paginationInfo">
+        <div class="empresas-pagination" id="pagination">
+            <div class="empresas-pagination-info" id="paginationInfo">
                 <!-- Info se actualizará dinámicamente -->
             </div>
-            <div class="pagination-controls">
+            <div class="empresas-pagination-controls">
                 <button id="prevBtn">Anterior</button>
-                <div class="page-numbers" id="pageNumbers"></div>
+                <div class="empresas-page-numbers" id="pageNumbers"></div>
                 <button id="nextBtn">Siguiente</button>
             </div>
         </div>
@@ -192,7 +196,7 @@
         const PAGE_SIZE = 10; // Registros por página, como en el ejemplo
 
         const form = document.getElementById('empresaForm');
-        const message = document.getElementById('message');
+        const message = document.getElementById('empresas-message');
         const empresasBody = document.getElementById('empresasBody');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
@@ -235,10 +239,10 @@
                 row.innerHTML = `
                     <td>${empresa.nombre}</td>
                     <td>${empresa.rut}</td>
-                    <td class="actions">
-                        <button class="btn-edit" onclick="editEmpresa('${empresa.id}')">Editar</button>
-                        <button class="btn-delete" onclick="deleteEmpresa('${empresa.id}')">Eliminar</button>
-                        <button class="btn-history" onclick="viewHistory('${empresa.id}')">Historial</button>
+                    <td class="empresas-actions">
+                        <button class="empresas-btn-edit" onclick="editEmpresa('${empresa.id}')">Editar</button>
+                        <button class="empresas-btn-delete" onclick="deleteEmpresa('${empresa.id}')">Eliminar</button>
+                        <button class="empresas-btn-history" onclick="viewHistory('${empresa.id}')">Historial</button>
                     </td>
                 `;
                 empresasBody.appendChild(row);
@@ -268,7 +272,7 @@
                 if (i > startPage && i <= endPage - 1 && endPage - startPage > 3) {
                     const dots = document.createElement('span');
                     dots.textContent = '...';
-                    dots.className = 'dots';
+                    dots.className = 'empresas-dots';
                     pageNumbers.appendChild(dots);
                     continue;
                 }
@@ -342,7 +346,7 @@
 
         function showMessage(text, type) {
             message.textContent = text;
-            message.className = type;
+            message.className = `empresas-message-${type}`;
             message.style.display = 'block';
             setTimeout(() => {
                 message.style.display = 'none';
