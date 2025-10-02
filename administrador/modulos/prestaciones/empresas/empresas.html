@@ -155,13 +155,13 @@
         
         <div id="message"></div>
 
-        <form id="companyForm" class="form-row">
-            <input type="text" id="companyName" placeholder="Nombre de la empresa" required>
-            <input type="text" id="companyRut" placeholder="RUT de la empresa (Ej: 12.345.678-9)" required>
+        <form id="empresaForm" class="form-row">
+            <input type="text" id="nombre" placeholder="Nombre de la empresa" required>
+            <input type="text" id="rut" placeholder="RUT de la empresa (Ej: 76.123.456-7)" required>
             <button type="submit">Registrar</button>
         </form>
 
-        <table id="companiesTable">
+        <table id="empresasTable">
             <thead>
                 <tr>
                     <th>Nombre de la empresa</th>
@@ -169,137 +169,82 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="companiesBody">
+            <tbody id="empresasBody">
                 <!-- Datos se cargarán aquí -->
             </tbody>
         </table>
 
         <div class="pagination" id="pagination">
-            <div class="pagination-info">
+            <div class="pagination-info" id="paginationInfo">
                 <!-- Info se actualizará dinámicamente -->
             </div>
             <div class="pagination-controls">
-                <button id="prevPage">Anterior</button>
+                <button id="prevBtn">Anterior</button>
                 <div class="page-numbers" id="pageNumbers"></div>
-                <button id="nextPage">Siguiente</button>
+                <button id="nextBtn">Siguiente</button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, startAfter, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
-            authDomain: "datara-salud.firebaseapp.com",
-            projectId: "datara-salud",
-            storageBucket: "datara-salud.firebasestorage.app",
-            messagingSenderId: "198886910481",
-            appId: "1:198886910481:web:abbc345203a423a6329fb0",
-            measurementId: "G-MLYVTZPPLD"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Configuración de paginación
-        const PAGE_SIZE = 10;
+    <script>
+        let empresas = []; // Array para almacenar las empresas
         let currentPage = 1;
-        let allCompanies = [];
-        let lastVisible = null;
+        const PAGE_SIZE = 10; // Registros por página, como en el ejemplo
 
-        const form = document.getElementById('companyForm');
+        const form = document.getElementById('empresaForm');
         const message = document.getElementById('message');
-        const companiesBody = document.getElementById('companiesBody');
-        const prevPageBtn = document.getElementById('prevPage');
-        const nextPageBtn = document.getElementById('nextPage');
+        const empresasBody = document.getElementById('empresasBody');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
         const pageNumbers = document.getElementById('pageNumbers');
-        const paginationInfo = document.querySelector('.pagination-info');
+        const paginationInfo = document.getElementById('paginationInfo');
 
-        // Cargar empresas iniciales
-        loadCompanies();
+        // Cargar tabla inicial
+        renderTable();
 
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const name = document.getElementById('companyName').value;
-            const rut = document.getElementById('companyRut').value;
+            const nombre = document.getElementById('nombre').value.trim();
+            const rut = document.getElementById('rut').value.trim();
 
-            try {
-                await addDoc(collection(db, 'companies'), {
-                    name: name,
-                    rut: rut,
-                    createdAt: new Date()
-                });
-
+            if (nombre && rut) {
+                empresas.push({ id: Date.now().toString(), nombre, rut, createdAt: new Date() });
                 showMessage('Empresa registrada exitosamente.', 'success');
                 form.reset();
-                // Recargar lista
-                allCompanies = [];
-                lastVisible = null;
-                currentPage = 1;
-                loadCompanies();
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage('Error al registrar: ' + error.message, 'error');
+                // Ajustar página si es necesario
+                const totalPages = Math.ceil(empresas.length / PAGE_SIZE);
+                if (currentPage > totalPages) {
+                    currentPage = totalPages;
+                }
+                renderTable();
+            } else {
+                showMessage('Por favor, completa todos los campos.', 'error');
             }
         });
 
-        async function loadCompanies() {
-            try {
-                let q;
-                if (currentPage === 1) {
-                    q = query(collection(db, 'companies'), orderBy('createdAt'), limit(PAGE_SIZE));
-                    lastVisible = null;
-                } else {
-                    q = query(collection(db, 'companies'), orderBy('createdAt'), startAfter(lastVisible), limit(PAGE_SIZE));
-                }
+        function renderTable() {
+            const start = (currentPage - 1) * PAGE_SIZE;
+            const end = start + PAGE_SIZE;
+            const pageEmpresas = empresas.slice(start, end).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Ordenar por fecha descendente
 
-                const querySnapshot = await getDocs(q);
-                const companies = [];
-                querySnapshot.forEach((doc) => {
-                    companies.push({ id: doc.id, ...doc.data() });
-                });
+            empresasBody.innerHTML = '';
 
-                if (querySnapshot.docs.length > 0) {
-                    lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-                }
-
-                // Cargar todas para paginación
-                if (allCompanies.length === 0) {
-                    const allQuery = query(collection(db, 'companies'), orderBy('createdAt'));
-                    const allSnapshot = await getDocs(allQuery);
-                    allCompanies = [];
-                    allSnapshot.forEach((doc) => {
-                        allCompanies.push({ id: doc.id, ...doc.data() });
-                    });
-                }
-
-                displayCompanies(companies);
-                updatePagination(allCompanies.length);
-            } catch (error) {
-                console.error('Error loading companies:', error);
-                showMessage('Error al cargar empresas.', 'error');
-            }
-        }
-
-        function displayCompanies(companies) {
-            companiesBody.innerHTML = '';
-            companies.forEach(company => {
+            pageEmpresas.forEach(empresa => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${company.name}</td>
-                    <td>${company.rut}</td>
+                    <td>${empresa.nombre}</td>
+                    <td>${empresa.rut}</td>
                     <td class="actions">
-                        <button class="btn-edit" onclick="editCompany('${company.id}')">Editar</button>
-                        <button class="btn-delete" onclick="deleteCompany('${company.id}')">Eliminar</button>
-                        <button class="btn-history" onclick="viewHistory('${company.id}')">Historial</button>
+                        <button class="btn-edit" onclick="editEmpresa('${empresa.id}')">Editar</button>
+                        <button class="btn-delete" onclick="deleteEmpresa('${empresa.id}')">Eliminar</button>
+                        <button class="btn-history" onclick="viewHistory('${empresa.id}')">Historial</button>
                     </td>
                 `;
-                companiesBody.appendChild(row);
+                empresasBody.appendChild(row);
             });
+
+            updatePagination(empresas.length);
         }
 
         function updatePagination(total) {
@@ -307,77 +252,92 @@
             const startPage = Math.max(1, currentPage - 2);
             const endPage = Math.min(totalPages, startPage + 4);
 
-            // Info
+            // Info de paginación
             const startRecord = (currentPage - 1) * PAGE_SIZE + 1;
             const endRecord = Math.min(currentPage * PAGE_SIZE, total);
-            paginationInfo.textContent = `Página ${currentPage} de ${totalPages} | ${endRecord - startRecord + 1} registros en esta página de ${total}`;
+            const recordsThisPage = endRecord - startRecord + 1;
+            paginationInfo.textContent = `Página ${currentPage} de ${totalPages} | ${recordsThisPage} registros en esta página de ${total}`;
 
-            // Controles
-            prevPageBtn.disabled = currentPage === 1;
-            nextPageBtn.disabled = currentPage === totalPages;
+            // Botones anterior/siguiente
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
 
             // Números de página
             pageNumbers.innerHTML = '';
             for (let i = startPage; i <= endPage; i++) {
+                if (i > startPage && i <= endPage - 1 && endPage - startPage > 3) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.className = 'dots';
+                    pageNumbers.appendChild(dots);
+                    continue;
+                }
                 const btn = document.createElement('button');
                 btn.textContent = i;
                 btn.className = i === currentPage ? 'active' : '';
                 btn.addEventListener('click', () => goToPage(i));
                 pageNumbers.appendChild(btn);
-                if (i < endPage && endPage - startPage > 3) {
-                    const dots = document.createElement('span');
-                    dots.textContent = '...';
-                    dots.className = 'dots';
-                    pageNumbers.appendChild(dots);
-                }
             }
         }
 
-        prevPageBtn.addEventListener('click', () => {
+        prevBtn.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
-                loadCompanies();
+                renderTable();
             }
         });
 
-        nextPageBtn.addEventListener('click', () => {
-            if (currentPage < Math.ceil(allCompanies.length / PAGE_SIZE)) {
+        nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(empresas.length / PAGE_SIZE);
+            if (currentPage < totalPages) {
                 currentPage++;
-                loadCompanies();
+                renderTable();
             }
         });
 
         function goToPage(page) {
             currentPage = page;
-            loadCompanies();
+            renderTable();
         }
 
         // Funciones para acciones
-        window.editCompany = async (id) => {
-            // Implementar edición (ej: prompt o modal)
-            const newName = prompt('Nuevo nombre:');
-            const newRut = prompt('Nuevo RUT:');
-            if (newName && newRut) {
-                // Aquí actualizar en Firestore (usa updateDoc)
-                alert('Edición implementada como placeholder. Usa updateDoc para real.');
-            }
-        };
-
-        window.deleteCompany = async (id) => {
-            if (confirm('¿Eliminar esta empresa?')) {
-                try {
-                    await deleteDoc(doc(db, 'companies', id));
-                    showMessage('Empresa eliminada.', 'success');
-                    loadCompanies();
-                } catch (error) {
-                    showMessage('Error al eliminar: ' + error.message, 'error');
+        window.editEmpresa = (id) => {
+            const empresa = empresas.find(e => e.id === id);
+            if (empresa) {
+                const newName = prompt('Nuevo nombre:', empresa.nombre);
+                const newRut = prompt('Nuevo RUT:', empresa.rut);
+                if (newName !== null && newRut !== null) {
+                    const trimmedName = newName.trim();
+                    const trimmedRut = newRut.trim();
+                    if (trimmedName && trimmedRut) {
+                        empresa.nombre = trimmedName;
+                        empresa.rut = trimmedRut;
+                        empresa.createdAt = new Date(); // Actualizar fecha
+                        showMessage('Empresa actualizada exitosamente.', 'success');
+                        renderTable();
+                    } else {
+                        showMessage('Por favor, completa todos los campos.', 'error');
+                    }
                 }
             }
         };
 
+        window.deleteEmpresa = (id) => {
+            if (confirm('¿Eliminar esta empresa?')) {
+                empresas = empresas.filter(e => e.id !== id);
+                showMessage('Empresa eliminada.', 'success');
+                // Ajustar página si es necesario
+                const totalPages = Math.ceil(empresas.length / PAGE_SIZE);
+                if (currentPage > totalPages) {
+                    currentPage = totalPages || 1;
+                }
+                renderTable();
+            }
+        };
+
         window.viewHistory = (id) => {
-            // Placeholder para historial
-            alert(`Historial de empresa ${id} - Implementar consulta a subcolección si existe.`);
+            // Placeholder para historial (puedes expandir con un array de cambios por empresa)
+            alert(`Historial de empresa ${id}: No hay cambios previos implementados.`);
         };
 
         function showMessage(text, type) {
