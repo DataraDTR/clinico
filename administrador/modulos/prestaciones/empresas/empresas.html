@@ -32,22 +32,24 @@
         .empresas-fields-container {
             display: flex;
             justify-content: space-between;
-            gap: 30px; /* Separación entre secciones izquierda y derecha */
+            gap: 40px; /* Aumentado para más separación entre secciones */
             margin-bottom: 20px;
         }
         .empresas-left-section, .empresas-right-section {
             display: flex;
+            flex-direction: row; /* Asegurar horizontal */
             align-items: flex-end; /* Alinea los inputs al fondo */
-            gap: 15px; /* Separación entre campos dentro de cada sección */
+            gap: 20px; /* Aumentado para más separación entre campos dentro de cada sección */
             flex: 1; /* Cada sección ocupa espacio igual */
         }
         .empresas-form-group {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 2px; /* Espacio mínimo entre label e input */
+            gap: 4px; /* Aumentado ligeramente el espacio entre label e input */
             flex: 1; /* Para que los grupos se expandan uniformemente */
             min-width: 0; /* Permite que se encoja si es necesario */
+            max-width: 180px; /* Ancho máximo reducido para campos más compactos */
         }
         .empresas-label {
             font-size: 10px; /* Labels más pequeños para ahorrar espacio */
@@ -56,13 +58,14 @@
             white-space: nowrap;
         }
         #nombre, #rut, #buscarNombre, #buscarRut {
-            width: 100%; /* Inputs ocupan todo el ancho del grupo */
+            width: 100%; /* Inputs ocupan todo el ancho del grupo (ahora más estrecho) */
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 11px;
+            box-sizing: border-box; /* Asegura que padding no aumente el ancho */
         }
-        .empresas-form-row button {
+        .empresas-register-btn {
             padding: 8px 16px;
             background-color: #007bff;
             color: white;
@@ -73,9 +76,12 @@
             font-size: 12px; /* Tamaño más pequeño para el botón */
             flex-shrink: 0; /* Botón no se encoje */
             align-self: flex-end; /* Alinea el botón al final verticalmente */
+            box-shadow: 0 2px 4px rgba(0,123,255,0.25); /* Sombra para estilo */
+            transition: background-color 0.3s ease; /* Transición suave */
         }
-        .empresas-form-row button:hover {
+        .empresas-register-btn:hover {
             background-color: #0056b3;
+            transform: translateY(-1px); /* Efecto lift al hover */
         }
         .empresas-table {
             width: 100%;
@@ -184,6 +190,9 @@
                 align-items: stretch;
                 gap: 15px;
             }
+            .empresas-form-group {
+                max-width: none; /* En móvil, campos ocupan todo el ancho */
+            }
             .empresas-actions {
                 flex-direction: column;
             }
@@ -206,7 +215,7 @@
                     <label for="rut" class="empresas-label">RUT de la empresa:</label>
                     <input type="text" id="rut" placeholder="RUT de la empresa (Ej: 76.123.456-7)" required>
                 </div>
-                <button type="submit">Registrar</button>
+                <button type="submit" class="empresas-register-btn">Registrar</button>
             </div>
             <div class="empresas-right-section">
                 <div class="empresas-form-group">
