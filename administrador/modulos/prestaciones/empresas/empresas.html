@@ -31,7 +31,7 @@
         }
         .empresas-form-row {
             display: flex;
-            gap: 10px;
+            gap: 15px; /* Espacio aumentado entre los elementos */
             align-items: flex-end;
             margin-bottom: 20px;
         }
@@ -66,9 +66,17 @@
             white-space: nowrap;
             font-size: 12px; /* Tamaño más pequeño para el botón */
             flex-shrink: 0; /* Botón no se encoje */
+            align-self: flex-end; /* Alinea el botón al final verticalmente */
         }
         .empresas-form-row button:hover {
             background-color: #0056b3;
+        }
+        .empresas-divider-vertical {
+            height: 100%;
+            border-left: 1px solid #ddd;
+            align-self: stretch;
+            margin: 0 10px;
+            flex-shrink: 0;
         }
         .empresas-table {
             width: 100%;
@@ -171,9 +179,13 @@
             .empresas-form-row {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 15px;
+            }
+            .empresas-divider-vertical {
+                display: none; /* Ocultar separador en móvil */
             }
             .empresas-form-group {
-                flex: none; /* En móvil, grupos no se expanden */
+                flex: none; /* En móvil, grupos no se expandan */
             }
             .empresas-actions {
                 flex-direction: column;
@@ -196,6 +208,8 @@
                 <label for="rut" class="empresas-label">RUT de la empresa:</label>
                 <input type="text" id="rut" placeholder="RUT de la empresa (Ej: 76.123.456-7)" required>
             </div>
+            <button type="submit">Registrar</button>
+            <div class="empresas-divider-vertical">|</div>
             <div class="empresas-form-group">
                 <label for="buscarNombre" class="empresas-label">Buscar empresa:</label>
                 <input type="text" id="buscarNombre" placeholder="Buscar por nombre">
@@ -204,7 +218,6 @@
                 <label for="buscarRut" class="empresas-label">Buscar RUT:</label>
                 <input type="text" id="buscarRut" placeholder="Buscar por RUT">
             </div>
-            <button type="submit">Registrar</button>
         </form>
 
         <table id="empresasTable" class="empresas-table">
