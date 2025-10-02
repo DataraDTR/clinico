@@ -515,10 +515,10 @@
 
             const editModal = document.getElementById('editModal');
             const deleteModal = document.getElementById('deleteModal');
-            const closeEditModal = document.getElementById('closeEditModal');
+            const closeEditSpan = document.getElementById('closeEditModal');
             const cancelEdit = document.getElementById('cancelEdit');
             const editForm = document.getElementById('editForm');
-            const closeDeleteModal = document.getElementById('closeDeleteModal');
+            const closeDeleteSpan = document.getElementById('closeDeleteModal');
             const cancelDelete = document.getElementById('cancelDelete');
             const confirmDelete = document.getElementById('confirmDelete');
             const deleteText = document.getElementById('deleteText');
@@ -553,7 +553,7 @@
                 editModal.style.display = 'block';
             }
 
-            function closeEditModal() {
+            function closeEditModalHandler() {
                 editModal.style.display = 'none';
                 currentEditId = null;
                 editForm.reset();
@@ -566,22 +566,22 @@
                 deleteModal.style.display = 'block';
             }
 
-            function closeDeleteModal() {
+            function closeDeleteModalHandler() {
                 deleteModal.style.display = 'none';
                 currentDeleteId = null;
                 currentDeleteNombre = null;
             }
 
-            closeEditModal.addEventListener('click', closeEditModal);
-            cancelEdit.addEventListener('click', closeEditModal);
+            closeEditSpan.addEventListener('click', closeEditModalHandler);
+            cancelEdit.addEventListener('click', closeEditModalHandler);
             window.addEventListener('click', (e) => {
-                if (e.target === editModal) closeEditModal();
+                if (e.target === editModal) closeEditModalHandler();
             });
 
-            closeDeleteModal.addEventListener('click', closeDeleteModal);
-            cancelDelete.addEventListener('click', closeDeleteModal);
+            closeDeleteSpan.addEventListener('click', closeDeleteModalHandler);
+            cancelDelete.addEventListener('click', closeDeleteModalHandler);
             window.addEventListener('click', (e) => {
-                if (e.target === deleteModal) closeDeleteModal();
+                if (e.target === deleteModal) closeDeleteModalHandler();
             });
 
             editForm.addEventListener('submit', async (e) => {
@@ -601,7 +601,7 @@
                         });
                         hideLoading();
                         showToast(`Se ha editado con éxito la empresa ${nombre}`, 'success');
-                        closeEditModal();
+                        closeEditModalHandler();
                         await loadEmpresas();
                     } catch (error) {
                         hideLoading();
@@ -620,7 +620,7 @@
                     await deleteDoc(doc(db, "empresas", currentDeleteId));
                     hideLoading();
                     showToast(`Se ha eliminado con éxito la empresa ${currentDeleteNombre}`, 'success');
-                    closeDeleteModal();
+                    closeDeleteModalHandler();
                     await loadEmpresas();
                 } catch (error) {
                     hideLoading();
