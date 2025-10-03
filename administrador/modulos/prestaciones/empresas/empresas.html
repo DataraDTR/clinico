@@ -6,9 +6,9 @@
     <title>Registro de Empresas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
         window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where };
     </script>
     <style>
@@ -284,7 +284,7 @@
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
-            max-width: 400px;
+            max-width: 500px;
             border-radius: 8px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
@@ -351,6 +351,9 @@
             font-size: 12px;
             line-height: 1.4;
             margin-bottom: 15px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
         }
         .history-entry {
             margin-bottom: 10px;
@@ -360,6 +363,9 @@
         .modal-content h2 {
             text-align: center;
             margin-bottom: 10px;
+        }
+        hr {
+            margin: 10px 0;
         }
         @media (max-width: 768px) {
             .empresas-fields-container {
