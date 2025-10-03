@@ -8,8 +8,8 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
-        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy };
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where };
     </script>
     <style>
         html, body {
@@ -345,6 +345,22 @@
             font-size: 14px;
             margin-bottom: 20px;
         }
+        #historyContent {
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        .history-entry {
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-content h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
         @media (max-width: 768px) {
             .empresas-fields-container {
                 flex-direction: column;
@@ -477,9 +493,21 @@
         </div>
     </div>
 
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeHistory">&times;</span>
+            <h2 id="historyTitle">HISTORIAL EMPRESA</h2>
+            <hr>
+            <div id="historyContent"></div>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn modal-btn-secondary" id="closeHistoryBtn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         const { initializeApp, getAuth, onAuthStateChanged } = window.firebaseModules;
-        const { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } = window.firebaseModules;
+        const { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } = window.firebaseModules;
 
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
@@ -515,6 +543,7 @@
 
             const editModal = document.getElementById('editModal');
             const deleteModal = document.getElementById('deleteModal');
+            const historyModal = document.getElementById('historyModal');
             const closeEditSpan = document.getElementById('closeEditModal');
             const cancelEdit = document.getElementById('cancelEdit');
             const editForm = document.getElementById('editForm');
@@ -522,10 +551,21 @@
             const cancelDelete = document.getElementById('cancelDelete');
             const confirmDelete = document.getElementById('confirmDelete');
             const deleteText = document.getElementById('deleteText');
+            const closeHistorySpan = document.getElementById('closeHistory');
+            const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+            const historyTitle = document.getElementById('historyTitle');
+            const historyContent = document.getElementById('historyContent');
 
             let currentEditId = null;
+            let currentEditOldNombre = null;
+            let currentEditOldRut = null;
             let currentDeleteId = null;
             let currentDeleteNombre = null;
+
+            function getCurrentUserName() {
+                const user = auth.currentUser;
+                return user ? (user.displayName || user.email.split('@')[0] || 'Usuario Invitado') : 'Usuario Invitado';
+            }
 
             window.showLoading = function() {
                 if (loading) loading.classList.add('show');
@@ -546,8 +586,22 @@
                 }
             }
 
+            async function logAction(empresaId, action, oldData = null, newData = null) {
+                await addDoc(collection(db, "empresas_historial"), {
+                    empresaId,
+                    action,
+                    timestamp: new Date(),
+                    userId: auth.currentUser ? auth.currentUser.uid : null,
+                    userName: getCurrentUserName(),
+                    oldData,
+                    newData
+                });
+            }
+
             function openEditModal(id, nombre, rut) {
                 currentEditId = id;
+                currentEditOldNombre = nombre;
+                currentEditOldRut = rut;
                 document.getElementById('editNombre').value = nombre;
                 document.getElementById('editRut').value = rut;
                 editModal.style.display = 'block';
@@ -556,6 +610,8 @@
             function closeEditModalHandler() {
                 editModal.style.display = 'none';
                 currentEditId = null;
+                currentEditOldNombre = null;
+                currentEditOldRut = null;
                 editForm.reset();
             }
 
@@ -572,6 +628,35 @@
                 currentDeleteNombre = null;
             }
 
+            function openHistoryModal(id, currentNombre) {
+                historyTitle.textContent = `HISTORIAL ${currentNombre}`;
+                showLoading();
+                const q = query(collection(db, "empresas_historial"), where("empresaId", "==", id), orderBy("timestamp", "desc"));
+                getDocs(q).then((querySnapshot) => {
+                    hideLoading();
+                    let html = '';
+                    querySnapshot.forEach((doc) => {
+                        const log = doc.data();
+                        const date = new Date(log.timestamp).toLocaleDateString('es-CL');
+                        if (log.action === 'create') {
+                            html += `<div class="history-entry">Creado | ${date} | ${log.userName} |</div>`;
+                        } else if (log.action === 'update') {
+                            html += `<div class="history-entry">Modificado | ${date} | ${log.userName} | modificado de ${log.oldData.nombre} a ${log.newData.nombre}.</div>`;
+                        }
+                    });
+                    historyContent.innerHTML = html || '<div>No hay historial disponible.</div>';
+                    historyModal.style.display = 'block';
+                }).catch((error) => {
+                    hideLoading();
+                    showToast('Error al cargar el historial: ' + error.message, 'error');
+                });
+            }
+
+            function closeHistoryModalHandler() {
+                historyModal.style.display = 'none';
+                historyContent.innerHTML = '';
+            }
+
             closeEditSpan.addEventListener('click', closeEditModalHandler);
             cancelEdit.addEventListener('click', closeEditModalHandler);
             window.addEventListener('click', (e) => {
@@ -584,6 +669,12 @@
                 if (e.target === deleteModal) closeDeleteModalHandler();
             });
 
+            closeHistorySpan.addEventListener('click', closeHistoryModalHandler);
+            closeHistoryBtn.addEventListener('click', closeHistoryModalHandler);
+            window.addEventListener('click', (e) => {
+                if (e.target === historyModal) closeHistoryModalHandler();
+            });
+
             editForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (!currentEditId) return;
@@ -592,6 +683,8 @@
                 const rut = document.getElementById('editRut').value.trim();
 
                 if (nombre && rut) {
+                    const oldNombre = currentEditOldNombre;
+                    const oldRut = currentEditOldRut;
                     showLoading();
                     try {
                         await updateDoc(doc(db, "empresas", currentEditId), {
@@ -599,6 +692,7 @@
                             rut,
                             createdAt: new Date()
                         });
+                        await logAction(currentEditId, 'update', {nombre: oldNombre, rut: oldRut}, {nombre, rut});
                         hideLoading();
                         showToast(`Se ha editado con éxito la empresa ${nombre}`, 'success');
                         closeEditModalHandler();
@@ -679,11 +773,12 @@
                     if (nombre && rut) {
                         showLoading();
                         try {
-                            await addDoc(collection(db, "empresas"), {
+                            const docRef = await addDoc(collection(db, "empresas"), {
                                 nombre,
                                 rut,
                                 createdAt: new Date()
                             });
+                            await logAction(docRef.id, 'create', null, {nombre, rut});
                             hideLoading();
                             showToast(`Se ha registrado con éxito la empresa ${nombre}`, 'success');
                             form.reset();
@@ -722,7 +817,7 @@
                             <td class="empresas-actions">
                                 <button title="Editar" class="empresas-btn-edit" onclick="openEditModal('${empresa.id}', '${empresa.nombre}', '${empresa.rut}')"><i class="fas fa-edit"></i></button>
                                 <button title="Eliminar" class="empresas-btn-delete" onclick="openDeleteModal('${empresa.id}', '${empresa.nombre}')"><i class="fas fa-trash"></i></button>
-                                <button title="Ver Historial" class="empresas-btn-history" onclick="viewHistory('${empresa.id}')"><i class="fas fa-history"></i></button>
+                                <button title="Ver Historial" class="empresas-btn-history" onclick="openHistoryModal('${empresa.id}', '${empresa.nombre}')"><i class="fas fa-history"></i></button>
                             </td>
                         `;
                         empresasBody.appendChild(row);
@@ -790,9 +885,7 @@
 
             window.openEditModal = openEditModal;
             window.openDeleteModal = openDeleteModal;
-            window.viewHistory = (id) => {
-                alert(`Historial de empresa ${id}: No hay cambios previos implementados.`);
-            };
+            window.openHistoryModal = openHistoryModal;
         });
     </script>
 </body>
