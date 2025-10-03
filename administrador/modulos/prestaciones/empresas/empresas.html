@@ -647,9 +647,9 @@
                         const date = log.timestamp ? log.timestamp.toDate().toLocaleDateString('es-CL') : 'Fecha inválida';
                         
                         if (log.action === 'create') {
-                            html += `<div class="history-entry">Creado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} |</div>`;
+                            html += `<div class="history-entry">Creado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} | ${date}</div>`;
                         } else if (log.action === 'update') {
-                            html += `<div class="history-entry">Modificado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} | modificado de ${log.oldData ? log.oldData.nombre : 'N/A'} a ${log.newData ? log.newData.nombre : 'N/A'}.</div>`;
+                            html += `<div class="history-entry">Modificado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} | ${date} | modificado de ${log.oldData ? log.oldData.nombre : 'N/A'} a ${log.newData ? log.newData.nombre : 'N/A'}.</div>`;
                         }
                     });
                     historyContent.innerHTML = html || '<div>No hay historial disponible.</div>';
