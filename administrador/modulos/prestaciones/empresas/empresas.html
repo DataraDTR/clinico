@@ -8,8 +8,8 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where };
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where, getDoc };
     </script>
     <style>
         html, body {
@@ -513,7 +513,7 @@
 
     <script type="module">
         const { initializeApp, getAuth, onAuthStateChanged } = window.firebaseModules;
-        const { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } = window.firebaseModules;
+        const { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where, getDoc } = window.firebaseModules;
 
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
@@ -568,11 +568,6 @@
             let currentDeleteId = null;
             let currentDeleteNombre = null;
 
-            function getCurrentUserName() {
-                const user = auth.currentUser;
-                return user ? (user.displayName || user.email.split('@')[0] || 'Usuario Invitado') : 'Usuario Invitado';
-            }
-
             window.showLoading = function() {
                 if (loading) loading.classList.add('show');
             };
@@ -593,12 +588,18 @@
             }
 
             async function logAction(empresaId, action, oldData = null, newData = null) {
+                if (!window.currentUserData) {
+                    console.warn('Datos del usuario no disponibles para log');
+                    return;
+                }
+                
                 await addDoc(collection(db, "empresas_historial"), {
                     empresaId,
                     action,
                     timestamp: new Date(),
                     userId: auth.currentUser ? auth.currentUser.uid : null,
-                    userName: getCurrentUserName(),
+                    userFullName: window.currentUserData.fullName || 'Usuario Invitado',
+                    username: window.currentUserData.username || 'invitado',
                     oldData,
                     newData
                 });
@@ -638,29 +639,28 @@
                 historyTitle.textContent = `HISTORIAL ${currentNombre}`;
                 showLoading();
                 const q = query(collection(db, "empresas_historial"), where("empresaId", "==", id), orderBy("timestamp", "desc"));
-                    getDocs(q).then((querySnapshot) => {
-                        hideLoading();
-                        let html = '';
-                        querySnapshot.forEach((doc) => {
-                            const log = doc.data();
-                            const date = new Date(log.timestamp).toLocaleDateString('es-CL');
-                            if (log.action === 'create') {
-                                html += `<div class="history-entry">Creado | ${date} | ${log.userName} |</div>`;
-                            } else if (log.action === 'update') {
-                                html += `<div class="history-entry">Modificado | ${date} | ${log.userName} | modificado de ${log.oldData.nombre} a ${log.newData.nombre}.</div>`;
-                            }
-                        });
-                        historyContent.innerHTML = html || '<div>No hay historial disponible.</div>';
-                        historyModal.style.display = 'block';
-                    }).catch((error) => {
-                        hideLoading();
-                        showToast('Error al cargar el historial: ' + error.message, 'error');
+                getDocs(q).then((querySnapshot) => {
+                    hideLoading();
+                    let html = '';
+                    querySnapshot.forEach((doc) => {
+                        const log = doc.data();
+                        const date = log.timestamp ? log.timestamp.toDate().toLocaleDateString('es-CL') : 'Fecha inválida';
                         
-                        // NUEVO: Registrar en consola para depuración
-                        console.error('Error al cargar el historial de empresa:', error);
-                        console.error('Código de error:', error.code);
-                        console.error('Mensaje completo:', error.message);
+                        if (log.action === 'create') {
+                            html += `<div class="history-entry">Creado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} |</div>`;
+                        } else if (log.action === 'update') {
+                            html += `<div class="history-entry">Modificado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} | modificado de ${log.oldData ? log.oldData.nombre : 'N/A'} a ${log.newData ? log.newData.nombre : 'N/A'}.</div>`;
+                        }
                     });
+                    historyContent.innerHTML = html || '<div>No hay historial disponible.</div>';
+                    historyModal.style.display = 'block';
+                }).catch((error) => {
+                    hideLoading();
+                    showToast('Error al cargar el historial: ' + error.message, 'error');
+                    console.error('Error al cargar el historial de empresa:', error);
+                    console.error('Código de error:', error.code);
+                    console.error('Mensaje completo:', error.message);
+                });
             }
 
             function closeHistoryModalHandler() {
@@ -738,6 +738,20 @@
                     window.location.replace('../index.html');
                     return;
                 }
+                
+                try {
+                    const userDocRef = doc(db, 'users', user.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    if (userDoc.exists()) {
+                        window.currentUserData = userDoc.data();
+                    } else {
+                        window.currentUserData = { fullName: 'Usuario Invitado', username: 'invitado' };
+                    }
+                } catch (error) {
+                    console.error('Error al cargar datos del usuario:', error);
+                    window.currentUserData = { fullName: 'Usuario Invitado', username: 'invitado' };
+                }
+                
                 await loadEmpresas();
             });
 
