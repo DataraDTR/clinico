@@ -1325,7 +1325,6 @@
                                 let newWidth = startWidth + (moveEvent.clientX - startX);
                                 newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
                                 header.style.width = `${newWidth}px`;
-                                // Ajustar todas las celdas en la misma columna
                                 cells.forEach(cell => {
                                     cell.style.width = `${newWidth}px`;
                                 });
