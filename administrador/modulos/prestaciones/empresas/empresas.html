@@ -382,29 +382,32 @@
         }
         .empresas-actions-menu {
             position: relative;
-            display: inline-block;
             margin-top: 10px;
             text-align: right;
         }
         #actionsBtn {
-            padding: 8px 16px;
-            background-color: #007bff;
-            color: white;
+            background: none;
             border: none;
-            border-radius: 4px;
+            color: #007bff;
             cursor: pointer;
             font-size: 12px;
+            padding: 8px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
         #actionsBtn:hover {
-            background-color: #0056b3;
+            color: #0056b3;
+            text-decoration: underline;
         }
         .empresas-dropdown-menu {
             display: none;
             position: absolute;
             right: 0;
+            bottom: 100%; /* Posiciona el menú hacia arriba */
             background-color: white;
-            min-width: 200px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            min-width: 250px; /* Aumenta el ancho para evitar corte de texto */
+            box-shadow: 0px -8px 16px 0px rgba(0,0,0,0.2); /* Sombra hacia arriba */
             z-index: 1;
             border-radius: 4px;
             overflow: hidden;
@@ -415,6 +418,7 @@
             text-decoration: none;
             display: block;
             font-size: 12px;
+            white-space: nowrap; /* Evita que el texto se corte */
         }
         .empresas-dropdown-menu a:hover {
             background-color: #f1f1f1;
@@ -473,6 +477,9 @@
                 padding: 3px 6px;
                 font-size: 10px;
             }
+            .empresas-dropdown-menu {
+                min-width: 200px; /* Ajusta el ancho para pantallas pequeñas */
+            }
         }
     </style>
 </head>
@@ -529,7 +536,7 @@
         </div>
 
         <div class="empresas-actions-menu">
-            <button id="actionsBtn">Acciones <i class="fas fa-caret-down"></i></button>
+            <button id="actionsBtn">Acciones <i class="fas fa-angle-right"></i></button>
             <div id="actionsMenu" class="empresas-dropdown-menu">
                 <a href="#" id="downloadAll">Descargar todos los registros</a>
                 <a href="#" id="downloadPage">Descargar hoja actual</a>
