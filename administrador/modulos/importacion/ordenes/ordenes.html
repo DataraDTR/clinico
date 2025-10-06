@@ -9,8 +9,8 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where, getDoc };
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, orderBy, where };
     </script>
     <style>
         html, body {
@@ -103,11 +103,13 @@
             right: 0;
             top: 100%;
             background-color: white;
-            min-width: 250px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            min-width: 200px;
+            box-shadow: -2px 8px 16px rgba(0,0,0,0.2);
             z-index: 1;
             border-radius: 4px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         .ordenes-dropdown-menu a {
             color: black;
@@ -139,25 +141,6 @@
         .ordenes-table tbody tr:hover {
             background-color: #f8f9fa;
         }
-        .ordenes-actions {
-            display: flex;
-            gap: 5px;
-        }
-        .ordenes-actions button {
-            padding: 4px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .ordenes-btn-edit { background-color: #ffc107; color: #000; }
-        .ordenes-btn-delete { background-color: #dc3545; color: white; }
-        .ordenes-btn-history { background-color: #17a2b8; color: white; }
         .ordenes-pagination {
             display: flex;
             justify-content: space-between;
@@ -347,7 +330,7 @@
             font-weight: bold;
             margin-bottom: 5px;
         }
-        .modal-form-group input, .modal-form-group select {
+        .modal-form-group select {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -374,36 +357,6 @@
             background-color: #6c757d;
             color: white;
         }
-        .modal-btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        .delete-modal-text {
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        #historyContent {
-            max-height: 300px;
-            overflow-y: auto;
-            font-size: 12px;
-            line-height: 1.4;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .history-entry {
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #eee;
-        }
-        .modal-content h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        hr {
-            margin: 10px 0;
-        }
         @media (max-width: 768px) {
             .ordenes-fields-container {
                 flex-direction: column;
@@ -415,9 +368,6 @@
             }
             .ordenes-form-group {
                 max-width: none;
-            }
-            .ordenes-actions {
-                flex-direction: column;
             }
             .ordenes-toast {
                 top: 10px;
@@ -455,7 +405,7 @@
                 font-size: 10px;
             }
             .ordenes-dropdown-menu {
-                min-width: 200px;
+                min-width: 180px;
             }
         }
     </style>
@@ -486,7 +436,7 @@
                 </div>
             </div>
             <div class="ordenes-actions-menu">
-                <button id="actionsBtn">Acciones <i class="fas fa-angle-right"></i></button>
+                <button id="actionsBtn">Acciones <i class="fas fa-angle-down"></i></button>
                 <div id="actionsMenu" class="ordenes-dropdown-menu">
                     <a href="#" id="downloadTemplate">Formato de importación</a>
                     <a href="#" id="importExcel">Importar Excel</a>
@@ -513,7 +463,6 @@
                     <th>Total</th>
                     <th>Estado</th>
                     <th>Evento</th>
-                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="ordenesBody">
@@ -540,92 +489,6 @@
         <div id="ordenes-toast" class="ordenes-toast"></div>
     </div>
 
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeEditModal">&times;</span>
-            <h2>Editar Orden</h2>
-            <form id="editForm">
-                <input type="hidden" id="editId">
-                <div class="modal-form-group">
-                    <label for="editCodigo">Código:</label>
-                    <input type="text" id="editCodigo" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editGeneracion">Generación:</label>
-                    <input type="date" id="editGeneracion" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editAutorizacion">Autorización:</label>
-                    <input type="date" id="editAutorizacion" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editSociedad">Sociedad:</label>
-                    <input type="text" id="editSociedad" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editTipoCompra">Tipo de compra:</label>
-                    <input type="text" id="editTipoCompra" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editProveedor">Proveedor:</label>
-                    <input type="text" id="editProveedor" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editDigitador">Digitador:</label>
-                    <input type="text" id="editDigitador" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editNivelActual">Nivel actual:</label>
-                    <input type="text" id="editNivelActual" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editNivelOx">Nivel ox:</label>
-                    <input type="text" id="editNivelOx" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editLiberada">Liberada:</label>
-                    <input type="text" id="editLiberada" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editTotal">Total:</label>
-                    <input type="text" id="editTotal" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editEstado">Estado:</label>
-                    <input type="text" id="editEstado" required>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="modal-btn modal-btn-secondary" id="cancelEdit">Cancelar</button>
-                    <button type="submit" class="modal-btn modal-btn-primary">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeDeleteModal">&times;</span>
-            <h2>Eliminar Orden</h2>
-            <p class="delete-modal-text" id="deleteText"></p>
-            <div class="modal-buttons">
-                <button type="button" class="modal-btn modal-btn-secondary" id="cancelDelete">No</button>
-                <button type="button" class="modal-btn modal-btn-danger" id="confirmDelete">Sí</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="historyModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeHistory">&times;</span>
-            <h2 id="historyTitle">HISTORIAL ORDEN</h2>
-            <hr>
-            <div id="historyContent"></div>
-            <div class="modal-buttons">
-                <button type="button" class="modal-btn modal-btn-secondary" id="closeHistoryBtn">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
     <div id="downloadMesModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeDownloadMes">&times;</span>
@@ -647,7 +510,7 @@
 
     <script type="module">
         const { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } = window.firebaseModules;
-        const { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where, getDoc } = window.firebaseModules;
+        const { getFirestore, collection, addDoc, getDocs, query, where } = window.firebaseModules;
 
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
@@ -686,14 +549,6 @@
             return `${day}-${month}-${year}`;
         }
 
-        // Función para convertir fecha DD-MM-YYYY a formato ISO para input date
-        function dateToISO(dateStr) {
-            if (!dateStr) return '';
-            const [day, month, year] = dateStr.split('-');
-            if (!day || !month || !year) return '';
-            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const loading = document.getElementById('ordenes-loading');
             const toast = document.getElementById('ordenes-toast');
@@ -707,21 +562,7 @@
             const selectAno = document.getElementById('selectAno');
             const selectMes = document.getElementById('selectMes');
 
-            const editModal = document.getElementById('editModal');
-            const deleteModal = document.getElementById('deleteModal');
-            const historyModal = document.getElementById('historyModal');
             const downloadMesModal = document.getElementById('downloadMesModal');
-            const closeEditSpan = document.getElementById('closeEditModal');
-            const cancelEdit = document.getElementById('cancelEdit');
-            const editForm = document.getElementById('editForm');
-            const closeDeleteSpan = document.getElementById('closeDeleteModal');
-            const cancelDelete = document.getElementById('cancelDelete');
-            const confirmDelete = document.getElementById('confirmDelete');
-            const deleteText = document.getElementById('deleteText');
-            const closeHistorySpan = document.getElementById('closeHistory');
-            const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-            const historyTitle = document.getElementById('historyTitle');
-            const historyContent = document.getElementById('historyContent');
             const closeDownloadMes = document.getElementById('closeDownloadMes');
             const cancelDownloadMes = document.getElementById('cancelDownloadMes');
             const confirmDownloadMes = document.getElementById('confirmDownloadMes');
@@ -736,11 +577,6 @@
             const downloadPage = document.getElementById('downloadPage');
             const downloadMes = document.getElementById('downloadMes');
             const fileUpload = document.getElementById('fileUpload');
-
-            let currentEditId = null;
-            let currentEditOldData = null;
-            let currentDeleteId = null;
-            let currentDeleteCodigo = null;
 
             window.showLoading = function() {
                 if (loading) loading.classList.add('show');
@@ -761,31 +597,6 @@
                 }
             }
 
-            async function logAction(ordenId, action, oldData = null, newData = null) {
-                if (!window.currentUserData) {
-                    console.warn('Datos del usuario no disponibles para log');
-                    return;
-                }
-                
-                await addDoc(collection(db, "ordenes_historial"), {
-                    ordenId,
-                    action,
-                    timestamp: new Date(),
-                    userId: auth.currentUser ? auth.currentUser.uid : null,
-                    userFullName: window.currentUserData.fullName || 'Usuario Invitado',
-                    username: window.currentUserData.username || 'invitado',
-                    oldData,
-                    newData
-                });
-            }
-
-            async function isDuplicate(codigo) {
-                if (!codigo || typeof codigo !== 'string') return false;
-                const codigoQuery = query(collection(db, "ordenes"), where("codigo", "==", codigo.trim()));
-                const querySnapshot = await getDocs(codigoQuery);
-                return !querySnapshot.empty;
-            }
-
             async function getOrdenByCodigo(codigo) {
                 if (!codigo || typeof codigo !== 'string') return null;
                 const q = query(collection(db, "ordenes"), where("codigo", "==", codigo.trim()));
@@ -797,74 +608,7 @@
                 return null;
             }
 
-            function openEditModal(id, data) {
-                currentEditId = id;
-                currentEditOldData = data;
-                document.getElementById('editCodigo').value = data.codigo || '';
-                document.getElementById('editGeneracion').value = dateToISO(data.generacion) || '';
-                document.getElementById('editAutorizacion').value = dateToISO(data.autorizacion) || '';
-                document.getElementById('editSociedad').value = data.sociedad || '';
-                document.getElementById('editTipoCompra').value = data.tipoCompra || '';
-                document.getElementById('editProveedor').value = data.proveedor || '';
-                document.getElementById('editDigitador').value = data.digitador || '';
-                document.getElementById('editNivelActual').value = data.nivelActual || '';
-                document.getElementById('editNivelOx').value = data.nivelOx || '';
-                document.getElementById('editLiberada').value = data.liberada || '';
-                document.getElementById('editTotal').value = data.total || '';
-                document.getElementById('editEstado').value = data.estado || '';
-                editModal.style.display = 'block';
-            }
-
-            function closeEditModalHandler() {
-                editModal.style.display = 'none';
-                currentEditId = null;
-                currentEditOldData = null;
-                editForm.reset();
-            }
-
-            function openDeleteModal(id, codigo) {
-                currentDeleteId = id;
-                currentDeleteCodigo = codigo;
-                deleteText.textContent = `¿Desea eliminar la orden "${codigo}"?`;
-                deleteModal.style.display = 'block';
-            }
-
-            function closeDeleteModalHandler() {
-                deleteModal.style.display = 'none';
-                currentDeleteId = null;
-                currentDeleteCodigo = null;
-            }
-
-            function openHistoryModal(id, currentCodigo) {
-                historyTitle.textContent = `HISTORIAL ${currentCodigo}`;
-                showLoading();
-                const q = query(collection(db, "ordenes_historial"), where("ordenId", "==", id), orderBy("timestamp", "desc"));
-                getDocs(q).then((querySnapshot) => {
-                    hideLoading();
-                    let html = '';
-                    querySnapshot.forEach((doc) => {
-                        const log = doc.data();
-                        const date = log.timestamp ? log.timestamp.toDate().toLocaleDateString('es-CL') : 'Fecha inválida';
-                        
-                        if (log.action === 'create') {
-                            html += `<div class="history-entry">Importado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} | ${date}</div>`;
-                        } else if (log.action === 'update') {
-                            html += `<div class="history-entry">Actualizado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} | ${date}</div>`;
-                        }
-                    });
-                    historyContent.innerHTML = html || '<div>No hay historial disponible.</div>';
-                    historyModal.style.display = 'block';
-                }).catch((error) => {
-                    hideLoading();
-                    showToast('Error al cargar el historial: ' + error.message, 'error');
-                    console.error('Error al cargar el historial de orden:', error);
-                });
-            }
-
-            function closeHistoryModalHandler() {
-                historyModal.style.display = 'none';
-                historyContent.innerHTML = '';
-            }
+ cybersnippet
 
             function openDownloadMesModal() {
                 populateAnoSelect(selectDownloadAno);
@@ -877,92 +621,10 @@
                 downloadMesModal.style.display = 'none';
             }
 
-            closeEditSpan.addEventListener('click', closeEditModalHandler);
-            cancelEdit.addEventListener('click', closeEditModalHandler);
-            window.addEventListener('click', (e) => {
-                if (e.target === editModal) closeEditModalHandler();
-            });
-
-            closeDeleteSpan.addEventListener('click', closeDeleteModalHandler);
-            cancelDelete.addEventListener('click', closeDeleteModalHandler);
-            window.addEventListener('click', (e) => {
-                if (e.target === deleteModal) closeDeleteModalHandler();
-            });
-
-            closeHistorySpan.addEventListener('click', closeHistoryModalHandler);
-            closeHistoryBtn.addEventListener('click', closeHistoryModalHandler);
-            window.addEventListener('click', (e) => {
-                if (e.target === historyModal) closeHistoryModalHandler();
-            });
-
             closeDownloadMes.addEventListener('click', closeDownloadMesModalHandler);
             cancelDownloadMes.addEventListener('click', closeDownloadMesModalHandler);
             window.addEventListener('click', (e) => {
                 if (e.target === downloadMesModal) closeDownloadMesModalHandler();
-            });
-
-            editForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!currentEditId) return;
-
-                const newData = {
-                    codigo: document.getElementById('editCodigo').value.trim(),
-                    generacion: document.getElementById('editGeneracion').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editGeneracion').value)) : '',
-                    autorizacion: document.getElementById('editAutorizacion').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editAutorizacion').value)) : '',
-                    sociedad: document.getElementById('editSociedad').value.trim(),
-                    tipoCompra: document.getElementById('editTipoCompra').value.trim(),
-                    proveedor: document.getElementById('editProveedor').value.trim(),
-                    digitador: document.getElementById('editDigitador').value.trim(),
-                    nivelActual: document.getElementById('editNivelActual').value.trim(),
-                    nivelOx: document.getElementById('editNivelOx').value.trim(),
-                    liberada: document.getElementById('editLiberada').value.trim(),
-                    total: document.getElementById('editTotal').value.trim(),
-                    estado: document.getElementById('editEstado').value.trim(),
-                };
-
-                if (newData.codigo && newData.generacion && newData.autorizacion) {
-                    showLoading();
-                    try {
-                        const duplicate = await getOrdenByCodigo(newData.codigo);
-                        if (duplicate && duplicate.id !== currentEditId) {
-                            hideLoading();
-                            showToast('El código de la orden ya existe.', 'error');
-                            return;
-                        }
-
-                        await updateDoc(doc(db, "ordenes", currentEditId), {
-                            ...newData,
-                            evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
-                            createdAt: new Date()
-                        });
-                        await logAction(currentEditId, 'update', currentEditOldData, newData);
-                        hideLoading();
-                        showToast(`Se ha editado con éxito la orden ${newData.codigo}`, 'success');
-                        closeEditModalHandler();
-                        await loadOrdenes();
-                    } catch (error) {
-                        hideLoading();
-                        showToast('Error al editar la orden: ' + error.message, 'error');
-                    }
-                } else {
-                    showToast('Por favor, completa los campos obligatorios: código, generación y autorización.', 'error');
-                }
-            });
-
-            confirmDelete.addEventListener('click', async () => {
-                if (!currentDeleteId || !currentDeleteCodigo) return;
-
-                showLoading();
-                try {
-                    await deleteDoc(doc(db, "ordenes", currentDeleteId));
-                    hideLoading();
-                    showToast(`Se ha eliminado con éxito la orden ${currentDeleteCodigo}`, 'success');
-                    closeDeleteModalHandler();
-                    await loadOrdenes();
-                } catch (error) {
-                    hideLoading();
-                    showToast('Error al eliminar la orden: ' + error.message, 'error');
-                }
             });
 
             confirmDownloadMes.addEventListener('click', async () => {
@@ -1071,7 +733,6 @@
                             mesesPorAno[ano].add(mes);
                         }
                     });
-                    ordenes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                     renderTable();
                     hideLoading();
                 } catch (error) {
@@ -1138,7 +799,8 @@
                     nivelOx: o.nivelOx,
                     liberada: o.liberada,
                     total: o.total,
-                    estado: o.estado
+                    estado: o.estado,
+                    evento: o.evento
                 })), 'todas_ordenes');
                 actionsMenu.style.display = 'none';
             });
@@ -1160,7 +822,8 @@
                     nivelOx: o.nivelOx,
                     liberada: o.liberada,
                     total: o.total,
-                    estado: o.estado
+                    estado: o.estado,
+                    evento: o.evento
                 }));
                 exportToExcel(pageData, 'pagina_actual_ordenes');
                 actionsMenu.style.display = 'none';
@@ -1274,7 +937,6 @@
                                             evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
                                             createdAt: new Date()
                                         });
-                                        await logAction(existing.id, 'update', existing, processedRow);
                                         updatedCount++;
                                     }
                                 } else {
@@ -1283,7 +945,6 @@
                                         evento: `Importado ${new Date().toLocaleString('es-CL')}`,
                                         createdAt: new Date()
                                     });
-                                    await logAction(docRef.id, 'create', null, processedRow);
                                     addedCount++;
                                 }
                             } else {
@@ -1319,14 +980,14 @@
                     String(orden.proveedor || '').toLowerCase().includes(searchProveedor.toLowerCase()) &&
                     (!selectedAno || new Date(orden.generacion).getFullYear() == selectedAno) &&
                     (!selectedMes || new Date(orden.generacion).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
-                ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                );
             }
 
             function renderTable() {
                 const filteredOrdenes = getFilteredOrdenes();
                 const start = (currentPage - 1) * PAGE_SIZE;
                 const end = start + PAGE_SIZE;
-                const pageOrdenes = filteredOrdenes.slice(start, end);
+                const pageOrdenes = filteredOrdenes.sort((a, b) => a.codigo.localeCompare(b.codigo)).slice(start, end);
 
                 if (ordenesBody) {
                     ordenesBody.innerHTML = '';
@@ -1347,11 +1008,6 @@
                             <td>${orden.total || ''}</td>
                             <td>${orden.estado || ''}</td>
                             <td>${orden.evento || 'N/A'}</td>
-                            <td class="ordenes-actions">
-                                <button title="Editar" class="ordenes-btn-edit" onclick="openEditModal('${orden.id}', ${JSON.stringify(orden).replace(/"/g, '&quot;')})"><i class="fas fa-edit"></i></button>
-                                <button title="Eliminar" class="ordenes-btn-delete" onclick="openDeleteModal('${orden.id}', '${orden.codigo || ''}')"><i class="fas fa-trash"></i></button>
-                                <button title="Ver Historial" class="ordenes-btn-history" onclick="openHistoryModal('${orden.id}', '${orden.codigo || ''}')"><i class="fas fa-history"></i></button>
-                            </td>
                         `;
                         ordenesBody.appendChild(row);
                     });
@@ -1415,10 +1071,6 @@
                     }
                 });
             }
-
-            window.openEditModal = openEditModal;
-            window.openDeleteModal = openDeleteModal;
-            window.openHistoryModal = openHistoryModal;
         });
     </script>
 </body>
