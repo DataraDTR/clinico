@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Empresas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -140,18 +141,18 @@
             padding: 10px;
             background: #f8f9fa;
             border-radius: 4px;
-            flex-wrap: nowrap; /* Asegura que todo esté en una sola fila */
+            flex-wrap: nowrap;
         }
         .empresas-pagination-info {
             font-size: 11px;
-            flex: 1; /* Permite que el texto ocupe el espacio disponible */
+            flex: 1;
             text-align: left;
         }
         .empresas-pagination-controls {
             display: flex;
             align-items: center;
-            gap: 5px; /* Reduce el espacio entre los elementos */
-            flex-shrink: 0; /* Evita que los controles se compriman */
+            gap: 5px;
+            flex-shrink: 0;
         }
         .empresas-pagination-controls button {
             padding: 6px 10px;
@@ -180,7 +181,7 @@
             background: white;
             cursor: pointer;
             font-size: 11px;
-            border-radius: 4px; /* Añade bordes redondeados para consistencia */
+            border-radius: 4px;
         }
         .empresas-page-numbers button.active {
             background-color: #007bff;
@@ -194,7 +195,7 @@
             padding: 4px;
             cursor: default;
             font-size: 11px;
-            line-height: 1.5; /* Ajusta la alineación vertical */
+            line-height: 1.5;
         }
         #empresas-message {
             margin-bottom: 20px;
@@ -379,6 +380,45 @@
         hr {
             margin: 10px 0;
         }
+        .empresas-actions-menu {
+            position: relative;
+            display: inline-block;
+            margin-top: 10px;
+            text-align: right;
+        }
+        #actionsBtn {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        #actionsBtn:hover {
+            background-color: #0056b3;
+        }
+        .empresas-dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .empresas-dropdown-menu a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 12px;
+        }
+        .empresas-dropdown-menu a:hover {
+            background-color: #f1f1f1;
+        }
         @media (max-width: 768px) {
             .empresas-fields-container {
                 flex-direction: column;
@@ -488,6 +528,18 @@
             </div>
         </div>
 
+        <div class="empresas-actions-menu">
+            <button id="actionsBtn">Acciones <i class="fas fa-caret-down"></i></button>
+            <div id="actionsMenu" class="empresas-dropdown-menu">
+                <a href="#" id="downloadAll">Descargar todos los registros</a>
+                <a href="#" id="downloadPage">Descargar hoja actual</a>
+                <a href="#" id="downloadTemplate">Descargar formato para importar</a>
+                <a href="#" id="importExcel">Importar Excel</a>
+            </div>
+        </div>
+
+        <input type="file" id="fileUpload" style="display:none;" accept=".xlsx, .xls">
+
         <div id="empresas-loading" class="empresas-loading">
             <div class="empresas-loading-spinner"></div>
             <div class="empresas-loading-text">Procesando...</div>
@@ -595,6 +647,14 @@
             const closeHistoryBtn = document.getElementById('closeHistoryBtn');
             const historyTitle = document.getElementById('historyTitle');
             const historyContent = document.getElementById('historyContent');
+
+            const actionsBtn = document.getElementById('actionsBtn');
+            const actionsMenu = document.getElementById('actionsMenu');
+            const downloadAll = document.getElementById('downloadAll');
+            const downloadPage = document.getElementById('downloadPage');
+            const downloadTemplate = document.getElementById('downloadTemplate');
+            const importExcel = document.getElementById('importExcel');
+            const fileUpload = document.getElementById('fileUpload');
 
             let currentEditId = null;
             let currentEditOldNombre = null;
@@ -940,6 +1000,101 @@
                         renderTable();
                     }
                 });
+            }
+
+            // Funcionalidades de acciones
+            actionsBtn.addEventListener('click', () => {
+                actionsMenu.style.display = actionsMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Cerrar menú si se hace click fuera
+            window.addEventListener('click', (e) => {
+                if (!actionsBtn.contains(e.target) && !actionsMenu.contains(e.target)) {
+                    actionsMenu.style.display = 'none';
+                }
+            });
+
+            downloadAll.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportToExcel(empresas.map(e => ({nombre: e.nombre, rut: e.rut})), 'todas_empresas');
+                actionsMenu.style.display = 'none';
+            });
+
+            downloadPage.addEventListener('click', (e) => {
+                e.preventDefault();
+                const filtered = getFilteredEmpresas();
+                const start = (currentPage - 1) * PAGE_SIZE;
+                const end = start + PAGE_SIZE;
+                const pageData = filtered.slice(start, end).map(e => ({nombre: e.nombre, rut: e.rut}));
+                exportToExcel(pageData, 'pagina_actual_empresas');
+                actionsMenu.style.display = 'none';
+            });
+
+            downloadTemplate.addEventListener('click', (e) => {
+                e.preventDefault();
+                downloadImportTemplate();
+                actionsMenu.style.display = 'none';
+            });
+
+            importExcel.addEventListener('click', (e) => {
+                e.preventDefault();
+                fileUpload.click();
+                actionsMenu.style.display = 'none';
+            });
+
+            fileUpload.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    await importFromExcel(file);
+                    fileUpload.value = '';
+                }
+            });
+
+            function exportToExcel(data, filename) {
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Empresas");
+                XLSX.writeFile(wb, filename + '.xlsx');
+            }
+
+            function downloadImportTemplate() {
+                const ws = XLSX.utils.aoa_to_sheet([["Nombre de la empresa", "RUT de la empresa"]]);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Template");
+                XLSX.writeFile(wb, 'template_empresas.xlsx');
+            }
+
+            async function importFromExcel(file) {
+                showLoading();
+                try {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const data = new Uint8Array(e.target.result);
+                        const wb = XLSX.read(data, {type: 'array'});
+                        const ws = wb.Sheets[wb.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(ws, {header: ["nombre", "rut"], range: 1}); // Skip header row
+
+                        let addedCount = 0;
+                        for (let row of json) {
+                            if (row.nombre && row.rut) {
+                                const docRef = await addDoc(collection(db, "empresas"), {
+                                    nombre: row.nombre.trim(),
+                                    rut: row.rut.trim(),
+                                    createdAt: new Date()
+                                });
+                                await logAction(docRef.id, 'create', null, {nombre: row.nombre, rut: row.rut});
+                                addedCount++;
+                            }
+                        }
+                        hideLoading();
+                        showToast(`Se han importado ${addedCount} empresas con éxito.`, 'success');
+                        await loadEmpresas();
+                    };
+                    reader.readAsArrayBuffer(file);
+                } catch (error) {
+                    hideLoading();
+                    showToast('Error al importar el archivo: ' + error.message, 'error');
+                }
             }
 
             window.openEditModal = openEditModal;
