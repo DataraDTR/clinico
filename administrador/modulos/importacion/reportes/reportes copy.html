@@ -121,55 +121,25 @@
         .reportes-dropdown-menu a:hover {
             background-color: #f1f1f1;
         }
-        .reportes-table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
         .reportes-table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 20px;
             font-size: 11px;
             border: 1px solid #ddd;
-            table-layout: auto;
         }
         .reportes-table th, .reportes-table td {
             padding: 4px;
             text-align: left;
             border: 1px solid #ddd;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            min-width: 100px;
-            max-width: 300px;
         }
         .reportes-table th {
             background-color: #f2f2f2;
             font-size: 11px;
-            resize: horizontal;
-            overflow: auto;
-            cursor: col-resize;
         }
         .reportes-table tbody tr:hover {
             background-color: #f8f9fa;
         }
-        .reportes-table th:nth-child(1) { min-width: 80px; max-width: 120px; } /* Fecha */
-        .reportes-table th:nth-child(2) { min-width: 60px; max-width: 100px; } /* Día */
-        .reportes-table th:nth-child(3) { min-width: 80px; max-width: 120px; } /* Mes */
-        .reportes-table th:nth-child(4) { min-width: 80px; max-width: 120px; } /* Cod. Artículo */
-        .reportes-table th:nth-child(5) { min-width: 200px; max-width: 400px; } /* Descripción */
-        .reportes-table th:nth-child(6) { min-width: 80px; max-width: 120px; } /* Admisión */
-        .reportes-table th:nth-child(7) { min-width: 100px; max-width: 150px; } /* Rut */
-        .reportes-table th:nth-child(8) { min-width: 150px; max-width: 250px; } /* Paciente */
-        .reportes-table th:nth-child(9) { min-width: 60px; max-width: 100px; } /* Edad */
-        .reportes-table th:nth-child(10) { min-width: 80px; max-width: 120px; } /* Previsión */
-        .reportes-table th:nth-child(11) { min-width: 100px; max-width: 150px; } /* Isapre */
-        .reportes-table th:nth-child(12) { min-width: 80px; max-width: 120px; } /* Convenio */
-        .reportes-table th:nth-child(13) { min-width: 80px; max-width: 120px; } /* Cód. Arancel */
-        .reportes-table th:nth-child(14) { min-width: 100px; max-width: 150px; } /* Arancel */
-        .reportes-table th:nth-child(15) { min-width: 60px; max-width: 100px; } /* Cant. Art. */
-        .reportes-table th:nth-child(16) { min-width: 150px; max-width: 250px; } /* 1° Cirujano */
-        .reportes-table th:nth-child(17) { min-width: 150px; max-width: 200px; } /* Evento */
         .reportes-pagination {
             display: flex;
             justify-content: space-between;
@@ -478,12 +448,6 @@
             .reportes-dropdown-menu {
                 min-width: 180px;
             }
-            .reportes-table-container {
-                overflow-x: auto;
-            }
-            .reportes-table th, .reportes-table td {
-                min-width: 80px;
-            }
         }
     </style>
 </head>
@@ -540,33 +504,31 @@
             </div>
         </div>
 
-        <div class="reportes-table-container">
-            <table id="reportesTable" class="reportes-table">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Día</th>
-                        <th>Mes</th>
-                        <th>Cod. Artículo</th>
-                        <th>Descripción</th>
-                        <th>Admisión</th>
-                        <th>Rut</th>
-                        <th>Paciente</th>
-                        <th>Edad</th>
-                        <th>Previsión</th>
-                        <th>Isapre</th>
-                        <th>Convenio</th>
-                        <th>Cód. Arancel</th>
-                        <th>Arancel</th>
-                        <th>Cant. Art.</th>
-                        <th>1° Cirujano</th>
-                        <th>Evento</th>
-                    </tr>
-                </thead>
-                <tbody id="reportesBody">
-                </tbody>
-            </table>
-        </div>
+        <table id="reportesTable" class="reportes-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Día</th>
+                    <th>Mes</th>
+                    <th>Cod. Artículo</th>
+                    <th>Descripción</th>
+                    <th>Admisión</th>
+                    <th>Rut</th>
+                    <th>Paciente</th>
+                    <th>Edad</th>
+                    <th>Previsión</th>
+                    <th>Isapre</th>
+                    <th>Convenio</th>
+                    <th>Cód. Arancel</th>
+                    <th>Arancel</th>
+                    <th>Cant. Art.</th>
+                    <th>1° Cirujano</th>
+                    <th>Evento</th>
+                </tr>
+            </thead>
+            <tbody id="reportesBody">
+            </tbody>
+        </table>
 
         <div class="reportes-pagination" id="pagination">
             <div class="reportes-pagination-info" id="paginationInfo">
