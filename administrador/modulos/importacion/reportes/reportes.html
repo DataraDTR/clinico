@@ -693,15 +693,32 @@
                 }
             }
 
-            async function getReporteByCodArticulo(codArticulo) {
-                if (!codArticulo || typeof codArticulo !== 'string') return null;
-                const q = query(collection(db, "reportes"), where("codArticulo", "==", codArticulo.trim()));
+            async function getReporteByUniqueKey(codArticulo, fecha) {
+                if (!codArticulo || !fecha) return null;
+                const q = query(
+                    collection(db, "reportes"),
+                    where("codArticulo", "==", codArticulo.trim()),
+                    where("fecha", "==", fecha.trim())
+                );
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
                     const doc = querySnapshot.docs[0];
                     return { id: doc.id, ...doc.data() };
                 }
                 return null;
+            }
+
+            async function logToHistorial(action, row, user) {
+                try {
+                    await addDoc(collection(db, "reportes_historial"), {
+                        action: action,
+                        row: row,
+                        user: user ? { uid: user.uid, email: user.email } : null,
+                        timestamp: new Date()
+                    });
+                } catch (error) {
+                    console.error('Error al registrar en reportes_historial:', error);
+                }
             }
 
             function openDownloadMesModal() {
@@ -1041,9 +1058,12 @@
 
                         let addedCount = 0;
                         let updatedCount = 0;
+                        let skippedCount = 0;
                         const totalRows = json.length;
 
                         showImportProgress(0); // Inicializar barra de progreso
+
+                        const user = auth.currentUser;
 
                         for (let i = 0; i < json.length; i++) {
                             const row = json[i];
@@ -1053,8 +1073,9 @@
                                 fecha = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fecha));
                             }
                             if (fecha && isNaN(new Date(fecha))) {
-                                console.warn(`Fila ignorada: Fecha no válida en la fila ${i + 2}`, row);
-                                showToast(`Fila ${i + 2}: Fecha no válida`, 'error');
+                                console.warn(`Fila ${i + 2}: Fecha no válida (${fecha})`, row);
+                                showToast(`Fila ${i + 2}: Fecha no válida (${fecha})`, 'error');
+                                skippedCount++;
                                 continue;
                             }
 
@@ -1062,7 +1083,7 @@
                                 fecha: fecha ? formatDateToDDMMYYYY(new Date(fecha)) : '',
                                 dia: String(row.dia || '').trim(),
                                 mes: String(row.mes || '').trim(),
-                                codArticulo: String(row.codArticulo || '').trim(),
+                                codArticulo: String(row.codArticulo || '').trim() || `TEMP_${Date.now()}_${i}`,
                                 descripcion: String(row.descripcion || '').trim(),
                                 admision: String(row.admision || '').trim(),
                                 rut: String(row.rut || '').trim(),
@@ -1077,8 +1098,8 @@
                                 primerCirujano: String(row.primerCirujano || '').trim()
                             };
 
-                            if (processedRow.codArticulo && processedRow.fecha) {
-                                const existing = await getReporteByCodArticulo(processedRow.codArticulo);
+                            if (processedRow.fecha) {
+                                const existing = await getReporteByUniqueKey(processedRow.codArticulo, processedRow.fecha);
                                 if (existing) {
                                     const hasChanges = Object.keys(processedRow).some(key => 
                                         key === 'fecha' 
@@ -1091,7 +1112,11 @@
                                             evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
                                             createdAt: new Date()
                                         });
+                                        await logToHistorial('update', processedRow, user);
                                         updatedCount++;
+                                    } else {
+                                        console.log(`Fila ${i + 2}: Sin cambios, omitida`, processedRow);
+                                        skippedCount++;
                                     }
                                 } else {
                                     const docRef = await addDoc(collection(db, "reportes"), {
@@ -1099,11 +1124,13 @@
                                         evento: `Importado ${new Date().toLocaleString('es-CL')}`,
                                         createdAt: new Date()
                                     });
+                                    await logToHistorial('add', processedRow, user);
                                     addedCount++;
                                 }
                             } else {
-                                console.warn(`Fila ignorada: Campos obligatorios faltantes en la fila ${i + 2}`, row);
-                                showToast(`Fila ${i + 2}: Faltan código artículo o fecha`, 'error');
+                                console.warn(`Fila ${i + 2}: Falta fecha, fila ignorada`, row);
+                                showToast(`Fila ${i + 2}: Falta fecha`, 'error');
+                                skippedCount++;
                             }
 
                             // Actualizar progreso
@@ -1112,7 +1139,7 @@
                         }
 
                         hideImportProgress();
-                        showToast(`Se han importado ${addedCount} reportes nuevos y actualizado ${updatedCount} reportes.`, 'success');
+                        showToast(`Importación completada: ${addedCount} nuevos, ${updatedCount} actualizados, ${skippedCount} omitidos.`, 'success');
                         await loadReportes();
                         populateAnoSelect(selectAno);
                         populateAnoSelect(selectDownloadAno);
