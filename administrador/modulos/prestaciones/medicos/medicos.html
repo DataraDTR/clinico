@@ -619,7 +619,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Configurar persistencia a 'session' (por pestaña/iframe, no compartida)
         setPersistence(auth, browserSessionPersistence);
 
         let medicos = [];
@@ -1030,12 +1029,10 @@
                 });
             }
 
-            // Funcionalidades de acciones
             actionsBtn.addEventListener('click', () => {
                 actionsMenu.style.display = actionsMenu.style.display === 'block' ? 'none' : 'block';
             });
 
-            // Cerrar menú si se hace click fuera
             window.addEventListener('click', (e) => {
                 if (!actionsBtn.contains(e.target) && !actionsMenu.contains(e.target)) {
                     actionsMenu.style.display = 'none';
