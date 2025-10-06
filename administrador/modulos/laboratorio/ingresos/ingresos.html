@@ -510,7 +510,7 @@
             </div>
             <div class="ingresos-form-group">
                 <label for="monto" class="ingresos-label">Monto:</label>
-                <input type="number" id="monto">
+                <input type="text" id="monto">
             </div>
             <div class="ingresos-form-group">
                 <label for="ordenCompra" class="ingresos-label">Orden de Compra:</label>
@@ -668,7 +668,7 @@
             storageBucket: "datara-salud.firebasestorage.app",
             messagingSenderId: "198886910481",
             appId: "1:198886910481:web:abbc345203a423a6329fb0",
-            measurementId: "G-MLYVTZPPLD"
+            measurementId: "G-MLyVTZPPLD"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -796,17 +796,6 @@
             async function getIngresoByUniqueKey(numeroFactura) {
                 if (!numeroFactura) return null;
                 const q = query(collection(db, "ingresos_lab"), where("numeroFactura", "==", numeroFactura.trim()));
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    const doc = querySnapshot.docs[0];
-                    return { id: doc.id, ...doc.data() };
-                }
-                return null;
-            }
-
-            async function getOrdenByCodigo(codigo) {
-                if (!codigo || typeof codigo !== 'string') return null;
-                const q = query(collection(db, "ordenes"), where("codigo", "==", codigo.trim()));
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
                     const doc = querySnapshot.docs[0];
@@ -1282,15 +1271,16 @@
                     pageIngresos.forEach(ingreso => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td>${ingreso.fechaIngreso || ''}</td>
+                            <td></td> 
+                            <td>${formatDateToDDMMYYYY(ingreso.fechaIngreso) || ''}</td>
                             <td>${ingreso.numeroFactura || ''}</td>
-                            <td>${ingreso.fechaFactura || ''}</td>
+                            <td>${formatDateToDDMMYYYY(ingreso.fechaFactura) || ''}</td>
                             <td>${ingreso.monto || ''}</td>
                             <td>${ingreso.oc || ''}</td>
-                            <td>${ingreso.fechaOc || ''}</td>
+                            <td>${formatDateToDDMMYYYY(ingreso.fechaOc) || ''}</td>
                             <td>${ingreso.proveedor || ''}</td>
                             <td>${ingreso.acta || ''}</td>
-                            <td>${ingreso.fechaSalida || ''}</td>
+                            <td>${formatDateToDDMMYYYY(ingreso.fechaSalida) || ''}</td>
                             <td>${ingreso.salida || ''}</td>
                             <td>${ingreso.usuario || ''}</td>
                         `;
@@ -1356,13 +1346,20 @@
             const today = new Date();
             fechaIngresoInput.value = formatDateToYYYYMMDD(today);
             fechaFacturaInput.value = formatDateToYYYYMMDD(today);
+            fechaSalidaInput.value = formatDateToYYYYMMDD(today);
+
+            montoInput.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                value = parseInt(value, 10) || 0;
+                e.target.value = value.toLocaleString('es-CL');
+            });
 
             ingresarBtn.addEventListener('click', async () => {
                 const processedRow = {
                     fechaIngreso: fechaIngresoInput.value,
                     numeroFactura: numeroFacturaInput.value.trim(),
                     fechaFactura: fechaFacturaInput.value,
-                    monto: montoInput.value.trim(),
+                    monto: montoInput.value.replace(/\./g, ''),
                     oc: ordenCompraInput.value.trim(),
                     fechaOc: fechaOcInput.value,
                     proveedor: proveedorInput.value,
@@ -1393,7 +1390,7 @@
                     ordenCompraInput.value = '';
                     actaInput.value = '';
                     salidaInput.value = '';
-                    fechaSalidaInput.value = '';
+                    fechaSalidaInput.value = formatDateToYYYYMMDD(new Date());
                     proveedorInput.value = '';
                     fechaOcInput.value = '';
                     await loadIngresos();
