@@ -131,7 +131,7 @@
             border-collapse: collapse;
             font-size: 11px;
             border: 1px solid #ddd;
-            table-layout: auto;
+            table-layout: fixed;
         }
         .reportes-table th, .reportes-table td {
             padding: 4px;
@@ -140,7 +140,6 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            min-width: 100px;
         }
         .reportes-table th {
             background-color: #f2f2f2;
@@ -160,23 +159,23 @@
         .reportes-table tbody tr:hover {
             background-color: #f8f9fa;
         }
-        .reportes-table th:nth-child(1) { min-width: 80px; } /* Fecha */
-        .reportes-table th:nth-child(2) { min-width: 60px; } /* Día */
-        .reportes-table th:nth-child(3) { min-width: 80px; } /* Mes */
-        .reportes-table th:nth-child(4) { min-width: 80px; } /* Cod. Artículo */
-        .reportes-table th:nth-child(5) { min-width: 200px; } /* Descripción */
-        .reportes-table th:nth-child(6) { min-width: 80px; } /* Admisión */
-        .reportes-table th:nth-child(7) { min-width: 100px; } /* Rut */
-        .reportes-table th:nth-child(8) { min-width: 150px; } /* Paciente */
-        .reportes-table th:nth-child(9) { min-width: 60px; } /* Edad */
-        .reportes-table th:nth-child(10) { min-width: 80px; } /* Previsión */
-        .reportes-table th:nth-child(11) { min-width: 100px; } /* Isapre */
-        .reportes-table th:nth-child(12) { min-width: 80px; } /* Convenio */
-        .reportes-table th:nth-child(13) { min-width: 80px; } /* Cód. Arancel */
-        .reportes-table th:nth-child(14) { min-width: 100px; } /* Arancel */
-        .reportes-table th:nth-child(15) { min-width: 60px; } /* Cant. Art. */
-        .reportes-table th:nth-child(16) { min-width: 150px; } /* 1° Cirujano */
-        .reportes-table th:nth-child(17) { min-width: 150px; } /* Evento */
+        .reportes-table th:nth-child(1), .reportes-table td:nth-child(1) { width: 100px; min-width: 80px; max-width: 100px; } /* Fecha */
+        .reportes-table th:nth-child(2), .reportes-table td:nth-child(2) { width: 80px; min-width: 60px; max-width: 80px; } /* Día */
+        .reportes-table th:nth-child(3), .reportes-table td:nth-child(3) { width: 100px; min-width: 80px; max-width: 100px; } /* Mes */
+        .reportes-table th:nth-child(4), .reportes-table td:nth-child(4) { width: 120px; min-width: 80px; max-width: 120px; } /* Cod. Artículo */
+        .reportes-table th:nth-child(5), .reportes-table td:nth-child(5) { width: 300px; min-width: 200px; max-width: 300px; } /* Descripción */
+        .reportes-table th:nth-child(6), .reportes-table td:nth-child(6) { width: 120px; min-width: 80px; max-width: 120px; } /* Admisión */
+        .reportes-table th:nth-child(7), .reportes-table td:nth-child(7) { width: 120px; min-width: 100px; max-width: 120px; } /* Rut */
+        .reportes-table th:nth-child(8), .reportes-table td:nth-child(8) { width: 200px; min-width: 150px; max-width: 200px; } /* Paciente */
+        .reportes-table th:nth-child(9), .reportes-table td:nth-child(9) { width: 80px; min-width: 60px; max-width: 80px; } /* Edad */
+        .reportes-table th:nth-child(10), .reportes-table td:nth-child(10) { width: 100px; min-width: 80px; max-width: 100px; } /* Previsión */
+        .reportes-table th:nth-child(11), .reportes-table td:nth-child(11) { width: 120px; min-width: 100px; max-width: 120px; } /* Isapre */
+        .reportes-table th:nth-child(12), .reportes-table td:nth-child(12) { width: 100px; min-width: 80px; max-width: 100px; } /* Convenio */
+        .reportes-table th:nth-child(13), .reportes-table td:nth-child(13) { width: 120px; min-width: 80px; max-width: 120px; } /* Cód. Arancel */
+        .reportes-table th:nth-child(14), .reportes-table td:nth-child(14) { width: 120px; min-width: 100px; max-width: 120px; } /* Arancel */
+        .reportes-table th:nth-child(15), .reportes-table td:nth-child(15) { width: 100px; min-width: 60px; max-width: 100px; } /* Cant. Art. */
+        .reportes-table th:nth-child(16), .reportes-table td:nth-child(16) { width: 200px; min-width: 150px; max-width: 200px; } /* 1° Cirujano */
+        .reportes-table th:nth-child(17), .reportes-table td:nth-child(17) { width: 200px; min-width: 150px; max-width: 200px; } /* Evento */
         .resizing {
             user-select: none;
         }
@@ -1305,7 +1304,7 @@
                 const headers = table.querySelectorAll('th');
                 headers.forEach((header, index) => {
                     header.addEventListener('mousedown', (e) => {
-                        // Detectar si el clic está cerca del borde derecho (5px)
+                        // Detectar si el clic está cerca del borde derecho (10px)
                         const rect = header.getBoundingClientRect();
                         if (e.clientX > rect.right - 10) {
                             e.preventDefault();
@@ -1313,14 +1312,20 @@
                             const startX = e.clientX;
                             const startWidth = header.offsetWidth;
                             const minWidth = parseInt(getComputedStyle(header).minWidth) || 50;
-                            const maxWidth = 2000; // Límite superior grande para permitir agrandar libremente
+                            const maxWidth = 2000; // Límite superior razonable
+
+                            // Eliminar max-width durante el redimensionamiento
+                            header.style.maxWidth = 'none';
+                            const cells = table.querySelectorAll(`td:nth-child(${index + 1})`);
+                            cells.forEach(cell => {
+                                cell.style.maxWidth = 'none';
+                            });
 
                             const onMouseMove = (moveEvent) => {
                                 let newWidth = startWidth + (moveEvent.clientX - startX);
                                 newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
                                 header.style.width = `${newWidth}px`;
                                 // Ajustar todas las celdas en la misma columna
-                                const cells = table.querySelectorAll(`td:nth-child(${index + 1})`);
                                 cells.forEach(cell => {
                                     cell.style.width = `${newWidth}px`;
                                 });
