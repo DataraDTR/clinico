@@ -100,11 +100,11 @@
         .reportes-dropdown-menu {
             display: none;
             position: absolute;
-            right: 0;
+            left: 0;
             top: 100%;
             background-color: white;
             min-width: 200px;
-            box-shadow: -2px 8px 16px rgba(0,0,0,0.2);
+            box-shadow: 2px 8px 16px rgba(0,0,0,0.2);
             z-index: 1;
             border-radius: 4px;
             overflow: hidden;
@@ -116,6 +116,7 @@
             text-decoration: none;
             display: block;
             font-size: 12px;
+            text-align: left;
             white-space: nowrap;
         }
         .reportes-dropdown-menu a:hover {
@@ -159,23 +160,22 @@
         .reportes-table tbody tr:hover {
             background-color: #f8f9fa;
         }
-        .reportes-table th:nth-child(1), .reportes-table td:nth-child(1) { width: 100px; min-width: 80px; max-width: 100px; } /* Fecha */
-        .reportes-table th:nth-child(2), .reportes-table td:nth-child(2) { width: 80px; min-width: 60px; max-width: 80px; } /* Día */
-        .reportes-table th:nth-child(3), .reportes-table td:nth-child(3) { width: 100px; min-width: 80px; max-width: 100px; } /* Mes */
-        .reportes-table th:nth-child(4), .reportes-table td:nth-child(4) { width: 120px; min-width: 80px; max-width: 120px; } /* Cod. Artículo */
-        .reportes-table th:nth-child(5), .reportes-table td:nth-child(5) { width: 300px; min-width: 200px; max-width: 300px; } /* Descripción */
-        .reportes-table th:nth-child(6), .reportes-table td:nth-child(6) { width: 120px; min-width: 80px; max-width: 120px; } /* Admisión */
-        .reportes-table th:nth-child(7), .reportes-table td:nth-child(7) { width: 120px; min-width: 100px; max-width: 120px; } /* Rut */
-        .reportes-table th:nth-child(8), .reportes-table td:nth-child(8) { width: 200px; min-width: 150px; max-width: 200px; } /* Paciente */
-        .reportes-table th:nth-child(9), .reportes-table td:nth-child(9) { width: 80px; min-width: 60px; max-width: 80px; } /* Edad */
-        .reportes-table th:nth-child(10), .reportes-table td:nth-child(10) { width: 100px; min-width: 80px; max-width: 100px; } /* Previsión */
-        .reportes-table th:nth-child(11), .reportes-table td:nth-child(11) { width: 120px; min-width: 100px; max-width: 120px; } /* Isapre */
-        .reportes-table th:nth-child(12), .reportes-table td:nth-child(12) { width: 100px; min-width: 80px; max-width: 100px; } /* Convenio */
-        .reportes-table th:nth-child(13), .reportes-table td:nth-child(13) { width: 120px; min-width: 80px; max-width: 120px; } /* Cód. Arancel */
-        .reportes-table th:nth-child(14), .reportes-table td:nth-child(14) { width: 120px; min-width: 100px; max-width: 120px; } /* Arancel */
-        .reportes-table th:nth-child(15), .reportes-table td:nth-child(15) { width: 100px; min-width: 60px; max-width: 100px; } /* Cant. Art. */
-        .reportes-table th:nth-child(16), .reportes-table td:nth-child(16) { width: 200px; min-width: 150px; max-width: 200px; } /* 1° Cirujano */
-        .reportes-table th:nth-child(17), .reportes-table td:nth-child(17) { width: 200px; min-width: 150px; max-width: 200px; } /* Evento */
+        .reportes-table th:nth-child(1), .reportes-table td:nth-child(1) { width: 100px; min-width: 80px; max-width: 100px; }
+        .reportes-table th:nth-child(2), .reportes-table td:nth-child(2) { width: 80px; min-width: 60px; max-width: 80px; }
+        .reportes-table th:nth-child(3), .reportes-table td:nth-child(3) { width: 100px; min-width: 80px; max-width: 100px; }
+        .reportes-table th:nth-child(4), .reportes-table td:nth-child(4) { width: 120px; min-width: 80px; max-width: 120px; }
+        .reportes-table th:nth-child(5), .reportes-table td:nth-child(5) { width: 300px; min-width: 200px; max-width: 300px; }
+        .reportes-table th:nth-child(6), .reportes-table td:nth-child(6) { width: 120px; min-width: 80px; max-width: 120px; }
+        .reportes-table th:nth-child(7), .reportes-table td:nth-child(7) { width: 120px; min-width: 100px; max-width: 120px; }
+        .reportes-table th:nth-child(8), .reportes-table td:nth-child(8) { width: 200px; min-width: 150px; max-width: 200px; }
+        .reportes-table th:nth-child(9), .reportes-table td:nth-child(9) { width: 80px; min-width: 60px; max-width: 80px; }
+        .reportes-table th:nth-child(10), .reportes-table td:nth-child(10) { width: 100px; min-width: 80px; max-width: 100px; }
+        .reportes-table th:nth-child(11), .reportes-table td:nth-child(11) { width: 120px; min-width: 100px; max-width: 120px; }
+        .reportes-table th:nth-child(12), .reportes-table td:nth-child(12) { width: 100px; min-width: 80px; max-width: 100px; }
+        .reportes-table th:nth-child(13), .reportes-table td:nth-child(13) { width: 120px; min-width: 80px; max-width: 120px; }
+        .reportes-table th:nth-child(14), .reportes-table td:nth-child(14) { width: 120px; min-width: 100px; max-width: 120px; }
+        .reportes-table th:nth-child(15), .reportes-table td:nth-child(15) { width: 100px; min-width: 60px; max-width: 100px; }
+        .reportes-table th:nth-child(16), .reportes-table td:nth-child(16) { width: 200px; min-width: 150px; max-width: 200px; }
         .resizing {
             user-select: none;
         }
@@ -499,9 +499,7 @@
 <body>
     <div class="reportes-main-container">
         <h1 class="reportes-title">Importación de Reportes</h1>
-        
         <div id="reportes-message"></div>
-
         <div class="reportes-fields-container">
             <div class="reportes-search-section">
                 <div class="reportes-form-group">
@@ -543,12 +541,11 @@
                     <a href="#" id="downloadTemplate">Formato de importación</a>
                     <a href="#" id="importExcel">Importar Excel</a>
                     <a href="#" id="downloadAll">Descargar todos los registros</a>
-                    <a href="#" id="downloadPage">Descargar hoja actual</a>
+                    <a href="#" id="downloadPage">Descargar página actual</a>
                     <a href="#" id="downloadMes">Descargar mes</a>
                 </div>
             </div>
         </div>
-
         <div class="reportes-table-container">
             <table id="reportesTable" class="reportes-table">
                 <thead>
@@ -569,41 +566,32 @@
                         <th>Arancel</th>
                         <th>Cant. Art.</th>
                         <th>1° Cirujano</th>
-                        <th>Evento</th>
                     </tr>
                 </thead>
-                <tbody id="reportesBody">
-                </tbody>
+                <tbody id="reportesBody"></tbody>
             </table>
         </div>
-
         <div class="reportes-pagination" id="pagination">
-            <div class="reportes-pagination-info" id="paginationInfo">
-            </div>
+            <div class="reportes-pagination-info" id="paginationInfo"></div>
             <div class="reportes-pagination-controls">
                 <button id="prevBtn">Anterior</button>
                 <div class="reportes-page-numbers" id="pageNumbers"></div>
                 <button id="nextBtn">Siguiente</button>
             </div>
         </div>
-
         <input type="file" id="fileUpload" style="display:none;" accept=".xlsx, .xls">
-
         <div id="reportes-loading" class="reportes-loading">
             <div class="reportes-loading-spinner"></div>
             <div class="reportes-loading-text">Procesando...</div>
         </div>
-
         <div id="reportes-import-progress" class="reportes-import-progress">
             <div class="reportes-progress-bar-container">
                 <div id="progressBar" class="reportes-progress-bar"></div>
             </div>
             <div id="progressText" class="reportes-progress-text">Importando: 0%</div>
         </div>
-
         <div id="reportes-toast" class="reportes-toast"></div>
     </div>
-
     <div id="downloadMesModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeDownloadMes">&times;</span>
@@ -622,11 +610,8 @@
             </div>
         </div>
     </div>
-
     <script type="module">
-        const { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } = window.firebaseModules;
-        const { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc } = window.firebaseModules;
-
+        const { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc } = window.firebaseModules;
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
             authDomain: "datara-salud.firebaseapp.com",
@@ -636,14 +621,10 @@
             appId: "1:198886910481:web:abbc345203a423a6329fb0",
             measurementId: "G-MLYVTZPPLD"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-        // Configurar persistencia a 'session' (por pestaña/iframe, no compartida)
         setPersistence(auth, browserSessionPersistence);
-
         let reportes = [];
         let currentPage = 1;
         const PAGE_SIZE = 10;
@@ -652,14 +633,12 @@
         let searchRut = '';
         let searchDescripcion = '';
         let searchPrimerCirujano = '';
-        let selectedAno = new Date().getFullYear(); // Año actual por default
+        let selectedAno = new Date().getFullYear();
         let selectedMes = '';
         let selectedDia = '';
         let anos = [];
         let mesesPorAno = {};
         let diasPorMesAno = {};
-
-        // Función para formatear fechas a DD-MM-YYYY
         function formatDateToDDMMYYYY(date) {
             if (!date || isNaN(new Date(date))) return '';
             const d = new Date(date);
@@ -668,7 +647,6 @@
             const year = d.getFullYear();
             return `${day}-${month}-${year}`;
         }
-
         document.addEventListener('DOMContentLoaded', () => {
             const loading = document.getElementById('reportes-loading');
             const importProgress = document.getElementById('reportes-import-progress');
@@ -688,14 +666,12 @@
             const selectAno = document.getElementById('selectAno');
             const selectMes = document.getElementById('selectMes');
             const selectDia = document.getElementById('selectDia');
-
             const downloadMesModal = document.getElementById('downloadMesModal');
             const closeDownloadMes = document.getElementById('closeDownloadMes');
             const cancelDownloadMes = document.getElementById('cancelDownloadMes');
             const confirmDownloadMes = document.getElementById('confirmDownloadMes');
             const selectDownloadAno = document.getElementById('selectDownloadAno');
             const selectDownloadMes = document.getElementById('selectDownloadMes');
-
             const actionsBtn = document.getElementById('actionsBtn');
             const actionsMenu = document.getElementById('actionsMenu');
             const downloadTemplate = document.getElementById('downloadTemplate');
@@ -704,15 +680,12 @@
             const downloadPage = document.getElementById('downloadPage');
             const downloadMes = document.getElementById('downloadMes');
             const fileUpload = document.getElementById('fileUpload');
-
             window.showLoading = function() {
                 if (loading) loading.classList.add('show');
             };
-
             window.hideLoading = function() {
                 if (loading) loading.classList.remove('show');
             };
-
             function showImportProgress(percent) {
                 if (importProgress && progressBar && progressText) {
                     importProgress.classList.add('show');
@@ -720,7 +693,6 @@
                     progressText.textContent = `Importando: ${Math.round(percent)}%`;
                 }
             }
-
             function hideImportProgress() {
                 if (importProgress) {
                     importProgress.classList.remove('show');
@@ -728,7 +700,6 @@
                     progressText.textContent = 'Importando: 0%';
                 }
             }
-
             function showToast(text, type = 'success') {
                 if (toast) {
                     toast.textContent = text;
@@ -739,7 +710,6 @@
                     }, 5000);
                 }
             }
-
             async function getReporteByUniqueKey(admision, codArticulo) {
                 if (!admision || !codArticulo) return null;
                 const q = query(
@@ -754,24 +724,20 @@
                 }
                 return null;
             }
-
             function openDownloadMesModal() {
                 populateAnoSelect(selectDownloadAno);
                 selectDownloadAno.value = selectedAno;
                 populateMesSelect(selectDownloadMes, selectDownloadAno.value);
                 downloadMesModal.style.display = 'block';
             }
-
             function closeDownloadMesModalHandler() {
                 downloadMesModal.style.display = 'none';
             }
-
             closeDownloadMes.addEventListener('click', closeDownloadMesModalHandler);
             cancelDownloadMes.addEventListener('click', closeDownloadMesModalHandler);
             window.addEventListener('click', (e) => {
                 if (e.target === downloadMesModal) closeDownloadMesModalHandler();
             });
-
             confirmDownloadMes.addEventListener('click', async () => {
                 const ano = selectDownloadAno.value;
                 const mes = selectDownloadMes.value;
@@ -795,8 +761,7 @@
                             codArancel: r.codArancel,
                             arancel: r.arancel,
                             cantidadArticulo: r.cantidadArticulo,
-                            primerCirujano: r.primerCirujano,
-                            evento: r.evento
+                            primerCirujano: r.primerCirujano
                         })), `reportes_${ano}_${mes}`);
                         hideLoading();
                         closeDownloadMesModalHandler();
@@ -808,15 +773,12 @@
                     showToast('Por favor, selecciona año y mes.', 'error');
                 }
             });
-
             onAuthStateChanged(auth, async (user) => {
                 if (!user) {
                     window.location.replace('../../../../../../index.html');
                     return;
                 }
-                
                 window.currentUserData = { fullName: user.displayName || 'Usuario Invitado', username: user.email || 'invitado' };
-                
                 await loadReportes();
                 populateAnoSelect(selectAno);
                 selectAno.value = selectedAno;
@@ -824,7 +786,6 @@
                 populateDiaSelect(selectDia, selectedAno, selectedMes);
                 enableColumnResizing();
             });
-
             if (buscarAdmisionInput) {
                 buscarAdmisionInput.addEventListener('input', (e) => {
                     searchAdmision = e.target.value.trim();
@@ -832,7 +793,6 @@
                     renderTable();
                 });
             }
-
             if (buscarPacienteInput) {
                 buscarPacienteInput.addEventListener('input', (e) => {
                     searchPaciente = e.target.value.trim();
@@ -840,7 +800,6 @@
                     renderTable();
                 });
             }
-
             if (buscarRutInput) {
                 buscarRutInput.addEventListener('input', (e) => {
                     searchRut = e.target.value.trim();
@@ -848,7 +807,6 @@
                     renderTable();
                 });
             }
-
             if (buscarDescripcionInput) {
                 buscarDescripcionInput.addEventListener('input', (e) => {
                     searchDescripcion = e.target.value.trim();
@@ -856,7 +814,6 @@
                     renderTable();
                 });
             }
-
             if (buscarPrimerCirujanoInput) {
                 buscarPrimerCirujanoInput.addEventListener('input', (e) => {
                     searchPrimerCirujano = e.target.value.trim();
@@ -864,7 +821,6 @@
                     renderTable();
                 });
             }
-
             if (selectAno) {
                 selectAno.addEventListener('change', (e) => {
                     selectedAno = e.target.value;
@@ -876,7 +832,6 @@
                     renderTable();
                 });
             }
-
             if (selectMes) {
                 selectMes.addEventListener('change', (e) => {
                     selectedMes = e.target.value;
@@ -886,7 +841,6 @@
                     renderTable();
                 });
             }
-
             if (selectDia) {
                 selectDia.addEventListener('change', (e) => {
                     selectedDia = e.target.value;
@@ -894,13 +848,11 @@
                     renderTable();
                 });
             }
-
             if (selectDownloadAno) {
                 selectDownloadAno.addEventListener('change', (e) => {
                     populateMesSelect(selectDownloadMes, e.target.value);
                 });
             }
-
             async function loadReportes() {
                 showLoading();
                 try {
@@ -932,7 +884,6 @@
                     showToast('Error al cargar los reportes: ' + error.message, 'error');
                 }
             }
-
             function populateAnoSelect(select) {
                 select.innerHTML = '<option value="">Todos</option>';
                 Array.from(anos).sort((a, b) => b - a).forEach(ano => {
@@ -942,7 +893,6 @@
                     select.appendChild(option);
                 });
             }
-
             function populateMesSelect(select, ano) {
                 select.innerHTML = '<option value="">Todos</option>';
                 if (ano && mesesPorAno[ano]) {
@@ -954,7 +904,6 @@
                     });
                 }
             }
-
             function populateDiaSelect(select, ano, mes) {
                 select.innerHTML = '<option value="">Todos</option>';
                 if (ano && mes && diasPorMesAno[ano] && diasPorMesAno[ano][mes]) {
@@ -966,29 +915,24 @@
                     });
                 }
             }
-
             actionsBtn.addEventListener('click', () => {
                 actionsMenu.style.display = actionsMenu.style.display === 'block' ? 'none' : 'block';
             });
-
             window.addEventListener('click', (e) => {
                 if (!actionsBtn.contains(e.target) && !actionsMenu.contains(e.target)) {
                     actionsMenu.style.display = 'none';
                 }
             });
-
             downloadTemplate.addEventListener('click', (e) => {
                 e.preventDefault();
                 downloadImportTemplate();
                 actionsMenu.style.display = 'none';
             });
-
             importExcel.addEventListener('click', (e) => {
                 e.preventDefault();
                 fileUpload.click();
                 actionsMenu.style.display = 'none';
             });
-
             downloadAll.addEventListener('click', (e) => {
                 e.preventDefault();
                 exportToExcel(reportes.map(r => ({
@@ -1007,12 +951,10 @@
                     codArancel: r.codArancel,
                     arancel: r.arancel,
                     cantidadArticulo: r.cantidadArticulo,
-                    primerCirujano: r.primerCirujano,
-                    evento: r.evento
+                    primerCirujano: r.primerCirujano
                 })), 'todos_reportes');
                 actionsMenu.style.display = 'none';
             });
-
             downloadPage.addEventListener('click', (e) => {
                 e.preventDefault();
                 const filtered = getFilteredReportes();
@@ -1034,19 +976,16 @@
                     codArancel: r.codArancel,
                     arancel: r.arancel,
                     cantidadArticulo: r.cantidadArticulo,
-                    primerCirujano: r.primerCirujano,
-                    evento: r.evento
+                    primerCirujano: r.primerCirujano
                 }));
                 exportToExcel(pageData, 'pagina_actual_reportes');
                 actionsMenu.style.display = 'none';
             });
-
             downloadMes.addEventListener('click', (e) => {
                 e.preventDefault();
                 openDownloadMesModal();
                 actionsMenu.style.display = 'none';
             });
-
             fileUpload.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (file) {
@@ -1054,7 +993,6 @@
                     fileUpload.value = '';
                 }
             });
-
             function exportToExcel(data, filename) {
                 const ws = XLSX.utils.json_to_sheet(data, {
                     dateNF: 'dd-mm-yyyy',
@@ -1064,7 +1002,6 @@
                 XLSX.utils.book_append_sheet(wb, ws, "Reportes");
                 XLSX.writeFile(wb, filename + '.xlsx');
             }
-
             function downloadImportTemplate() {
                 const ws = XLSX.utils.aoa_to_sheet([[
                     "Fecha", "Día", "Mes", "Cod. Artículo", "Descripción", "Admisión", "Rut", "Paciente", "Edad", "Previsión", "Isapre", "Convenio", "Cód. Arancel", "Arancel", "Cant. Art.", "1° Cirujano"
@@ -1075,7 +1012,6 @@
                 XLSX.utils.book_append_sheet(wb, ws, "Template");
                 XLSX.writeFile(wb, 'template_reportes.xlsx');
             }
-
             async function importFromExcel(file) {
                 try {
                     const reader = new FileReader();
@@ -1090,28 +1026,22 @@
                             raw: false,
                             dateNF: 'dd-mm-yyyy'
                         });
-
                         let addedCount = 0;
                         let updatedCount = 0;
                         let skippedCount = 0;
                         const totalRows = json.length;
-
-                        showImportProgress(0); // Inicializar barra de progreso
-
+                        showImportProgress(0);
                         for (let i = 0; i < json.length; i++) {
                             const row = json[i];
-                            // Validar y formatear fecha
                             let fecha = row.fecha;
                             if (typeof fecha === 'number') {
                                 fecha = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fecha));
                             }
                             if (fecha && isNaN(new Date(fecha))) {
-                                console.warn(`Fila ignorada: Fecha no válida en la fila ${i + 2}`, row);
                                 showToast(`Fila ${i + 2}: Fecha no válida`, 'error');
                                 skippedCount++;
                                 continue;
                             }
-
                             const processedRow = {
                                 fecha: fecha ? formatDateToDDMMYYYY(new Date(fecha)) : '',
                                 dia: String(row.dia || '').trim(),
@@ -1130,7 +1060,6 @@
                                 cantidadArticulo: String(row.cantidadArticulo || '').trim(),
                                 primerCirujano: String(row.primerCirujano || '').trim()
                             };
-
                             if (processedRow.admision && processedRow.codArticulo && processedRow.fecha) {
                                 const existing = await getReporteByUniqueKey(processedRow.admision, processedRow.codArticulo);
                                 if (existing) {
@@ -1140,36 +1069,29 @@
                                         : processedRow[key] !== String(existing[key] || '').trim()
                                     );
                                     if (hasChanges) {
-                                        await window.firebaseModules.updateDoc(window.firebaseModules.doc(db, "reportes", existing.id), {
+                                        await updateDoc(doc(db, "reportes", existing.id), {
                                             ...processedRow,
-                                            evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
                                             createdAt: new Date()
                                         });
                                         updatedCount++;
                                     } else {
-                                        console.log(`Fila ${i + 2}: Registro duplicado sin cambios`, processedRow);
                                         showToast(`Fila ${i + 2}: Registro duplicado sin cambios`, 'error');
                                         skippedCount++;
                                     }
                                 } else {
-                                    const docRef = await addDoc(collection(db, "reportes"), {
+                                    await addDoc(collection(db, "reportes"), {
                                         ...processedRow,
-                                        evento: `Importado ${new Date().toLocaleString('es-CL')}`,
                                         createdAt: new Date()
                                     });
                                     addedCount++;
                                 }
                             } else {
-                                console.warn(`Fila ignorada: Campos obligatorios faltantes (admision, código artículo o fecha) en la fila ${i + 2}`, row);
                                 showToast(`Fila ${i + 2}: Faltan admisión, código artículo o fecha`, 'error');
                                 skippedCount++;
                             }
-
-                            // Actualizar progreso
                             const progress = ((i + 1) / totalRows) * 100;
                             showImportProgress(progress);
                         }
-
                         hideImportProgress();
                         showToast(`Importación completada: ${addedCount} nuevos, ${updatedCount} actualizados, ${skippedCount} omitidos.`, 'success');
                         await loadReportes();
@@ -1180,18 +1102,14 @@
                 } catch (error) {
                     hideImportProgress();
                     showToast('Error al importar el archivo: ' + error.message, 'error');
-                    console.error('Error al importar:', error);
                 }
             }
-
             async function getReportesByMes(ano, mes) {
-                const filtered = reportes.filter(r => {
+                return reportes.filter(r => {
                     const fechaDate = new Date(r.fecha);
                     return fechaDate.getFullYear() == ano && fechaDate.toLocaleString('es-CL', { month: 'long' }) === mes;
                 });
-                return filtered;
             }
-
             function getFilteredReportes() {
                 return reportes.filter(reporte => 
                     String(reporte.admision || '').toLowerCase().includes(searchAdmision.toLowerCase()) &&
@@ -1204,16 +1122,13 @@
                     (!selectedDia || String(reporte.dia || '').toLowerCase() === selectedDia.toLowerCase())
                 );
             }
-
             function renderTable() {
                 const filteredReportes = getFilteredReportes();
                 const start = (currentPage - 1) * PAGE_SIZE;
                 const end = start + PAGE_SIZE;
                 const pageReportes = filteredReportes.sort((a, b) => a.admision.localeCompare(b.admision)).slice(start, end);
-
                 if (reportesBody) {
                     reportesBody.innerHTML = '';
-
                     pageReportes.forEach(reporte => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -1233,29 +1148,23 @@
                             <td>${reporte.arancel || ''}</td>
                             <td>${reporte.cantidadArticulo || ''}</td>
                             <td>${reporte.primerCirujano || ''}</td>
-                            <td>${reporte.evento || 'N/A'}</td>
                         `;
                         reportesBody.appendChild(row);
                     });
                 }
-
                 updatePagination(filteredReportes.length);
                 enableColumnResizing();
             }
-
             function updatePagination(total) {
                 const totalPages = Math.ceil(total / PAGE_SIZE);
                 const startPage = Math.max(1, currentPage - 2);
                 const endPage = Math.min(totalPages, startPage + 4);
-
                 const startRecord = (currentPage - 1) * PAGE_SIZE + 1;
                 const endRecord = Math.min(currentPage * PAGE_SIZE, total);
                 const recordsThisPage = endRecord - startRecord + 1;
                 if (paginationInfo) paginationInfo.textContent = `Página ${currentPage} de ${totalPages} | ${recordsThisPage} registros en esta página de ${total}`;
-
                 if (prevBtn) prevBtn.disabled = currentPage === 1;
                 if (nextBtn) nextBtn.disabled = currentPage === totalPages;
-
                 if (pageNumbers) {
                     pageNumbers.innerHTML = '';
                     for (let i = startPage; i <= endPage; i++) {
@@ -1274,12 +1183,10 @@
                     }
                 }
             }
-
             function goToPage(page) {
                 currentPage = page;
                 renderTable();
             }
-
             if (prevBtn) {
                 prevBtn.addEventListener('click', () => {
                     if (currentPage > 1) {
@@ -1288,7 +1195,6 @@
                     }
                 });
             }
-
             if (nextBtn) {
                 nextBtn.addEventListener('click', () => {
                     const totalPages = Math.ceil(getFilteredReportes().length / PAGE_SIZE);
@@ -1298,13 +1204,11 @@
                     }
                 });
             }
-
             function enableColumnResizing() {
                 const table = document.getElementById('reportesTable');
                 const headers = table.querySelectorAll('th');
                 headers.forEach((header, index) => {
                     header.addEventListener('mousedown', (e) => {
-                        // Detectar si el clic está cerca del borde derecho (10px)
                         const rect = header.getBoundingClientRect();
                         if (e.clientX > rect.right - 10) {
                             e.preventDefault();
@@ -1312,15 +1216,12 @@
                             const startX = e.clientX;
                             const startWidth = header.offsetWidth;
                             const minWidth = parseInt(getComputedStyle(header).minWidth) || 50;
-                            const maxWidth = 2000; // Límite superior razonable
-
-                            // Eliminar max-width durante el redimensionamiento
+                            const maxWidth = 2000;
                             header.style.maxWidth = 'none';
                             const cells = table.querySelectorAll(`td:nth-child(${index + 1})`);
                             cells.forEach(cell => {
                                 cell.style.maxWidth = 'none';
                             });
-
                             const onMouseMove = (moveEvent) => {
                                 let newWidth = startWidth + (moveEvent.clientX - startX);
                                 newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
@@ -1329,14 +1230,12 @@
                                     cell.style.width = `${newWidth}px`;
                                 });
                             };
-
                             const onMouseUp = () => {
                                 document.body.classList.remove('resizing');
                                 document.removeEventListener('mousemove', onMouseMove);
                                 document.removeEventListener('mouseup', onMouseUp);
                                 document.removeEventListener('mouseleave', onMouseUp);
                             };
-
                             document.addEventListener('mousemove', onMouseMove);
                             document.addEventListener('mouseup', onMouseUp);
                             document.addEventListener('mouseleave', onMouseUp);
