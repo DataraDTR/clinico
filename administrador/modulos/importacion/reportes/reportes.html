@@ -693,32 +693,15 @@
                 }
             }
 
-            async function getReporteByUniqueKey(codArticulo, fecha) {
-                if (!codArticulo || !fecha) return null;
-                const q = query(
-                    collection(db, "reportes"),
-                    where("codArticulo", "==", codArticulo.trim()),
-                    where("fecha", "==", fecha.trim())
-                );
+            async function getReporteByAdmision(admision) {
+                if (!admision) return null;
+                const q = query(collection(db, "reportes"), where("admision", "==", admision.trim()));
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
                     const doc = querySnapshot.docs[0];
                     return { id: doc.id, ...doc.data() };
                 }
                 return null;
-            }
-
-            async function logToHistorial(action, row, user) {
-                try {
-                    await addDoc(collection(db, "reportes_historial"), {
-                        action: action,
-                        row: row,
-                        user: user ? { uid: user.uid, email: user.email } : null,
-                        timestamp: new Date()
-                    });
-                } catch (error) {
-                    console.error('Error al registrar en reportes_historial:', error);
-                }
             }
 
             function openDownloadMesModal() {
@@ -860,12 +843,6 @@
                 });
             }
 
-            if (selectDownloadAno) {
-                selectDownloadAno.addEventListener('change', (e) => {
-                    populateMesSelect(selectDownloadMes, e.target.value);
-                });
-            }
-
             async function loadReportes() {
                 showLoading();
                 try {
@@ -880,8 +857,8 @@
                         const fechaDate = new Date(data.fecha);
                         if (!isNaN(fechaDate)) {
                             const ano = fechaDate.getFullYear();
-                            const mes = fechaDate.toLocaleString('es-CL', { month: 'long' });
-                            const dia = data.dia;
+                            const mes = data.mes || fechaDate.toLocaleString('es-CL', { month: 'long' });
+                            const dia = data.dia || fechaDate.toLocaleString('es-CL', { weekday: 'long' });
                             anos.add(ano);
                             if (!mesesPorAno[ano]) mesesPorAno[ano] = new Set();
                             mesesPorAno[ano].add(mes);
@@ -1058,12 +1035,9 @@
 
                         let addedCount = 0;
                         let updatedCount = 0;
-                        let skippedCount = 0;
                         const totalRows = json.length;
 
                         showImportProgress(0); // Inicializar barra de progreso
-
-                        const user = auth.currentUser;
 
                         for (let i = 0; i < json.length; i++) {
                             const row = json[i];
@@ -1073,9 +1047,8 @@
                                 fecha = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fecha));
                             }
                             if (fecha && isNaN(new Date(fecha))) {
-                                console.warn(`Fila ${i + 2}: Fecha no válida (${fecha})`, row);
-                                showToast(`Fila ${i + 2}: Fecha no válida (${fecha})`, 'error');
-                                skippedCount++;
+                                console.warn(`Fila ignorada: Fecha no válida en la fila ${i + 2}`, row);
+                                showToast(`Fila ${i + 2}: Fecha no válida`, 'error');
                                 continue;
                             }
 
@@ -1083,7 +1056,7 @@
                                 fecha: fecha ? formatDateToDDMMYYYY(new Date(fecha)) : '',
                                 dia: String(row.dia || '').trim(),
                                 mes: String(row.mes || '').trim(),
-                                codArticulo: String(row.codArticulo || '').trim() || `TEMP_${Date.now()}_${i}`,
+                                codArticulo: String(row.codArticulo || '').trim(),
                                 descripcion: String(row.descripcion || '').trim(),
                                 admision: String(row.admision || '').trim(),
                                 rut: String(row.rut || '').trim(),
@@ -1098,8 +1071,8 @@
                                 primerCirujano: String(row.primerCirujano || '').trim()
                             };
 
-                            if (processedRow.fecha) {
-                                const existing = await getReporteByUniqueKey(processedRow.codArticulo, processedRow.fecha);
+                            if (processedRow.admision && processedRow.fecha) {
+                                const existing = await getReporteByAdmision(processedRow.admision);
                                 if (existing) {
                                     const hasChanges = Object.keys(processedRow).some(key => 
                                         key === 'fecha' 
@@ -1112,11 +1085,7 @@
                                             evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
                                             createdAt: new Date()
                                         });
-                                        await logToHistorial('update', processedRow, user);
                                         updatedCount++;
-                                    } else {
-                                        console.log(`Fila ${i + 2}: Sin cambios, omitida`, processedRow);
-                                        skippedCount++;
                                     }
                                 } else {
                                     const docRef = await addDoc(collection(db, "reportes"), {
@@ -1124,13 +1093,11 @@
                                         evento: `Importado ${new Date().toLocaleString('es-CL')}`,
                                         createdAt: new Date()
                                     });
-                                    await logToHistorial('add', processedRow, user);
                                     addedCount++;
                                 }
                             } else {
-                                console.warn(`Fila ${i + 2}: Falta fecha, fila ignorada`, row);
-                                showToast(`Fila ${i + 2}: Falta fecha`, 'error');
-                                skippedCount++;
+                                console.warn(`Fila ignorada: Campos obligatorios faltantes (admision o fecha) en la fila ${i + 2}`, row);
+                                showToast(`Fila ${i + 2}: Faltan admisión o fecha`, 'error');
                             }
 
                             // Actualizar progreso
@@ -1139,7 +1106,7 @@
                         }
 
                         hideImportProgress();
-                        showToast(`Importación completada: ${addedCount} nuevos, ${updatedCount} actualizados, ${skippedCount} omitidos.`, 'success');
+                        showToast(`Se han importado ${addedCount} reportes nuevos y actualizado ${updatedCount} reportes.`, 'success');
                         await loadReportes();
                         populateAnoSelect(selectAno);
                         populateAnoSelect(selectDownloadAno);
@@ -1177,7 +1144,7 @@
                 const filteredReportes = getFilteredReportes();
                 const start = (currentPage - 1) * PAGE_SIZE;
                 const end = start + PAGE_SIZE;
-                const pageReportes = filteredReportes.sort((a, b) => a.codArticulo.localeCompare(b.codArticulo)).slice(start, end);
+                const pageReportes = filteredReportes.sort((a, b) => a.admision.localeCompare(b.admision)).slice(start, end);
 
                 if (reportesBody) {
                     reportesBody.innerHTML = '';
