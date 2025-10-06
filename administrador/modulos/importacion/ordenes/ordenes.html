@@ -9,8 +9,8 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, orderBy, where };
+        import { getFirestore, collection, addDoc, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, where };
     </script>
     <style>
         html, body {
@@ -108,7 +108,6 @@
             z-index: 1;
             border-radius: 4px;
             overflow: hidden;
-            display: flex;
             flex-direction: column;
         }
         .ordenes-dropdown-menu a {
@@ -608,8 +607,6 @@
                 return null;
             }
 
- cybersnippet
-
             function openDownloadMesModal() {
                 populateAnoSelect(selectDownloadAno);
                 selectDownloadAno.value = selectedAno;
@@ -925,20 +922,12 @@
                             if (processedRow.codigo && processedRow.generacion && processedRow.autorizacion) {
                                 const existing = await getOrdenByCodigo(processedRow.codigo);
                                 if (existing) {
-                                    // Comparar si hay cambios
-                                    const hasChanges = Object.keys(processedRow).some(key => 
-                                        key === 'generacion' || key === 'autorizacion' 
-                                        ? processedRow[key] !== formatDateToDDMMYYYY(existing[key])
-                                        : processedRow[key] !== String(existing[key] || '').trim()
-                                    );
-                                    if (hasChanges) {
-                                        await updateDoc(doc(db, "ordenes", existing.id), {
-                                            ...processedRow,
-                                            evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
-                                            createdAt: new Date()
-                                        });
-                                        updatedCount++;
-                                    }
+                                    await updateDoc(doc(db, "ordenes", existing.id), {
+                                        ...processedRow,
+                                        evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
+                                        createdAt: new Date()
+                                    });
+                                    updatedCount++;
                                 } else {
                                     const docRef = await addDoc(collection(db, "ordenes"), {
                                         ...processedRow,
