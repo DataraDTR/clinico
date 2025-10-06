@@ -66,7 +66,7 @@
             color: #333;
             white-space: nowrap;
         }
-        #buscarCodArticulo, #buscarPaciente, #buscarRut, #selectAno, #selectMes {
+        #buscarAdmision, #buscarPaciente, #buscarRut, #buscarDescripcion, #buscarPrimerCirujano, #selectAno, #selectMes, #selectDia {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -74,7 +74,7 @@
             font-size: 11px;
             box-sizing: border-box;
         }
-        #buscarCodArticulo:focus, #buscarPaciente:focus, #buscarRut:focus, #selectAno:focus, #selectMes:focus {
+        #buscarAdmision:focus, #buscarPaciente:focus, #buscarRut:focus, #buscarDescripcion:focus, #buscarPrimerCirujano:focus, #selectAno:focus, #selectMes:focus, #selectDia:focus {
             box-shadow: 0 0 12px rgba(0, 123, 255, 0.5);
             outline: none;
         }
@@ -460,8 +460,8 @@
         <div class="reportes-fields-container">
             <div class="reportes-search-section">
                 <div class="reportes-form-group">
-                    <label for="buscarCodArticulo" class="reportes-label">Buscar Cód. Artículo:</label>
-                    <input type="text" id="buscarCodArticulo" placeholder="Buscar por código artículo" autocomplete="off">
+                    <label for="buscarAdmision" class="reportes-label">Buscar Admisión:</label>
+                    <input type="text" id="buscarAdmision" placeholder="Buscar por admisión" autocomplete="off">
                 </div>
                 <div class="reportes-form-group">
                     <label for="buscarPaciente" class="reportes-label">Buscar Paciente:</label>
@@ -472,12 +472,24 @@
                     <input type="text" id="buscarRut" placeholder="Buscar por rut" autocomplete="off">
                 </div>
                 <div class="reportes-form-group">
+                    <label for="buscarDescripcion" class="reportes-label">Buscar Descripción:</label>
+                    <input type="text" id="buscarDescripcion" placeholder="Buscar por descripción" autocomplete="off">
+                </div>
+                <div class="reportes-form-group">
+                    <label for="buscarPrimerCirujano" class="reportes-label">Buscar 1° Cirujano:</label>
+                    <input type="text" id="buscarPrimerCirujano" placeholder="Buscar por 1° cirujano" autocomplete="off">
+                </div>
+                <div class="reportes-form-group">
                     <label for="selectAno" class="reportes-label">Año:</label>
                     <select id="selectAno"></select>
                 </div>
                 <div class="reportes-form-group">
                     <label for="selectMes" class="reportes-label">Mes:</label>
                     <select id="selectMes"></select>
+                </div>
+                <div class="reportes-form-group">
+                    <label for="selectDia" class="reportes-label">Día:</label>
+                    <select id="selectDia"></select>
                 </div>
             </div>
             <div class="reportes-actions-menu">
@@ -588,13 +600,17 @@
         let reportes = [];
         let currentPage = 1;
         const PAGE_SIZE = 10;
-        let searchCodArticulo = '';
+        let searchAdmision = '';
         let searchPaciente = '';
         let searchRut = '';
+        let searchDescripcion = '';
+        let searchPrimerCirujano = '';
         let selectedAno = new Date().getFullYear(); // Año actual por default
         let selectedMes = '';
+        let selectedDia = '';
         let anos = [];
         let mesesPorAno = {};
+        let diasPorMesAno = {};
 
         // Función para formatear fechas a DD-MM-YYYY
         function formatDateToDDMMYYYY(date) {
@@ -617,11 +633,14 @@
             const nextBtn = document.getElementById('nextBtn');
             const pageNumbers = document.getElementById('pageNumbers');
             const paginationInfo = document.getElementById('paginationInfo');
-            const buscarCodArticuloInput = document.getElementById('buscarCodArticulo');
+            const buscarAdmisionInput = document.getElementById('buscarAdmision');
             const buscarPacienteInput = document.getElementById('buscarPaciente');
             const buscarRutInput = document.getElementById('buscarRut');
+            const buscarDescripcionInput = document.getElementById('buscarDescripcion');
+            const buscarPrimerCirujanoInput = document.getElementById('buscarPrimerCirujano');
             const selectAno = document.getElementById('selectAno');
             const selectMes = document.getElementById('selectMes');
+            const selectDia = document.getElementById('selectDia');
 
             const downloadMesModal = document.getElementById('downloadMesModal');
             const closeDownloadMes = document.getElementById('closeDownloadMes');
@@ -751,12 +770,12 @@
                 populateAnoSelect(selectAno);
                 selectAno.value = selectedAno;
                 populateMesSelect(selectMes, selectedAno);
-                populateAnoSelect(selectDownloadAno);
+                populateDiaSelect(selectDia, selectedAno, selectedMes);
             });
 
-            if (buscarCodArticuloInput) {
-                buscarCodArticuloInput.addEventListener('input', (e) => {
-                    searchCodArticulo = e.target.value.trim();
+            if (buscarAdmisionInput) {
+                buscarAdmisionInput.addEventListener('input', (e) => {
+                    searchAdmision = e.target.value.trim();
                     currentPage = 1;
                     renderTable();
                 });
@@ -778,10 +797,29 @@
                 });
             }
 
+            if (buscarDescripcionInput) {
+                buscarDescripcionInput.addEventListener('input', (e) => {
+                    searchDescripcion = e.target.value.trim();
+                    currentPage = 1;
+                    renderTable();
+                });
+            }
+
+            if (buscarPrimerCirujanoInput) {
+                buscarPrimerCirujanoInput.addEventListener('input', (e) => {
+                    searchPrimerCirujano = e.target.value.trim();
+                    currentPage = 1;
+                    renderTable();
+                });
+            }
+
             if (selectAno) {
                 selectAno.addEventListener('change', (e) => {
                     selectedAno = e.target.value;
+                    selectedMes = '';
+                    selectedDia = '';
                     populateMesSelect(selectMes, selectedAno);
+                    populateDiaSelect(selectDia, selectedAno, selectedMes);
                     currentPage = 1;
                     renderTable();
                 });
@@ -790,6 +828,16 @@
             if (selectMes) {
                 selectMes.addEventListener('change', (e) => {
                     selectedMes = e.target.value;
+                    selectedDia = '';
+                    populateDiaSelect(selectDia, selectedAno, selectedMes);
+                    currentPage = 1;
+                    renderTable();
+                });
+            }
+
+            if (selectDia) {
+                selectDia.addEventListener('change', (e) => {
+                    selectedDia = e.target.value;
                     currentPage = 1;
                     renderTable();
                 });
@@ -808,6 +856,7 @@
                     reportes = [];
                     anos = new Set();
                     mesesPorAno = {};
+                    diasPorMesAno = {};
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
                         reportes.push({ id: doc.id, ...data });
@@ -815,9 +864,13 @@
                         if (!isNaN(fechaDate)) {
                             const ano = fechaDate.getFullYear();
                             const mes = fechaDate.toLocaleString('es-CL', { month: 'long' });
+                            const dia = data.dia;
                             anos.add(ano);
                             if (!mesesPorAno[ano]) mesesPorAno[ano] = new Set();
                             mesesPorAno[ano].add(mes);
+                            if (!diasPorMesAno[ano]) diasPorMesAno[ano] = {};
+                            if (!diasPorMesAno[ano][mes]) diasPorMesAno[ano][mes] = new Set();
+                            if (dia) diasPorMesAno[ano][mes].add(dia);
                         }
                     });
                     renderTable();
@@ -845,6 +898,18 @@
                         const option = document.createElement('option');
                         option.value = mes;
                         option.textContent = mes;
+                        select.appendChild(option);
+                    });
+                }
+            }
+
+            function populateDiaSelect(select, ano, mes) {
+                select.innerHTML = '<option value="">Todos</option>';
+                if (ano && mes && diasPorMesAno[ano] && diasPorMesAno[ano][mes]) {
+                    Array.from(diasPorMesAno[ano][mes]).sort().forEach(dia => {
+                        const option = document.createElement('option');
+                        option.value = dia;
+                        option.textContent = dia;
                         select.appendChild(option);
                     });
                 }
@@ -1070,11 +1135,14 @@
 
             function getFilteredReportes() {
                 return reportes.filter(reporte => 
-                    String(reporte.codArticulo || '').toLowerCase().includes(searchCodArticulo.toLowerCase()) &&
+                    String(reporte.admision || '').toLowerCase().includes(searchAdmision.toLowerCase()) &&
                     String(reporte.paciente || '').toLowerCase().includes(searchPaciente.toLowerCase()) &&
                     String(reporte.rut || '').toLowerCase().includes(searchRut.toLowerCase()) &&
+                    String(reporte.descripcion || '').toLowerCase().includes(searchDescripcion.toLowerCase()) &&
+                    String(reporte.primerCirujano || '').toLowerCase().includes(searchPrimerCirujano.toLowerCase()) &&
                     (!selectedAno || new Date(reporte.fecha).getFullYear() == selectedAno) &&
-                    (!selectedMes || new Date(reporte.fecha).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
+                    (!selectedMes || new Date(reporte.fecha).toLocaleString('es-CL', { month: 'long' }) === selectedMes) &&
+                    (!selectedDia || String(reporte.dia || '').toLowerCase() === selectedDia.toLowerCase())
                 );
             }
 
