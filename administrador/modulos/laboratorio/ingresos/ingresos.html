@@ -793,7 +793,7 @@
 
             async function getIngresoByUniqueKey(numeroFactura) {
                 if (!numeroFactura) return null;
-                const q = query(collection(db, "ingresos"), where("numeroFactura", "==", numeroFactura.trim()));
+                const q = query(collection(db, "ingresos_lab"), where("numeroFactura", "==", numeroFactura.trim()));
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
                     const doc = querySnapshot.docs[0];
@@ -945,7 +945,7 @@
             async function loadIngresos() {
                 showLoading();
                 try {
-                    const querySnapshot = await getDocs(collection(db, "ingresos"));
+                    const querySnapshot = await getDocs(collection(db, "ingresos_lab"));
                     ingresos = [];
                     anos = new Set();
                     mesesPorAno = {};
@@ -1175,14 +1175,14 @@
                                         : processedRow[key] !== String(existing[key] || '').trim()
                                     );
                                     if (hasChanges) {
-                                        await updateDoc(doc(db, "ingresos", existing.id), {
+                                        await updateDoc(doc(db, "ingresos_lab", existing.id), {
                                             ...processedRow,
                                             createdAt: new Date()
                                         });
                                         updatedCount++;
                                     }
                                 } else {
-                                    await addDoc(collection(db, "ingresos"), {
+                                    await addDoc(collection(db, "ingresos_lab"), {
                                         ...processedRow,
                                         createdAt: new Date()
                                     });
@@ -1208,12 +1208,14 @@
                     showToast('Error al importar el archivo: ' + error.message, 'error');
                 }
             }
+
             async function getIngresosByMes(ano, mes) {
                 return ingresos.filter(i => {
                     const fechaIngresoDate = new Date(i.fechaIngreso);
                     return fechaIngresoDate.getFullYear() == ano && fechaIngresoDate.toLocaleString('es-CL', { month: 'long' }) === mes;
                 });
             }
+
             function getFilteredIngresos() {
                 return ingresos.filter(ingreso => 
                     String(ingreso.numeroFactura || '').toLowerCase().includes(searchNumeroFactura.toLowerCase()) &&
@@ -1227,6 +1229,7 @@
                     (!selectedMes || new Date(ingreso.fechaIngreso).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
                 );
             }
+
             function renderTable() {
                 const filteredIngresos = getFilteredIngresos();
                 const start = (currentPage - 1) * PAGE_SIZE;
@@ -1254,6 +1257,7 @@
                 }
                 updatePagination(filteredIngresos.length);
             }
+
             function updatePagination(total) {
                 const totalPages = Math.ceil(total / PAGE_SIZE);
                 const startPage = Math.max(1, currentPage - 2);
@@ -1282,10 +1286,12 @@
                     }
                 }
             }
+
             function goToPage(page) {
                 currentPage = page;
                 renderTable();
             }
+
             if (prevBtn) {
                 prevBtn.addEventListener('click', () => {
                     if (currentPage > 1) {
@@ -1294,6 +1300,7 @@
                     }
                 });
             }
+
             if (nextBtn) {
                 nextBtn.addEventListener('click', () => {
                     const totalPages = Math.ceil(getFilteredIngresos().length / PAGE_SIZE);
@@ -1303,9 +1310,11 @@
                     }
                 });
             }
+
             const today = new Date();
             fechaIngresoInput.value = formatDateToYYYYMMDD(today);
             fechaFacturaInput.value = formatDateToYYYYMMDD(today);
+
             ingresarBtn.addEventListener('click', async () => {
                 const processedRow = {
                     fechaIngreso: fechaIngresoInput.value,
@@ -1320,23 +1329,24 @@
                     salida: salidaInput.value.trim(),
                     usuario: window.currentUserData.username
                 };
+
                 if (processedRow.numeroFactura && processedRow.fechaIngreso) {
                     const existing = await getIngresoByUniqueKey(processedRow.numeroFactura);
                     if (existing) {
-                        await updateDoc(doc(db, "ingresos", existing.id), {
+                        await updateDoc(doc(db, "ingresos_lab", existing.id), {
                             ...processedRow,
                             createdAt: new Date()
                         });
                         showToast('Ingreso actualizado exitosamente', 'success');
                     } else {
-                        await addDoc(collection(db, "ingresos"), {
+                        await addDoc(collection(db, "ingresos_lab"), {
                             ...processedRow,
                             createdAt: new Date()
                         });
                         showToast('Ingreso agregado exitosamente', 'success');
                     }
                     numeroFacturaInput.value = '';
-                    fechaFacturaInput.value = '';
+                    fechaFacturaInput.value = formatDateToYYYYMMDD(new Date());
                     montoInput.value = '';
                     ordenCompraInput.value = '';
                     actaInput.value = '';
@@ -1347,6 +1357,7 @@
                     showToast('Faltan número de factura o fecha de ingreso', 'error');
                 }
             });
+
             function enableColumnResizing() {
                 const table = document.getElementById('ingresosTable');
                 const headers = table.querySelectorAll('th');
