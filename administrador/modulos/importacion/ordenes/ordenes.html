@@ -574,7 +574,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Configurar persistencia a 'session' (por pestaña/iframe, no compartida)
+
         setPersistence(auth, browserSessionPersistence);
 
         let ordenes = [];
@@ -582,12 +582,11 @@
         const PAGE_SIZE = 10;
         let searchCodigo = '';
         let searchProveedor = '';
-        let selectedAno = new Date().getFullYear(); // Año actual por default
+        let selectedAno = new Date().getFullYear(); 
         let selectedMes = '';
         let anos = [];
         let mesesPorAno = {};
 
-        // Función para formatear fechas a DD-MM-YYYY
         function formatDateToDDMMYYYY(date) {
             if (!date || isNaN(new Date(date))) return '';
             const d = new Date(date);
@@ -948,15 +947,13 @@
                         let updatedCount = 0;
                         const totalRows = json.length;
 
-                        showImportProgress(0); // Inicializar barra de progreso
+                        showImportProgress(0); 
 
                         for (let i = 0; i < json.length; i++) {
                             const row = json[i];
-                            // Validar y formatear fechas
                             let generacion = row.generacion;
                             let autorizacion = row.autorizacion;
 
-                            // Convertir fechas si son números (Excel serial dates)
                             if (typeof generacion === 'number') {
                                 generacion = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(generacion));
                             }
@@ -964,7 +961,6 @@
                                 autorizacion = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(autorizacion));
                             }
 
-                            // Validar que las fechas sean válidas
                             if (generacion && isNaN(new Date(generacion))) {
                                 console.warn(`Fila ignorada: Fecha de generación no válida en la fila ${i + 2}`, row);
                                 showToast(`Fila ${i + 2}: Fecha de generación no válida`, 'error');
@@ -1020,7 +1016,6 @@
                                 showToast(`Fila ${i + 2}: Faltan código, generación o autorización`, 'error');
                             }
 
-                            // Actualizar progreso
                             const progress = ((i + 1) / totalRows) * 100;
                             showImportProgress(progress);
                         }
