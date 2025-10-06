@@ -693,9 +693,13 @@
                 }
             }
 
-            async function getReporteByAdmision(admision) {
-                if (!admision) return null;
-                const q = query(collection(db, "reportes"), where("admision", "==", admision.trim()));
+            async function getReporteByUniqueKey(admision, codArticulo) {
+                if (!admision || !codArticulo) return null;
+                const q = query(
+                    collection(db, "reportes"),
+                    where("admision", "==", admision.trim()),
+                    where("codArticulo", "==", codArticulo.trim())
+                );
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
                     const doc = querySnapshot.docs[0];
@@ -840,6 +844,12 @@
                     selectedDia = e.target.value;
                     currentPage = 1;
                     renderTable();
+                });
+            }
+
+            if (selectDownloadAno) {
+                selectDownloadAno.addEventListener('change', (e) => {
+                    populateMesSelect(selectDownloadMes, e.target.value);
                 });
             }
 
@@ -1035,6 +1045,7 @@
 
                         let addedCount = 0;
                         let updatedCount = 0;
+                        let skippedCount = 0;
                         const totalRows = json.length;
 
                         showImportProgress(0); // Inicializar barra de progreso
@@ -1049,6 +1060,7 @@
                             if (fecha && isNaN(new Date(fecha))) {
                                 console.warn(`Fila ignorada: Fecha no válida en la fila ${i + 2}`, row);
                                 showToast(`Fila ${i + 2}: Fecha no válida`, 'error');
+                                skippedCount++;
                                 continue;
                             }
 
@@ -1071,8 +1083,8 @@
                                 primerCirujano: String(row.primerCirujano || '').trim()
                             };
 
-                            if (processedRow.admision && processedRow.fecha) {
-                                const existing = await getReporteByAdmision(processedRow.admision);
+                            if (processedRow.admision && processedRow.codArticulo && processedRow.fecha) {
+                                const existing = await getReporteByUniqueKey(processedRow.admision, processedRow.codArticulo);
                                 if (existing) {
                                     const hasChanges = Object.keys(processedRow).some(key => 
                                         key === 'fecha' 
@@ -1086,6 +1098,10 @@
                                             createdAt: new Date()
                                         });
                                         updatedCount++;
+                                    } else {
+                                        console.log(`Fila ${i + 2}: Registro duplicado sin cambios`, processedRow);
+                                        showToast(`Fila ${i + 2}: Registro duplicado sin cambios`, 'error');
+                                        skippedCount++;
                                     }
                                 } else {
                                     const docRef = await addDoc(collection(db, "reportes"), {
@@ -1096,8 +1112,9 @@
                                     addedCount++;
                                 }
                             } else {
-                                console.warn(`Fila ignorada: Campos obligatorios faltantes (admision o fecha) en la fila ${i + 2}`, row);
-                                showToast(`Fila ${i + 2}: Faltan admisión o fecha`, 'error');
+                                console.warn(`Fila ignorada: Campos obligatorios faltantes (admision, código artículo o fecha) en la fila ${i + 2}`, row);
+                                showToast(`Fila ${i + 2}: Faltan admisión, código artículo o fecha`, 'error');
+                                skippedCount++;
                             }
 
                             // Actualizar progreso
@@ -1106,7 +1123,7 @@
                         }
 
                         hideImportProgress();
-                        showToast(`Se han importado ${addedCount} reportes nuevos y actualizado ${updatedCount} reportes.`, 'success');
+                        showToast(`Importación completada: ${addedCount} nuevos, ${updatedCount} actualizados, ${skippedCount} omitidos.`, 'success');
                         await loadReportes();
                         populateAnoSelect(selectAno);
                         populateAnoSelect(selectDownloadAno);
