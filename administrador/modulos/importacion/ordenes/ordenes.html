@@ -979,6 +979,7 @@
             });
 
             onAuthStateChanged(auth, async (user) => {
+                console.log('Usuario:', user ? user.uid : 'No autenticado');
                 if (!user) {
                     window.location.replace('../../../../../index.html');
                     return;
