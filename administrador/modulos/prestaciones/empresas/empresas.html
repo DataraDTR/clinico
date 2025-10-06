@@ -140,13 +140,21 @@
             padding: 10px;
             background: #f8f9fa;
             border-radius: 4px;
+            flex-wrap: nowrap; /* Asegura que todo esté en una sola fila */
         }
         .empresas-pagination-info {
             font-size: 11px;
+            flex: 1; /* Permite que el texto ocupe el espacio disponible */
+            text-align: left;
+        }
+        .empresas-pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px; /* Reduce el espacio entre los elementos */
+            flex-shrink: 0; /* Evita que los controles se compriman */
         }
         .empresas-pagination-controls button {
             padding: 6px 10px;
-            margin: 0 5px;
             background-color: #007bff;
             color: white;
             border: none;
@@ -164,6 +172,7 @@
         .empresas-page-numbers {
             display: flex;
             gap: 5px;
+            align-items: center;
         }
         .empresas-page-numbers button {
             padding: 4px 8px;
@@ -171,18 +180,21 @@
             background: white;
             cursor: pointer;
             font-size: 11px;
+            border-radius: 4px; /* Añade bordes redondeados para consistencia */
         }
         .empresas-page-numbers button.active {
             background-color: #007bff;
             color: white;
+            border-color: #007bff;
         }
-        .empresas-page-numbers button:hover {
+        .empresas-page-numbers button:hover:not(.active) {
             background-color: #f0f0f0;
         }
         .empresas-page-numbers .empresas-dots {
-            padding: 5px;
+            padding: 4px;
             cursor: default;
             font-size: 11px;
+            line-height: 1.5; /* Ajusta la alineación vertical */
         }
         #empresas-message {
             margin-bottom: 20px;
@@ -401,6 +413,25 @@
             .modal-content {
                 width: 90%;
                 margin: 20% auto;
+            }
+            .empresas-pagination {
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+            }
+            .empresas-pagination-info {
+                font-size: 10px;
+            }
+            .empresas-pagination-controls {
+                flex-shrink: 0;
+            }
+            .empresas-pagination-controls button {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+            .empresas-page-numbers button {
+                padding: 3px 6px;
+                font-size: 10px;
             }
         }
     </style>
