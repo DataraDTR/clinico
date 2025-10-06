@@ -404,10 +404,10 @@
             display: none;
             position: absolute;
             right: 0;
-            bottom: 100%; /* Posiciona el menú hacia arriba */
+            bottom: 100%;
             background-color: white;
-            min-width: 250px; /* Aumenta el ancho para evitar corte de texto */
-            box-shadow: 0px -8px 16px 0px rgba(0,0,0,0.2); /* Sombra hacia arriba */
+            min-width: 250px;
+            box-shadow: 0px -8px 16px 0px rgba(0,0,0,0.2);
             z-index: 1;
             border-radius: 4px;
             overflow: hidden;
@@ -418,7 +418,7 @@
             text-decoration: none;
             display: block;
             font-size: 12px;
-            white-space: nowrap; /* Evita que el texto se corte */
+            white-space: nowrap;
         }
         .empresas-dropdown-menu a:hover {
             background-color: #f1f1f1;
@@ -478,7 +478,7 @@
                 font-size: 10px;
             }
             .empresas-dropdown-menu {
-                min-width: 200px; /* Ajusta el ancho para pantallas pequeñas */
+                min-width: 200px;
             }
         }
     </style>
@@ -706,6 +706,18 @@
                 });
             }
 
+            async function isDuplicate(nombre, rut, excludeId = null) {
+                const nombreQuery = query(collection(db, "empresas"), where("nombre", "==", nombre.trim()));
+                const rutQuery = query(collection(db, "empresas"), where("rut", "==", rut.trim()));
+                
+                const [nombreSnapshot, rutSnapshot] = await Promise.all([getDocs(nombreQuery), getDocs(rutQuery)]);
+                
+                const nombreExists = nombreSnapshot.docs.some(doc => doc.id !== excludeId);
+                const rutExists = rutSnapshot.docs.some(doc => doc.id !== excludeId);
+                
+                return { nombreExists, rutExists };
+            }
+
             function openEditModal(id, nombre, rut) {
                 currentEditId = id;
                 currentEditOldNombre = nombre;
@@ -795,10 +807,22 @@
                 const rut = document.getElementById('editRut').value.trim();
 
                 if (nombre && rut) {
-                    const oldNombre = currentEditOldNombre;
-                    const oldRut = currentEditOldRut;
                     showLoading();
                     try {
+                        const { nombreExists, rutExists } = await isDuplicate(nombre, rut, currentEditId);
+                        if (nombreExists) {
+                            hideLoading();
+                            showToast('El nombre de la empresa ya existe.', 'error');
+                            return;
+                        }
+                        if (rutExists) {
+                            hideLoading();
+                            showToast('El RUT de la empresa ya existe.', 'error');
+                            return;
+                        }
+
+                        const oldNombre = currentEditOldNombre;
+                        const oldRut = currentEditOldRut;
                         await updateDoc(doc(db, "empresas", currentEditId), {
                             nombre,
                             rut,
@@ -851,6 +875,7 @@
                 } catch (error) {
                     console.error('Error al cargar datos del usuario:', error);
                     window.currentUserData = { fullName: 'Usuario Invitado', username: 'invitado' };
+                    showToast('Error al cargar datos del usuario.', 'error');
                 }
                 
                 await loadEmpresas();
@@ -899,6 +924,18 @@
                     if (nombre && rut) {
                         showLoading();
                         try {
+                            const { nombreExists, rutExists } = await isDuplicate(nombre, rut);
+                            if (nombreExists) {
+                                hideLoading();
+                                showToast('El nombre de la empresa ya existe.', 'error');
+                                return;
+                            }
+                            if (rutExists) {
+                                hideLoading();
+                                showToast('El RUT de la empresa ya existe.', 'error');
+                                return;
+                            }
+
                             const docRef = await addDoc(collection(db, "empresas"), {
                                 nombre,
                                 rut,
@@ -1084,6 +1121,15 @@
                         let addedCount = 0;
                         for (let row of json) {
                             if (row.nombre && row.rut) {
+                                const { nombreExists, rutExists } = await isDuplicate(row.nombre, row.rut);
+                                if (nombreExists) {
+                                    showToast(`La empresa "${row.nombre}" ya existe, se omitió.`, 'error');
+                                    continue;
+                                }
+                                if (rutExists) {
+                                    showToast(`El RUT "${row.rut}" ya existe, se omitió.`, 'error');
+                                    continue;
+                                }
                                 const docRef = await addDoc(collection(db, "empresas"), {
                                     nombre: row.nombre.trim(),
                                     rut: row.rut.trim(),
