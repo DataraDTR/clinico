@@ -552,11 +552,11 @@
                 </div>
                 <div class="modal-form-group">
                     <label for="editGeneracion">Generación:</label>
-                    <input type="text" id="editGeneracion" required>
+                    <input type="date" id="editGeneracion" required>
                 </div>
                 <div class="modal-form-group">
                     <label for="editAutorizacion">Autorización:</label>
-                    <input type="text" id="editAutorizacion" required>
+                    <input type="date" id="editAutorizacion" required>
                 </div>
                 <div class="modal-form-group">
                     <label for="editSociedad">Sociedad:</label>
@@ -676,6 +676,24 @@
         let anos = [];
         let mesesPorAno = {};
 
+        // Función para formatear fechas a DD-MM-YYYY
+        function formatDateToDDMMYYYY(date) {
+            if (!date || isNaN(new Date(date))) return '';
+            const d = new Date(date);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        // Función para convertir fecha DD-MM-YYYY a formato ISO para input date
+        function dateToISO(dateStr) {
+            if (!dateStr) return '';
+            const [day, month, year] = dateStr.split('-');
+            if (!day || !month || !year) return '';
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const loading = document.getElementById('ordenes-loading');
             const toast = document.getElementById('ordenes-toast');
@@ -783,8 +801,8 @@
                 currentEditId = id;
                 currentEditOldData = data;
                 document.getElementById('editCodigo').value = data.codigo || '';
-                document.getElementById('editGeneracion').value = data.generacion || '';
-                document.getElementById('editAutorizacion').value = data.autorizacion || '';
+                document.getElementById('editGeneracion').value = dateToISO(data.generacion) || '';
+                document.getElementById('editAutorizacion').value = dateToISO(data.autorizacion) || '';
                 document.getElementById('editSociedad').value = data.sociedad || '';
                 document.getElementById('editTipoCompra').value = data.tipoCompra || '';
                 document.getElementById('editProveedor').value = data.proveedor || '';
@@ -889,8 +907,8 @@
 
                 const newData = {
                     codigo: document.getElementById('editCodigo').value.trim(),
-                    generacion: document.getElementById('editGeneracion').value.trim(),
-                    autorizacion: document.getElementById('editAutorizacion').value.trim(),
+                    generacion: document.getElementById('editGeneracion').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editGeneracion').value)) : '',
+                    autorizacion: document.getElementById('editAutorizacion').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editAutorizacion').value)) : '',
                     sociedad: document.getElementById('editSociedad').value.trim(),
                     tipoCompra: document.getElementById('editTipoCompra').value.trim(),
                     proveedor: document.getElementById('editProveedor').value.trim(),
@@ -902,7 +920,7 @@
                     estado: document.getElementById('editEstado').value.trim(),
                 };
 
-                if (newData.codigo) {
+                if (newData.codigo && newData.generacion && newData.autorizacion) {
                     showLoading();
                     try {
                         const duplicate = await getOrdenByCodigo(newData.codigo);
@@ -927,7 +945,7 @@
                         showToast('Error al editar la orden: ' + error.message, 'error');
                     }
                 } else {
-                    showToast('Por favor, completa el campo código.', 'error');
+                    showToast('Por favor, completa los campos obligatorios: código, generación y autorización.', 'error');
                 }
             });
 
@@ -956,8 +974,8 @@
                         const data = await getOrdenesByMes(ano, mes);
                         exportToExcel(data.map(o => ({
                             codigo: o.codigo,
-                            generacion: o.generacion,
-                            autorizacion: o.autorizacion,
+                            generacion: formatDateToDDMMYYYY(o.generacion),
+                            autorizacion: formatDateToDDMMYYYY(o.autorizacion),
                             sociedad: o.sociedad,
                             tipoCompra: o.tipoCompra,
                             proveedor: o.proveedor,
@@ -1110,8 +1128,8 @@
                 e.preventDefault();
                 exportToExcel(ordenes.map(o => ({
                     codigo: o.codigo,
-                    generacion: o.generacion,
-                    autorizacion: o.autorizacion,
+                    generacion: formatDateToDDMMYYYY(o.generacion),
+                    autorizacion: formatDateToDDMMYYYY(o.autorizacion),
                     sociedad: o.sociedad,
                     tipoCompra: o.tipoCompra,
                     proveedor: o.proveedor,
@@ -1132,8 +1150,8 @@
                 const end = start + PAGE_SIZE;
                 const pageData = filtered.slice(start, end).map(o => ({
                     codigo: o.codigo,
-                    generacion: o.generacion,
-                    autorizacion: o.autorizacion,
+                    generacion: formatDateToDDMMYYYY(o.generacion),
+                    autorizacion: formatDateToDDMMYYYY(o.autorizacion),
                     sociedad: o.sociedad,
                     tipoCompra: o.tipoCompra,
                     proveedor: o.proveedor,
@@ -1163,7 +1181,10 @@
             });
 
             function exportToExcel(data, filename) {
-                const ws = XLSX.utils.json_to_sheet(data);
+                const ws = XLSX.utils.json_to_sheet(data, {
+                    dateNF: 'dd-mm-yyyy',
+                    cellDates: true
+                });
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Órdenes");
                 XLSX.writeFile(wb, filename + '.xlsx');
@@ -1172,6 +1193,8 @@
             function downloadImportTemplate() {
                 const ws = XLSX.utils.aoa_to_sheet([[
                     "Código", "Generación", "Autorización", "Sociedad", "Tipo de compra", "Proveedor", "Digitador", "Nivel actual", "Nivel ox", "Liberada", "Total", "Estado"
+                ], [
+                    "ORD001", "01-10-2025", "01-10-2025", "Ejemplo SA", "Compra Directa", "Proveedor A", "Juan Pérez", "Nivel 1", "Ox 1", "Sí", "10000", "Activo"
                 ]]);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Template");
@@ -1184,18 +1207,47 @@
                     const reader = new FileReader();
                     reader.onload = async (e) => {
                         const data = new Uint8Array(e.target.result);
-                        const wb = XLSX.read(data, {type: 'array'});
+                        const wb = XLSX.read(data, {type: 'array', cellDates: true, dateNF: 'dd-mm-yyyy'});
                         const ws = wb.Sheets[wb.SheetNames[0]];
-                        const json = XLSX.utils.sheet_to_json(ws, {header: ["codigo", "generacion", "autorizacion", "sociedad", "tipoCompra", "proveedor", "digitador", "nivelActual", "nivelOx", "liberada", "total", "estado"], range: 1, defval: ''}); // Skip header, set default value to empty string
+                        const json = XLSX.utils.sheet_to_json(ws, {
+                            header: ["codigo", "generacion", "autorizacion", "sociedad", "tipoCompra", "proveedor", "digitador", "nivelActual", "nivelOx", "liberada", "total", "estado"],
+                            range: 1,
+                            defval: '',
+                            raw: false,
+                            dateNF: 'dd-mm-yyyy'
+                        });
 
                         let addedCount = 0;
                         let updatedCount = 0;
                         for (let row of json) {
-                            // Convertir todos los valores a cadenas y manejar valores nulos/undefined
+                            // Validar y formatear fechas
+                            let generacion = row.generacion;
+                            let autorizacion = row.autorizacion;
+
+                            // Convertir fechas si son números (Excel serial dates)
+                            if (typeof generacion === 'number') {
+                                generacion = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(generacion));
+                            }
+                            if (typeof autorizacion === 'number') {
+                                autorizacion = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(autorizacion));
+                            }
+
+                            // Validar que las fechas sean válidas
+                            if (generacion && isNaN(new Date(generacion))) {
+                                console.warn(`Fila ignorada: Fecha de generación no válida en la fila ${json.indexOf(row) + 2}`, row);
+                                showToast(`Fila ${json.indexOf(row) + 2}: Fecha de generación no válida`, 'error');
+                                continue;
+                            }
+                            if (autorizacion && isNaN(new Date(autorizacion))) {
+                                console.warn(`Fila ignorada: Fecha de autorización no válida en la fila ${json.indexOf(row) + 2}`, row);
+                                showToast(`Fila ${json.indexOf(row) + 2}: Fecha de autorización no válida`, 'error');
+                                continue;
+                            }
+
                             const processedRow = {
                                 codigo: String(row.codigo || '').trim(),
-                                generacion: String(row.generacion || '').trim(),
-                                autorizacion: String(row.autorizacion || '').trim(),
+                                generacion: generacion ? formatDateToDDMMYYYY(new Date(generacion)) : '',
+                                autorizacion: autorizacion ? formatDateToDDMMYYYY(new Date(autorizacion)) : '',
                                 sociedad: String(row.sociedad || '').trim(),
                                 tipoCompra: String(row.tipoCompra || '').trim(),
                                 proveedor: String(row.proveedor || '').trim(),
@@ -1207,11 +1259,15 @@
                                 estado: String(row.estado || '').trim()
                             };
 
-                            if (processedRow.codigo) {
+                            if (processedRow.codigo && processedRow.generacion && processedRow.autorizacion) {
                                 const existing = await getOrdenByCodigo(processedRow.codigo);
                                 if (existing) {
                                     // Comparar si hay cambios
-                                    const hasChanges = Object.keys(processedRow).some(key => processedRow[key] !== String(existing[key] || '').trim());
+                                    const hasChanges = Object.keys(processedRow).some(key => 
+                                        key === 'generacion' || key === 'autorizacion' 
+                                        ? processedRow[key] !== formatDateToDDMMYYYY(existing[key])
+                                        : processedRow[key] !== String(existing[key] || '').trim()
+                                    );
                                     if (hasChanges) {
                                         await updateDoc(doc(db, "ordenes", existing.id), {
                                             ...processedRow,
@@ -1221,7 +1277,6 @@
                                         await logAction(existing.id, 'update', existing, processedRow);
                                         updatedCount++;
                                     }
-                                    // Si no hay cambios, no hacer nada
                                 } else {
                                     const docRef = await addDoc(collection(db, "ordenes"), {
                                         ...processedRow,
@@ -1232,7 +1287,8 @@
                                     addedCount++;
                                 }
                             } else {
-                                console.warn('Fila ignorada: código no válido', row);
+                                console.warn(`Fila ignorada: Campos obligatorios faltantes en la fila ${json.indexOf(row) + 2}`, row);
+                                showToast(`Fila ${json.indexOf(row) + 2}: Faltan código, generación o autorización`, 'error');
                             }
                         }
                         hideLoading();
@@ -1279,8 +1335,8 @@
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${orden.codigo || ''}</td>
-                            <td>${orden.generacion || ''}</td>
-                            <td>${orden.autorizacion || ''}</td>
+                            <td>${formatDateToDDMMYYYY(orden.generacion) || ''}</td>
+                            <td>${formatDateToDDMMYYYY(orden.autorizacion) || ''}</td>
                             <td>${orden.sociedad || ''}</td>
                             <td>${orden.tipoCompra || ''}</td>
                             <td>${orden.proveedor || ''}</td>
