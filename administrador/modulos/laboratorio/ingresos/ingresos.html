@@ -659,7 +659,7 @@
 
     <script type="module">
         const { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } = window.firebaseModules;
-        const { getFirestore, collection, addDoc, getDocs, query, orderBy, where } = window.firebaseModules;
+        const { getFirestore, collection, addDoc, getDocs, query, orderBy, where, doc, updateDoc } = window.firebaseModules;
 
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
@@ -677,7 +677,7 @@
 
         setPersistence(auth, browserSessionPersistence);
 
-        const PAGE_SIZE = 10; // Definir PAGE_SIZE para la paginación
+        const PAGE_SIZE = 10;
 
         let ingresos = [];
         let currentPage = 1;
@@ -796,6 +796,17 @@
             async function getIngresoByUniqueKey(numeroFactura) {
                 if (!numeroFactura) return null;
                 const q = query(collection(db, "ingresos_lab"), where("numeroFactura", "==", numeroFactura.trim()));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    const doc = querySnapshot.docs[0];
+                    return { id: doc.id, ...doc.data() };
+                }
+                return null;
+            }
+
+            async function getOrdenByCodigo(codigo) {
+                if (!codigo || typeof codigo !== 'string') return null;
+                const q = query(collection(db, "ordenes"), where("codigo", "==", codigo.trim()));
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
                     const doc = querySnapshot.docs[0];
@@ -941,6 +952,35 @@
             if (selectDownloadAno) {
                 selectDownloadAno.addEventListener('change', (e) => {
                     populateMesSelect(selectDownloadMes, e.target.value);
+                });
+            }
+
+            if (ordenCompraInput) {
+                ordenCompraInput.addEventListener('input', async (e) => {
+                    const codigo = e.target.value.trim();
+                    if (codigo) {
+                        showLoading();
+                        try {
+                            const orden = await getOrdenByCodigo(codigo);
+                            if (orden) {
+                                proveedorInput.value = orden.proveedor || '';
+                                fechaOcInput.value = formatDateToDDMMYYYY(orden.generacion) || '';
+                            } else {
+                                proveedorInput.value = '';
+                                fechaOcInput.value = '';
+                                showToast('No se encontró una orden con ese código', 'error');
+                            }
+                            hideLoading();
+                        } catch (error) {
+                            hideLoading();
+                            showToast('Error al buscar la orden: ' + error.message, 'error');
+                            proveedorInput.value = '';
+                            fechaOcInput.value = '';
+                        }
+                    } else {
+                        proveedorInput.value = '';
+                        fechaOcInput.value = '';
+                    }
                 });
             }
 
@@ -1354,6 +1394,8 @@
                     actaInput.value = '';
                     salidaInput.value = '';
                     fechaSalidaInput.value = '';
+                    proveedorInput.value = '';
+                    fechaOcInput.value = '';
                     await loadIngresos();
                 } else {
                     showToast('Faltan número de factura o fecha de ingreso', 'error');
