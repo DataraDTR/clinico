@@ -141,7 +141,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             min-width: 100px;
-            max-width: 300px;
         }
         .reportes-table th {
             background-color: #f2f2f2;
@@ -161,23 +160,23 @@
         .reportes-table tbody tr:hover {
             background-color: #f8f9fa;
         }
-        .reportes-table th:nth-child(1) { min-width: 80px; max-width: 120px; } /* Fecha */
-        .reportes-table th:nth-child(2) { min-width: 60px; max-width: 100px; } /* Día */
-        .reportes-table th:nth-child(3) { min-width: 80px; max-width: 120px; } /* Mes */
-        .reportes-table th:nth-child(4) { min-width: 80px; max-width: 120px; } /* Cod. Artículo */
-        .reportes-table th:nth-child(5) { min-width: 200px; max-width: 600px; } /* Descripción */
-        .reportes-table th:nth-child(6) { min-width: 80px; max-width: 120px; } /* Admisión */
-        .reportes-table th:nth-child(7) { min-width: 100px; max-width: 150px; } /* Rut */
-        .reportes-table th:nth-child(8) { min-width: 150px; max-width: 350px; } /* Paciente */
-        .reportes-table th:nth-child(9) { min-width: 60px; max-width: 100px; } /* Edad */
-        .reportes-table th:nth-child(10) { min-width: 80px; max-width: 120px; } /* Previsión */
-        .reportes-table th:nth-child(11) { min-width: 100px; max-width: 150px; } /* Isapre */
-        .reportes-table th:nth-child(12) { min-width: 80px; max-width: 120px; } /* Convenio */
-        .reportes-table th:nth-child(13) { min-width: 80px; max-width: 120px; } /* Cód. Arancel */
-        .reportes-table th:nth-child(14) { min-width: 100px; max-width: 150px; } /* Arancel */
-        .reportes-table th:nth-child(15) { min-width: 60px; max-width: 100px; } /* Cant. Art. */
-        .reportes-table th:nth-child(16) { min-width: 150px; max-width: 350px; } /* 1° Cirujano */
-        .reportes-table th:nth-child(17) { min-width: 150px; max-width: 200px; } /* Evento */
+        .reportes-table th:nth-child(1) { min-width: 80px; } /* Fecha */
+        .reportes-table th:nth-child(2) { min-width: 60px; } /* Día */
+        .reportes-table th:nth-child(3) { min-width: 80px; } /* Mes */
+        .reportes-table th:nth-child(4) { min-width: 80px; } /* Cod. Artículo */
+        .reportes-table th:nth-child(5) { min-width: 200px; } /* Descripción */
+        .reportes-table th:nth-child(6) { min-width: 80px; } /* Admisión */
+        .reportes-table th:nth-child(7) { min-width: 100px; } /* Rut */
+        .reportes-table th:nth-child(8) { min-width: 150px; } /* Paciente */
+        .reportes-table th:nth-child(9) { min-width: 60px; } /* Edad */
+        .reportes-table th:nth-child(10) { min-width: 80px; } /* Previsión */
+        .reportes-table th:nth-child(11) { min-width: 100px; } /* Isapre */
+        .reportes-table th:nth-child(12) { min-width: 80px; } /* Convenio */
+        .reportes-table th:nth-child(13) { min-width: 80px; } /* Cód. Arancel */
+        .reportes-table th:nth-child(14) { min-width: 100px; } /* Arancel */
+        .reportes-table th:nth-child(15) { min-width: 60px; } /* Cant. Art. */
+        .reportes-table th:nth-child(16) { min-width: 150px; } /* 1° Cirujano */
+        .reportes-table th:nth-child(17) { min-width: 150px; } /* Evento */
         .resizing {
             user-select: none;
         }
@@ -1314,7 +1313,7 @@
                             const startX = e.clientX;
                             const startWidth = header.offsetWidth;
                             const minWidth = parseInt(getComputedStyle(header).minWidth) || 50;
-                            const maxWidth = parseInt(getComputedStyle(header).maxWidth) || 1000;
+                            const maxWidth = 2000; // Límite superior grande para permitir agrandar libremente
 
                             const onMouseMove = (moveEvent) => {
                                 let newWidth = startWidth + (moveEvent.clientX - startX);
@@ -1324,7 +1323,6 @@
                                 const cells = table.querySelectorAll(`td:nth-child(${index + 1})`);
                                 cells.forEach(cell => {
                                     cell.style.width = `${newWidth}px`;
-                                    cell.style.maxWidth = `${newWidth}px`;
                                 });
                             };
 
