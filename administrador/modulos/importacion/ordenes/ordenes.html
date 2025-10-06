@@ -9,8 +9,8 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, where };
+        import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc };
     </script>
     <style>
         html, body {
@@ -509,7 +509,7 @@
 
     <script type="module">
         const { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } = window.firebaseModules;
-        const { getFirestore, collection, addDoc, getDocs, query, where } = window.firebaseModules;
+        const { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc } = window.firebaseModules;
 
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
@@ -922,12 +922,19 @@
                             if (processedRow.codigo && processedRow.generacion && processedRow.autorizacion) {
                                 const existing = await getOrdenByCodigo(processedRow.codigo);
                                 if (existing) {
-                                    await updateDoc(doc(db, "ordenes", existing.id), {
-                                        ...processedRow,
-                                        evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
-                                        createdAt: new Date()
-                                    });
-                                    updatedCount++;
+                                    const hasChanges = Object.keys(processedRow).some(key => 
+                                        key === 'generacion' || key === 'autorizacion' 
+                                        ? processedRow[key] !== formatDateToDDMMYYYY(existing[key])
+                                        : processedRow[key] !== String(existing[key] || '').trim()
+                                    );
+                                    if (hasChanges) {
+                                        await window.firebaseModules.updateDoc(window.firebaseModules.doc(db, "ordenes", existing.id), {
+                                            ...processedRow,
+                                            evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
+                                            createdAt: new Date()
+                                        });
+                                        updatedCount++;
+                                    }
                                 } else {
                                     const docRef = await addDoc(collection(db, "ordenes"), {
                                         ...processedRow,
