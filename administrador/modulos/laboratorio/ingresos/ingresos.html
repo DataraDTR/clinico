@@ -659,7 +659,7 @@
 
     <script type="module">
         const { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } = window.firebaseModules;
-        const { getFirestore, collection, addDoc, getDocs, query, orderBy, where, doc, updateDoc } = window.firebaseModules;
+        const { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc } = window.firebaseModules;
 
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
@@ -668,7 +668,7 @@
             storageBucket: "datara-salud.firebasestorage.app",
             messagingSenderId: "198886910481",
             appId: "1:198886910481:web:abbc345203a423a6329fb0",
-            measurementId: "G-MLyVTZPPLD"
+            measurementId: "G-MLYVTZPPLD"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -710,6 +710,17 @@
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const year = d.getFullYear();
             return `${year}-${month}-${day}`;
+        }
+
+        async function getOrdenByCodigo(codigo) {
+            if (!codigo || typeof codigo !== 'string') return null;
+            const q = query(collection(db, "ordenes"), where("codigo", "==", codigo.trim()));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                const doc = querySnapshot.docs[0];
+                return { id: doc.id, ...doc.data() };
+            }
+            return null;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1118,7 +1129,7 @@
                 const ws = XLSX.utils.aoa_to_sheet([[
                     "Fecha de Ingreso", "Número de Factura", "Fecha de Factura", "Monto", "OC", "Fecha de OC", "Proveedor", "Acta", "Fecha de Salida", "Salida", "Usuario"
                 ], [
-                    "01-10-2025", "FACT001", "01-10-2025", "10000", "OC001", "01-10-2025", "Proveedor A", "ACTA001", "01-10-2025", "Salida 1", "Usuario Ejemplo"
+                    "06-10-2025", "FACT001", "06-10-2025", "10000", "OC001", "06-10-2025", "Proveedor A", "ACTA001", "06-10-2025", "Salida 1", "Usuario Ejemplo"
                 ]]);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Template");
@@ -1187,7 +1198,7 @@
                                 fechaIngreso: fechaIngreso ? formatDateToDDMMYYYY(new Date(fechaIngreso)) : '',
                                 numeroFactura: String(row.numeroFactura || '').trim(),
                                 fechaFactura: fechaFactura ? formatDateToDDMMYYYY(new Date(fechaFactura)) : '',
-                                monto: String(row.monto || '').trim(),
+                                monto: String(row.monto || '').trim().replace(/\./g, ''),
                                 oc: String(row.oc || '').trim(),
                                 fechaOc: fechaOc ? formatDateToDDMMYYYY(new Date(fechaOc)) : '',
                                 proveedor: String(row.proveedor || '').trim(),
@@ -1271,11 +1282,11 @@
                     pageIngresos.forEach(ingreso => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td></td> 
+                            <td></td>
                             <td>${formatDateToDDMMYYYY(ingreso.fechaIngreso) || ''}</td>
                             <td>${ingreso.numeroFactura || ''}</td>
                             <td>${formatDateToDDMMYYYY(ingreso.fechaFactura) || ''}</td>
-                            <td>${ingreso.monto || ''}</td>
+                            <td>${ingreso.monto ? parseInt(ingreso.monto).toLocaleString('es-CL') : ''}</td>
                             <td>${ingreso.oc || ''}</td>
                             <td>${formatDateToDDMMYYYY(ingreso.fechaOc) || ''}</td>
                             <td>${ingreso.proveedor || ''}</td>
@@ -1356,15 +1367,15 @@
 
             ingresarBtn.addEventListener('click', async () => {
                 const processedRow = {
-                    fechaIngreso: fechaIngresoInput.value,
+                    fechaIngreso: fechaIngresoInput.value ? formatDateToDDMMYYYY(new Date(fechaIngresoInput.value)) : '',
                     numeroFactura: numeroFacturaInput.value.trim(),
-                    fechaFactura: fechaFacturaInput.value,
+                    fechaFactura: fechaFacturaInput.value ? formatDateToDDMMYYYY(new Date(fechaFacturaInput.value)) : '',
                     monto: montoInput.value.replace(/\./g, ''),
                     oc: ordenCompraInput.value.trim(),
                     fechaOc: fechaOcInput.value,
                     proveedor: proveedorInput.value,
                     acta: actaInput.value.trim(),
-                    fechaSalida: fechaSalidaInput.value,
+                    fechaSalida: fechaSalidaInput.value ? formatDateToDDMMYYYY(new Date(fechaSalidaInput.value)) : '',
                     salida: salidaInput.value.trim(),
                     usuario: window.currentUserData.username
                 };
@@ -1438,6 +1449,8 @@
                     });
                 });
             }
+
+            enableColumnResizing();
         });
     </script>
 </body>
