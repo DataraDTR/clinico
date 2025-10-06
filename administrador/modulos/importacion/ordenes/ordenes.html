@@ -101,10 +101,10 @@
             display: none;
             position: absolute;
             right: 0;
-            bottom: 100%;
+            top: 100%; /* Cambiado de bottom: 100% a top: 100% para desplegar hacia abajo */
             background-color: white;
             min-width: 250px;
-            box-shadow: 0px -8px 16px 0px rgba(0,0,0,0.2);
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); /* Ajustado el box-shadow para reflejar la dirección hacia abajo */
             z-index: 1;
             border-radius: 4px;
             overflow: hidden;
@@ -979,25 +979,12 @@
             });
 
             onAuthStateChanged(auth, async (user) => {
-                console.log('Usuario:', user ? user.uid : 'No autenticado');
                 if (!user) {
                     window.location.replace('../../../../../index.html');
                     return;
                 }
                 
-                try {
-                    const userDocRef = doc(db, 'users', user.uid);
-                    const userDoc = await getDoc(userDocRef);
-                    if (userDoc.exists()) {
-                        window.currentUserData = userDoc.data();
-                    } else {
-                        window.currentUserData = { fullName: 'Usuario Invitado', username: 'invitado' };
-                    }
-                } catch (error) {
-                    console.error('Error al cargar datos del usuario:', error);
-                    window.currentUserData = { fullName: 'Usuario Invitado', username: 'invitado' };
-                    showToast('Error al cargar datos del usuario.', 'error');
-                }
+                window.currentUserData = { fullName: user.displayName || 'Usuario Invitado', username: user.email || 'invitado' };
                 
                 await loadOrdenes();
                 populateAnoSelect(selectAno);
