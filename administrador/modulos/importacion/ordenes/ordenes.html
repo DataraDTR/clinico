@@ -101,10 +101,10 @@
             display: none;
             position: absolute;
             right: 0;
-            top: 100%; /* Cambiado de bottom: 100% a top: 100% para desplegar hacia abajo */
+            top: 100%;
             background-color: white;
             min-width: 250px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); /* Ajustado el box-shadow para reflejar la dirección hacia abajo */
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 1;
             border-radius: 4px;
             overflow: hidden;
@@ -762,12 +762,14 @@
             }
 
             async function isDuplicate(codigo) {
+                if (!codigo || typeof codigo !== 'string') return false;
                 const codigoQuery = query(collection(db, "ordenes"), where("codigo", "==", codigo.trim()));
                 const querySnapshot = await getDocs(codigoQuery);
                 return !querySnapshot.empty;
             }
 
             async function getOrdenByCodigo(codigo) {
+                if (!codigo || typeof codigo !== 'string') return null;
                 const q = query(collection(db, "ordenes"), where("codigo", "==", codigo.trim()));
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
@@ -780,18 +782,18 @@
             function openEditModal(id, data) {
                 currentEditId = id;
                 currentEditOldData = data;
-                document.getElementById('editCodigo').value = data.codigo;
-                document.getElementById('editGeneracion').value = data.generacion;
-                document.getElementById('editAutorizacion').value = data.autorizacion;
-                document.getElementById('editSociedad').value = data.sociedad;
-                document.getElementById('editTipoCompra').value = data.tipoCompra;
-                document.getElementById('editProveedor').value = data.proveedor;
-                document.getElementById('editDigitador').value = data.digitador;
-                document.getElementById('editNivelActual').value = data.nivelActual;
-                document.getElementById('editNivelOx').value = data.nivelOx;
-                document.getElementById('editLiberada').value = data.liberada;
-                document.getElementById('editTotal').value = data.total;
-                document.getElementById('editEstado').value = data.estado;
+                document.getElementById('editCodigo').value = data.codigo || '';
+                document.getElementById('editGeneracion').value = data.generacion || '';
+                document.getElementById('editAutorizacion').value = data.autorizacion || '';
+                document.getElementById('editSociedad').value = data.sociedad || '';
+                document.getElementById('editTipoCompra').value = data.tipoCompra || '';
+                document.getElementById('editProveedor').value = data.proveedor || '';
+                document.getElementById('editDigitador').value = data.digitador || '';
+                document.getElementById('editNivelActual').value = data.nivelActual || '';
+                document.getElementById('editNivelOx').value = data.nivelOx || '';
+                document.getElementById('editLiberada').value = data.liberada || '';
+                document.getElementById('editTotal').value = data.total || '';
+                document.getElementById('editEstado').value = data.estado || '';
                 editModal.style.display = 'block';
             }
 
@@ -1184,35 +1186,53 @@
                         const data = new Uint8Array(e.target.result);
                         const wb = XLSX.read(data, {type: 'array'});
                         const ws = wb.Sheets[wb.SheetNames[0]];
-                        const json = XLSX.utils.sheet_to_json(ws, {header: ["codigo", "generacion", "autorizacion", "sociedad", "tipoCompra", "proveedor", "digitador", "nivelActual", "nivelOx", "liberada", "total", "estado"], range: 1}); // Skip header
+                        const json = XLSX.utils.sheet_to_json(ws, {header: ["codigo", "generacion", "autorizacion", "sociedad", "tipoCompra", "proveedor", "digitador", "nivelActual", "nivelOx", "liberada", "total", "estado"], range: 1, defval: ''}); // Skip header, set default value to empty string
 
                         let addedCount = 0;
                         let updatedCount = 0;
                         for (let row of json) {
-                            if (row.codigo) {
-                                const existing = await getOrdenByCodigo(row.codigo);
+                            // Convertir todos los valores a cadenas y manejar valores nulos/undefined
+                            const processedRow = {
+                                codigo: String(row.codigo || '').trim(),
+                                generacion: String(row.generacion || '').trim(),
+                                autorizacion: String(row.autorizacion || '').trim(),
+                                sociedad: String(row.sociedad || '').trim(),
+                                tipoCompra: String(row.tipoCompra || '').trim(),
+                                proveedor: String(row.proveedor || '').trim(),
+                                digitador: String(row.digitador || '').trim(),
+                                nivelActual: String(row.nivelActual || '').trim(),
+                                nivelOx: String(row.nivelOx || '').trim(),
+                                liberada: String(row.liberada || '').trim(),
+                                total: String(row.total || '').trim(),
+                                estado: String(row.estado || '').trim()
+                            };
+
+                            if (processedRow.codigo) {
+                                const existing = await getOrdenByCodigo(processedRow.codigo);
                                 if (existing) {
                                     // Comparar si hay cambios
-                                    const hasChanges = Object.keys(row).some(key => row[key] !== existing[key]);
+                                    const hasChanges = Object.keys(processedRow).some(key => processedRow[key] !== String(existing[key] || '').trim());
                                     if (hasChanges) {
                                         await updateDoc(doc(db, "ordenes", existing.id), {
-                                            ...row,
+                                            ...processedRow,
                                             evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
                                             createdAt: new Date()
                                         });
-                                        await logAction(existing.id, 'update', existing, row);
+                                        await logAction(existing.id, 'update', existing, processedRow);
                                         updatedCount++;
                                     }
                                     // Si no hay cambios, no hacer nada
                                 } else {
                                     const docRef = await addDoc(collection(db, "ordenes"), {
-                                        ...row,
+                                        ...processedRow,
                                         evento: `Importado ${new Date().toLocaleString('es-CL')}`,
                                         createdAt: new Date()
                                     });
-                                    await logAction(docRef.id, 'create', null, row);
+                                    await logAction(docRef.id, 'create', null, processedRow);
                                     addedCount++;
                                 }
+                            } else {
+                                console.warn('Fila ignorada: código no válido', row);
                             }
                         }
                         hideLoading();
@@ -1225,6 +1245,7 @@
                 } catch (error) {
                     hideLoading();
                     showToast('Error al importar el archivo: ' + error.message, 'error');
+                    console.error('Error al importar:', error);
                 }
             }
 
@@ -1238,8 +1259,8 @@
 
             function getFilteredOrdenes() {
                 return ordenes.filter(orden => 
-                    orden.codigo.toLowerCase().includes(searchCodigo.toLowerCase()) &&
-                    orden.proveedor.toLowerCase().includes(searchProveedor.toLowerCase()) &&
+                    String(orden.codigo || '').toLowerCase().includes(searchCodigo.toLowerCase()) &&
+                    String(orden.proveedor || '').toLowerCase().includes(searchProveedor.toLowerCase()) &&
                     (!selectedAno || new Date(orden.generacion).getFullYear() == selectedAno) &&
                     (!selectedMes || new Date(orden.generacion).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
                 ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1257,23 +1278,23 @@
                     pageOrdenes.forEach(orden => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td>${orden.codigo}</td>
-                            <td>${orden.generacion}</td>
-                            <td>${orden.autorizacion}</td>
-                            <td>${orden.sociedad}</td>
-                            <td>${orden.tipoCompra}</td>
-                            <td>${orden.proveedor}</td>
-                            <td>${orden.digitador}</td>
-                            <td>${orden.nivelActual}</td>
-                            <td>${orden.nivelOx}</td>
-                            <td>${orden.liberada}</td>
-                            <td>${orden.total}</td>
-                            <td>${orden.estado}</td>
+                            <td>${orden.codigo || ''}</td>
+                            <td>${orden.generacion || ''}</td>
+                            <td>${orden.autorizacion || ''}</td>
+                            <td>${orden.sociedad || ''}</td>
+                            <td>${orden.tipoCompra || ''}</td>
+                            <td>${orden.proveedor || ''}</td>
+                            <td>${orden.digitador || ''}</td>
+                            <td>${orden.nivelActual || ''}</td>
+                            <td>${orden.nivelOx || ''}</td>
+                            <td>${orden.liberada || ''}</td>
+                            <td>${orden.total || ''}</td>
+                            <td>${orden.estado || ''}</td>
                             <td>${orden.evento || 'N/A'}</td>
                             <td class="ordenes-actions">
                                 <button title="Editar" class="ordenes-btn-edit" onclick="openEditModal('${orden.id}', ${JSON.stringify(orden).replace(/"/g, '&quot;')})"><i class="fas fa-edit"></i></button>
-                                <button title="Eliminar" class="ordenes-btn-delete" onclick="openDeleteModal('${orden.id}', '${orden.codigo}')"><i class="fas fa-trash"></i></button>
-                                <button title="Ver Historial" class="ordenes-btn-history" onclick="openHistoryModal('${orden.id}', '${orden.codigo}')"><i class="fas fa-history"></i></button>
+                                <button title="Eliminar" class="ordenes-btn-delete" onclick="openDeleteModal('${orden.id}', '${orden.codigo || ''}')"><i class="fas fa-trash"></i></button>
+                                <button title="Ver Historial" class="ordenes-btn-history" onclick="openHistoryModal('${orden.id}', '${orden.codigo || ''}')"><i class="fas fa-history"></i></button>
                             </td>
                         `;
                         ordenesBody.appendChild(row);
