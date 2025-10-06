@@ -100,7 +100,7 @@
         .ordenes-dropdown-menu {
             display: none;
             position: absolute;
-            right: 0;
+            left: calc(-200px + 20px);
             top: 100%;
             background-color: white;
             min-width: 200px;
@@ -116,7 +116,7 @@
             text-decoration: none;
             display: block;
             font-size: 12px;
-            white-space: nowrap;
+            overflow-wrap: break-word;
         }
         .ordenes-dropdown-menu a:hover {
             background-color: #f1f1f1;
@@ -447,6 +447,7 @@
             }
             .ordenes-dropdown-menu {
                 min-width: 180px;
+                left: calc(-180px + 20px);
             }
         }
     </style>
@@ -454,9 +455,7 @@
 <body>
     <div class="ordenes-main-container">
         <h1 class="ordenes-title">Importación de Órdenes</h1>
-        
         <div id="ordenes-message"></div>
-
         <div class="ordenes-fields-container">
             <div class="ordenes-search-section">
                 <div class="ordenes-form-group">
@@ -487,7 +486,6 @@
                 </div>
             </div>
         </div>
-
         <table id="ordenesTable" class="ordenes-table">
             <thead>
                 <tr>
@@ -506,37 +504,29 @@
                     <th>Evento</th>
                 </tr>
             </thead>
-            <tbody id="ordenesBody">
-            </tbody>
+            <tbody id="ordenesBody"></tbody>
         </table>
-
         <div class="ordenes-pagination" id="pagination">
-            <div class="ordenes-pagination-info" id="paginationInfo">
-            </div>
+            <div class="ordenes-pagination-info" id="paginationInfo"></div>
             <div class="ordenes-pagination-controls">
                 <button id="prevBtn">Anterior</button>
                 <div class="ordenes-page-numbers" id="pageNumbers"></div>
                 <button id="nextBtn">Siguiente</button>
             </div>
         </div>
-
         <input type="file" id="fileUpload" style="display:none;" accept=".xlsx, .xls">
-
         <div id="ordenes-loading" class="ordenes-loading">
             <div class="ordenes-loading-spinner"></div>
             <div class="ordenes-loading-text">Procesando...</div>
         </div>
-
         <div id="ordenes-import-progress" class="ordenes-import-progress">
             <div class="ordenes-progress-bar-container">
                 <div id="progressBar" class="ordenes-progress-bar"></div>
             </div>
             <div id="progressText" class="ordenes-progress-text">Importando: 0%</div>
         </div>
-
         <div id="ordenes-toast" class="ordenes-toast"></div>
     </div>
-
     <div id="downloadMesModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeDownloadMes">&times;</span>
@@ -555,11 +545,9 @@
             </div>
         </div>
     </div>
-
     <script type="module">
         const { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } = window.firebaseModules;
         const { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc } = window.firebaseModules;
-
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
             authDomain: "datara-salud.firebaseapp.com",
@@ -569,24 +557,19 @@
             appId: "1:198886910481:web:abbc345203a423a6329fb0",
             measurementId: "G-MLYVTZPPLD"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-
         setPersistence(auth, browserSessionPersistence);
-
         let ordenes = [];
         let currentPage = 1;
         const PAGE_SIZE = 10;
         let searchCodigo = '';
         let searchProveedor = '';
-        let selectedAno = new Date().getFullYear(); 
+        let selectedAno = new Date().getFullYear();
         let selectedMes = '';
         let anos = [];
         let mesesPorAno = {};
-
         function formatDateToDDMMYYYY(date) {
             if (!date || isNaN(new Date(date))) return '';
             const d = new Date(date);
@@ -595,7 +578,6 @@
             const year = d.getFullYear();
             return `${day}-${month}-${year}`;
         }
-
         document.addEventListener('DOMContentLoaded', () => {
             const loading = document.getElementById('ordenes-loading');
             const importProgress = document.getElementById('ordenes-import-progress');
@@ -611,14 +593,12 @@
             const buscarProveedorInput = document.getElementById('buscarProveedor');
             const selectAno = document.getElementById('selectAno');
             const selectMes = document.getElementById('selectMes');
-
             const downloadMesModal = document.getElementById('downloadMesModal');
             const closeDownloadMes = document.getElementById('closeDownloadMes');
             const cancelDownloadMes = document.getElementById('cancelDownloadMes');
             const confirmDownloadMes = document.getElementById('confirmDownloadMes');
             const selectDownloadAno = document.getElementById('selectDownloadAno');
             const selectDownloadMes = document.getElementById('selectDownloadMes');
-
             const actionsBtn = document.getElementById('actionsBtn');
             const actionsMenu = document.getElementById('actionsMenu');
             const downloadTemplate = document.getElementById('downloadTemplate');
@@ -627,15 +607,12 @@
             const downloadPage = document.getElementById('downloadPage');
             const downloadMes = document.getElementById('downloadMes');
             const fileUpload = document.getElementById('fileUpload');
-
             window.showLoading = function() {
                 if (loading) loading.classList.add('show');
             };
-
             window.hideLoading = function() {
                 if (loading) loading.classList.remove('show');
             };
-
             function showImportProgress(percent) {
                 if (importProgress && progressBar && progressText) {
                     importProgress.classList.add('show');
@@ -643,7 +620,6 @@
                     progressText.textContent = `Importando: ${Math.round(percent)}%`;
                 }
             }
-
             function hideImportProgress() {
                 if (importProgress) {
                     importProgress.classList.remove('show');
@@ -651,7 +627,6 @@
                     progressText.textContent = 'Importando: 0%';
                 }
             }
-
             function showToast(text, type = 'success') {
                 if (toast) {
                     toast.textContent = text;
@@ -662,7 +637,6 @@
                     }, 5000);
                 }
             }
-
             async function getOrdenByCodigo(codigo) {
                 if (!codigo || typeof codigo !== 'string') return null;
                 const q = query(collection(db, "ordenes"), where("codigo", "==", codigo.trim()));
@@ -673,24 +647,20 @@
                 }
                 return null;
             }
-
             function openDownloadMesModal() {
                 populateAnoSelect(selectDownloadAno);
                 selectDownloadAno.value = selectedAno;
                 populateMesSelect(selectDownloadMes, selectDownloadAno.value);
                 downloadMesModal.style.display = 'block';
             }
-
             function closeDownloadMesModalHandler() {
                 downloadMesModal.style.display = 'none';
             }
-
             closeDownloadMes.addEventListener('click', closeDownloadMesModalHandler);
             cancelDownloadMes.addEventListener('click', closeDownloadMesModalHandler);
             window.addEventListener('click', (e) => {
                 if (e.target === downloadMesModal) closeDownloadMesModalHandler();
             });
-
             confirmDownloadMes.addEventListener('click', async () => {
                 const ano = selectDownloadAno.value;
                 const mes = selectDownloadMes.value;
@@ -723,22 +693,18 @@
                     showToast('Por favor, selecciona año y mes.', 'error');
                 }
             });
-
             onAuthStateChanged(auth, async (user) => {
                 if (!user) {
                     window.location.replace('../../../../../index.html');
                     return;
                 }
-                
                 window.currentUserData = { fullName: user.displayName || 'Usuario Invitado', username: user.email || 'invitado' };
-                
                 await loadOrdenes();
                 populateAnoSelect(selectAno);
                 selectAno.value = selectedAno;
                 populateMesSelect(selectMes, selectedAno);
                 populateAnoSelect(selectDownloadAno);
             });
-
             if (buscarCodigoInput) {
                 buscarCodigoInput.addEventListener('input', (e) => {
                     searchCodigo = e.target.value.trim();
@@ -746,7 +712,6 @@
                     renderTable();
                 });
             }
-
             if (buscarProveedorInput) {
                 buscarProveedorInput.addEventListener('input', (e) => {
                     searchProveedor = e.target.value.trim();
@@ -754,7 +719,6 @@
                     renderTable();
                 });
             }
-
             if (selectAno) {
                 selectAno.addEventListener('change', (e) => {
                     selectedAno = e.target.value;
@@ -763,7 +727,6 @@
                     renderTable();
                 });
             }
-
             if (selectMes) {
                 selectMes.addEventListener('change', (e) => {
                     selectedMes = e.target.value;
@@ -771,13 +734,11 @@
                     renderTable();
                 });
             }
-
             if (selectDownloadAno) {
                 selectDownloadAno.addEventListener('change', (e) => {
                     populateMesSelect(selectDownloadMes, e.target.value);
                 });
             }
-
             async function loadOrdenes() {
                 showLoading();
                 try {
@@ -804,7 +765,6 @@
                     showToast('Error al cargar las órdenes: ' + error.message, 'error');
                 }
             }
-
             function populateAnoSelect(select) {
                 select.innerHTML = '<option value="">Todos</option>';
                 Array.from(anos).sort((a, b) => b - a).forEach(ano => {
@@ -814,7 +774,6 @@
                     select.appendChild(option);
                 });
             }
-
             function populateMesSelect(select, ano) {
                 select.innerHTML = '<option value="">Todos</option>';
                 if (ano && mesesPorAno[ano]) {
@@ -826,29 +785,24 @@
                     });
                 }
             }
-
             actionsBtn.addEventListener('click', () => {
                 actionsMenu.style.display = actionsMenu.style.display === 'block' ? 'none' : 'block';
             });
-
             window.addEventListener('click', (e) => {
                 if (!actionsBtn.contains(e.target) && !actionsMenu.contains(e.target)) {
                     actionsMenu.style.display = 'none';
                 }
             });
-
             downloadTemplate.addEventListener('click', (e) => {
                 e.preventDefault();
                 downloadImportTemplate();
                 actionsMenu.style.display = 'none';
             });
-
             importExcel.addEventListener('click', (e) => {
                 e.preventDefault();
                 fileUpload.click();
                 actionsMenu.style.display = 'none';
             });
-
             downloadAll.addEventListener('click', (e) => {
                 e.preventDefault();
                 exportToExcel(ordenes.map(o => ({
@@ -868,7 +822,6 @@
                 })), 'todas_ordenes');
                 actionsMenu.style.display = 'none';
             });
-
             downloadPage.addEventListener('click', (e) => {
                 e.preventDefault();
                 const filtered = getFilteredOrdenes();
@@ -892,13 +845,11 @@
                 exportToExcel(pageData, 'pagina_actual_ordenes');
                 actionsMenu.style.display = 'none';
             });
-
             downloadMes.addEventListener('click', (e) => {
                 e.preventDefault();
                 openDownloadMesModal();
                 actionsMenu.style.display = 'none';
             });
-
             fileUpload.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (file) {
@@ -906,7 +857,6 @@
                     fileUpload.value = '';
                 }
             });
-
             function exportToExcel(data, filename) {
                 const ws = XLSX.utils.json_to_sheet(data, {
                     dateNF: 'dd-mm-yyyy',
@@ -916,7 +866,6 @@
                 XLSX.utils.book_append_sheet(wb, ws, "Órdenes");
                 XLSX.writeFile(wb, filename + '.xlsx');
             }
-
             function downloadImportTemplate() {
                 const ws = XLSX.utils.aoa_to_sheet([[
                     "Código", "Generación", "Autorización", "Sociedad", "Tipo de compra", "Proveedor", "Digitador", "Nivel actual", "Nivel ox", "Liberada", "Total", "Estado"
@@ -927,7 +876,6 @@
                 XLSX.utils.book_append_sheet(wb, ws, "Template");
                 XLSX.writeFile(wb, 'template_ordenes.xlsx');
             }
-
             async function importFromExcel(file) {
                 try {
                     const reader = new FileReader();
@@ -942,36 +890,28 @@
                             raw: false,
                             dateNF: 'dd-mm-yyyy'
                         });
-
                         let addedCount = 0;
                         let updatedCount = 0;
                         const totalRows = json.length;
-
-                        showImportProgress(0); 
-
+                        showImportProgress(0);
                         for (let i = 0; i < json.length; i++) {
                             const row = json[i];
                             let generacion = row.generacion;
                             let autorizacion = row.autorizacion;
-
                             if (typeof generacion === 'number') {
                                 generacion = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(generacion));
                             }
                             if (typeof autorizacion === 'number') {
                                 autorizacion = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(autorizacion));
                             }
-
                             if (generacion && isNaN(new Date(generacion))) {
-                                console.warn(`Fila ignorada: Fecha de generación no válida en la fila ${i + 2}`, row);
                                 showToast(`Fila ${i + 2}: Fecha de generación no válida`, 'error');
                                 continue;
                             }
                             if (autorizacion && isNaN(new Date(autorizacion))) {
-                                console.warn(`Fila ignorada: Fecha de autorización no válida en la fila ${i + 2}`, row);
                                 showToast(`Fila ${i + 2}: Fecha de autorización no válida`, 'error');
                                 continue;
                             }
-
                             const processedRow = {
                                 codigo: String(row.codigo || '').trim(),
                                 generacion: generacion ? formatDateToDDMMYYYY(new Date(generacion)) : '',
@@ -986,17 +926,16 @@
                                 total: String(row.total || '').trim(),
                                 estado: String(row.estado || '').trim()
                             };
-
                             if (processedRow.codigo && processedRow.generacion && processedRow.autorizacion) {
                                 const existing = await getOrdenByCodigo(processedRow.codigo);
                                 if (existing) {
-                                    const hasChanges = Object.keys(processedRow).some(key => 
-                                        key === 'generacion' || key === 'autorizacion' 
+                                    const hasChanges = Object.keys(processedRow).some(key =>
+                                        key === 'generacion' || key === 'autorizacion'
                                         ? processedRow[key] !== formatDateToDDMMYYYY(existing[key])
                                         : processedRow[key] !== String(existing[key] || '').trim()
                                     );
                                     if (hasChanges) {
-                                        await window.firebaseModules.updateDoc(window.firebaseModules.doc(db, "ordenes", existing.id), {
+                                        await updateDoc(doc(db, "ordenes", existing.id), {
                                             ...processedRow,
                                             evento: `Actualizado ${new Date().toLocaleString('es-CL')}`,
                                             createdAt: new Date()
@@ -1012,14 +951,11 @@
                                     addedCount++;
                                 }
                             } else {
-                                console.warn(`Fila ignorada: Campos obligatorios faltantes en la fila ${i + 2}`, row);
                                 showToast(`Fila ${i + 2}: Faltan código, generación o autorización`, 'error');
                             }
-
                             const progress = ((i + 1) / totalRows) * 100;
                             showImportProgress(progress);
                         }
-
                         hideImportProgress();
                         showToast(`Se han importado ${addedCount} órdenes nuevas y actualizado ${updatedCount} órdenes.`, 'success');
                         await loadOrdenes();
@@ -1030,10 +966,8 @@
                 } catch (error) {
                     hideImportProgress();
                     showToast('Error al importar el archivo: ' + error.message, 'error');
-                    console.error('Error al importar:', error);
                 }
             }
-
             async function getOrdenesByMes(ano, mes) {
                 const filtered = ordenes.filter(o => {
                     const generacionDate = new Date(o.generacion);
@@ -1041,25 +975,21 @@
                 });
                 return filtered;
             }
-
             function getFilteredOrdenes() {
-                return ordenes.filter(orden => 
+                return ordenes.filter(orden =>
                     String(orden.codigo || '').toLowerCase().includes(searchCodigo.toLowerCase()) &&
                     String(orden.proveedor || '').toLowerCase().includes(searchProveedor.toLowerCase()) &&
                     (!selectedAno || new Date(orden.generacion).getFullYear() == selectedAno) &&
                     (!selectedMes || new Date(orden.generacion).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
                 );
             }
-
             function renderTable() {
                 const filteredOrdenes = getFilteredOrdenes();
                 const start = (currentPage - 1) * PAGE_SIZE;
                 const end = start + PAGE_SIZE;
                 const pageOrdenes = filteredOrdenes.sort((a, b) => a.codigo.localeCompare(b.codigo)).slice(start, end);
-
                 if (ordenesBody) {
                     ordenesBody.innerHTML = '';
-
                     pageOrdenes.forEach(orden => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -1080,23 +1010,18 @@
                         ordenesBody.appendChild(row);
                     });
                 }
-
                 updatePagination(filteredOrdenes.length);
             }
-
             function updatePagination(total) {
                 const totalPages = Math.ceil(total / PAGE_SIZE);
                 const startPage = Math.max(1, currentPage - 2);
                 const endPage = Math.min(totalPages, startPage + 4);
-
                 const startRecord = (currentPage - 1) * PAGE_SIZE + 1;
                 const endRecord = Math.min(currentPage * PAGE_SIZE, total);
                 const recordsThisPage = endRecord - startRecord + 1;
                 if (paginationInfo) paginationInfo.textContent = `Página ${currentPage} de ${totalPages} | ${recordsThisPage} registros en esta página de ${total}`;
-
                 if (prevBtn) prevBtn.disabled = currentPage === 1;
                 if (nextBtn) nextBtn.disabled = currentPage === totalPages;
-
                 if (pageNumbers) {
                     pageNumbers.innerHTML = '';
                     for (let i = startPage; i <= endPage; i++) {
@@ -1115,12 +1040,10 @@
                     }
                 }
             }
-
             function goToPage(page) {
                 currentPage = page;
                 renderTable();
             }
-
             if (prevBtn) {
                 prevBtn.addEventListener('click', () => {
                     if (currentPage > 1) {
@@ -1129,7 +1052,6 @@
                     }
                 });
             }
-
             if (nextBtn) {
                 nextBtn.addEventListener('click', () => {
                     const totalPages = Math.ceil(getFilteredOrdenes().length / PAGE_SIZE);
