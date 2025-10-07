@@ -280,7 +280,7 @@
 
         setPersistence(auth, browserSessionPersistence);
 
-        const PAGE_SIZE = 50;
+        const PAGE_SIZE = 10;
 
         let ingresos = [];
         let currentPage = 1;
@@ -300,7 +300,7 @@
 
         function parseDateDDMMYYYY(dateStr) {
             if (!dateStr) return null;
-            const [day, month, year] = dateStr.split('-').map(Number);
+            const [day, month, year] = dateStr.split(/[-\/.]/).map(Number);
             if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) return null;
             return new Date(year, month - 1, day);
         }
@@ -1164,7 +1164,7 @@
                 const ws = XLSX.utils.aoa_to_sheet([[
                     "Fecha de Ingreso", "Número de Factura", "Fecha de Factura", "Monto", "OC", "Fecha de OC", "Proveedor", "Acta", "Fecha de Salida", "Salida", "Nombre Completo"
                 ], [
-                    "07-10-2025", "FACT001", "07-10-2025", "10000", "OC001", "07-10-2025", "Proveedor A", "ACTA001", "07-10-2025", "Salida 1", "Usuario Ejemplo"
+                    "18-06-2025", "FACT001", "18-06-2025", "10000", "OC001", "18-06-2025", "Proveedor A", "ACTA001", "18-06-2025", "Salida 1", "Usuario Ejemplo"
                 ]]);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Template");
@@ -1176,7 +1176,7 @@
                     const reader = new FileReader();
                     reader.onload = async (e) => {
                         const data = new Uint8Array(e.target.result);
-                        const wb = XLSX.read(data, {type: 'array', cellDates: false, raw: true});
+                        const wb = XLSX.read(data, { type: 'array', cellDates: false, raw: true });
                         const ws = wb.Sheets[wb.SheetNames[0]];
                         const json = XLSX.utils.sheet_to_json(ws, {
                             header: ["fechaIngreso", "numeroFactura", "fechaFactura", "monto", "oc", "fechaOc", "proveedor", "acta", "fechaSalida", "salida", "fullName"],
@@ -1192,12 +1192,12 @@
 
                         for (let i = 0; i < json.length; i++) {
                             const row = json[i];
-                            let fechaIngreso = row.fechaIngreso;
-                            let fechaFactura = row.fechaFactura;
-                            let fechaOc = row.fechaOc;
-                            let fechaSalida = row.fechaSalida;
+                            let fechaIngreso = row.fechaIngreso || '';
+                            let fechaFactura = row.fechaFactura || '';
+                            let fechaOc = row.fechaOc || '';
+                            let fechaSalida = row.fechaSalida || '';
 
-                            // Convert Excel date or string to DD-MM-YYYY
+                            // Process dates from Excel
                             if (fechaIngreso && typeof fechaIngreso === 'string') {
                                 fechaIngreso = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaIngreso.replace(/[\/.]/g, '-')));
                             } else if (typeof fechaIngreso === 'number') {
@@ -1219,6 +1219,7 @@
                                 fechaSalida = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaSalida));
                             }
 
+                            // Validate dates
                             if (fechaIngreso && isNaN(parseDateDDMMYYYY(fechaIngreso))) {
                                 showToast(`Fila ${i + 2}: Fecha de ingreso no válida`, 'error');
                                 continue;
@@ -1237,15 +1238,15 @@
                             }
 
                             const processedRow = {
-                                fechaIngreso: fechaIngreso ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaIngreso)) : formatDateToDDMMYYYY(new Date()),
+                                fechaIngreso: fechaIngreso || '',
                                 numeroFactura: String(row.numeroFactura || '').trim(),
-                                fechaFactura: fechaFactura ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaFactura)) : formatDateToDDMMYYYY(new Date()),
+                                fechaFactura: fechaFactura || '',
                                 monto: String(row.monto || '').trim().replace(/[^\d]/g, ''),
                                 oc: String(row.oc || '').trim(),
-                                fechaOc: fechaOc ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaOc)) : '',
+                                fechaOc: fechaOc || '',
                                 proveedor: String(row.proveedor || '').trim(),
                                 acta: String(row.acta || '').trim(),
-                                fechaSalida: fechaSalida ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaSalida)) : formatDateToDDMMYYYY(new Date()),
+                                fechaSalida: fechaSalida || '',
                                 salida: String(row.salida || '').trim(),
                                 fullName: String(row.fullName || window.currentUserData.fullName).trim()
                             };
