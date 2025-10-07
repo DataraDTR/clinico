@@ -118,7 +118,7 @@ html, body {
     background-color: white;
     min-width: 200px;
     box-shadow: 2px 8px 16px rgba(0,0,0,0.2);
-    z-index: 1;
+    z-index: 20; /* Actualizado para asegurar que el menú esté por encima del encabezado de la tabla */
     border-radius: 4px;
     overflow: hidden;
     flex-direction: column;
@@ -147,13 +147,13 @@ html, body {
 
 .ingresos-table-container {
     width: 100%;
-    max-height: 500px; /* Fixed height for the table container */
-    overflow-y: auto; /* Enable vertical scrollbar */
-    overflow-x: auto; /* Maintain horizontal scrollbar for wide tables */
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: auto;
     margin-bottom: 20px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    flex-grow: 1; /* Allow table container to take available space */
+    flex-grow: 1;
 }
 
 .ingresos-table {
@@ -178,7 +178,7 @@ html, body {
     cursor: col-resize;
     position: sticky;
     top: 0;
-    z-index: 10; /* Ensure headers stay above table content */
+    z-index: 10;
 }
 
 .ingresos-table th::after {
@@ -267,7 +267,7 @@ html, body {
     flex-wrap: nowrap;
     position: sticky;
     bottom: 0;
-    z-index: 10; /* Ensure pagination stays above other content */
+    z-index: 10;
 }
 
 .ingresos-pagination-info {
@@ -315,6 +315,7 @@ html, body {
     cursor: pointer;
     font-size: 11px;
     border-radius: 4px;
+    color: #333; /* Agregado para asegurar que el texto de botones no activos sea visible */
 }
 
 .ingresos-page-numbers button.active {
@@ -325,6 +326,7 @@ html, body {
 
 .ingresos-page-numbers button:hover:not(.active) {
     background-color: #f0f0f0;
+    color: #333; /* Agregado para mantener el texto visible en hover */
 }
 
 .ingresos-page-numbers .ingresos-dots {
