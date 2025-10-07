@@ -256,7 +256,7 @@
         setPersistence(auth, browserSessionPersistence);
 
         let ingresos = [];
-        let anos = [];
+        let anos = new Set();
         const GOAL_AMOUNT = 50000000; // Meta de 50,000,000 CLP por mes
 
         const meses = [
@@ -264,9 +264,24 @@
             'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
         ];
 
+        function formatDateToDDMMYYYY(date) {
+            if (!date || isNaN(new Date(date))) return '';
+            const d = new Date(date);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
         function parseDateDDMMYYYY(dateStr) {
             if (!dateStr) return null;
-            const [day, month, year] = dateStr.split('-').map(Number);
+            if (typeof dateStr === 'object' && 'toDate' in dateStr) {
+                // Handle Firestore Timestamp
+                const date = dateStr.toDate();
+                return date && !isNaN(date) ? date : null;
+            }
+            const normalized = String(dateStr).replace(/[\/.]/g, '-');
+            const [day, month, year] = normalized.split('-').map(Number);
             if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) return null;
             return new Date(year, month - 1, day);
         }
@@ -329,17 +344,43 @@
                     anos = new Set();
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
-                        ingresos.push(data);
-                        const fechaIngresoDate = parseDateDDMMYYYY(data.fechaIngreso);
+                        let fechaIngreso = data.fechaIngreso;
+                        let fechaSalida = data.fechaSalida;
+
+                        // Convert Timestamp to DD-MM-YYYY string if necessary
+                        if (fechaIngreso && typeof fechaIngreso === 'object' && 'toDate' in fechaIngreso) {
+                            fechaIngreso = formatDateToDDMMYYYY(fechaIngreso.toDate());
+                            console.warn(`Documento ${doc.id} tiene fechaIngreso como Timestamp: ${data.fechaIngreso}. Convertido a: ${fechaIngreso}`);
+                        }
+                        if (fechaSalida && typeof fechaSalida === 'object' && 'toDate' in fechaSalida) {
+                            fechaSalida = formatDateToDDMMYYYY(fechaSalida.toDate());
+                            console.warn(`Documento ${doc.id} tiene fechaSalida como Timestamp: ${data.fechaSalida}. Convertido a: ${fechaSalida}`);
+                        }
+
+                        if (!fechaIngreso || typeof fechaIngreso !== 'string' || !parseDateDDMMYYYY(fechaIngreso)) {
+                            console.warn(`Documento ${doc.id} tiene fechaIngreso inválida: ${data.fechaIngreso}. Se omite.`);
+                            return;
+                        }
+
+                        const ingreso = {
+                            ...data,
+                            fechaIngreso,
+                            fechaSalida: fechaSalida || ''
+                        };
+                        ingresos.push(ingreso);
+                        const fechaIngresoDate = parseDateDDMMYYYY(fechaIngreso);
                         if (fechaIngresoDate && !isNaN(fechaIngresoDate)) {
                             const ano = fechaIngresoDate.getFullYear();
                             anos.add(ano);
                         }
                     });
+                    console.log('Ingresos cargados:', ingresos);
                     hideLoading();
+                    showToast('Ingresos cargados correctamente. Si algunos registros no aparecen, use la opción "Corregir formatos de fecha" en la página de Ingresos.', 'info');
                 } catch (error) {
                     hideLoading();
                     showToast('Error al cargar los ingresos: ' + error.message, 'error');
+                    console.error('Error en loadIngresos:', error);
                 }
             }
 
