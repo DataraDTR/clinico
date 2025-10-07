@@ -73,6 +73,7 @@
                     <a href="#" id="downloadAll">Descargar todos los registros</a>
                     <a href="#" id="downloadPage">Descargar hoja actual</a>
                     <a href="#" id="downloadMes">Descargar mes</a>
+                    <a href="#" id="fixDates">Corregir formatos de fecha</a>
                 </div>
             </div>
         </div>
@@ -287,11 +288,11 @@
 
         let ingresos = [];
         let currentPage = 1;
-        let anos = [];
-        let mesesPorAno = [];
+        let anos = new Set();
+        let mesesPorAno = {};
         let ingresosPorMes = {};
         let meses = [];
-        let selectedAno = new Date().getFullYear();
+        let selectedAno = new Date().getFullYear().toString();
         let selectedMes = '';
         let searchNumeroFactura = '';
         let searchProveedor = '';
@@ -329,10 +330,9 @@
 
         function excelSerialToDate(serial) {
             if (!serial || isNaN(serial)) return null;
-            // Excel serial date: number of days since 1900-01-01, adjusted for Excel's leap year bug
-            const excelEpoch = new Date(1899, 11, 30); // 1899-12-30 to account for Excel's base date
+            const excelEpoch = new Date(1899, 11, 30);
             const days = Math.floor(serial);
-            const milliseconds = (serial - days) * 24 * 60 * 60 * 1000; // Handle fractional days
+            const milliseconds = (serial - days) * 24 * 60 * 60 * 1000;
             const date = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000 + milliseconds);
             return date;
         }
@@ -383,6 +383,61 @@
             });
         }
 
+        async function fixInvalidDateFormats() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "ingresos_lab"));
+                let fixedCount = 0;
+                showLoading();
+
+                for (const doc of querySnapshot.docs) {
+                    const data = doc.data();
+                    let needsUpdate = false;
+                    const updates = {};
+
+                    const convertTimestampToString = (value) => {
+                        if (value && typeof value === 'object' && 'toDate' in value) {
+                            const date = value.toDate();
+                            return formatDateToDDMMYYYY(date);
+                        }
+                        return value;
+                    };
+
+                    if (data.fechaIngreso && typeof data.fechaIngreso === 'object' && 'toDate' in data.fechaIngreso) {
+                        updates.fechaIngreso = convertTimestampToString(data.fechaIngreso);
+                        needsUpdate = true;
+                    }
+                    if (data.fechaFactura && typeof data.fechaFactura === 'object' && 'toDate' in data.fechaFactura) {
+                        updates.fechaFactura = convertTimestampToString(data.fechaFactura);
+                        needsUpdate = true;
+                    }
+                    if (data.fechaOc && typeof data.fechaOc === 'object' && 'toDate' in data.fechaOc) {
+                        updates.fechaOc = convertTimestampToString(data.fechaOc);
+                        needsUpdate = true;
+                    }
+                    if (data.fechaSalida && typeof data.fechaSalida === 'object' && 'toDate' in data.fechaSalida) {
+                        updates.fechaSalida = convertTimestampToString(data.fechaSalida);
+                        needsUpdate = true;
+                    }
+
+                    if (needsUpdate) {
+                        console.log(`Corrigiendo documento ${doc.id}:`, updates);
+                        await updateDoc(doc.ref, updates);
+                        fixedCount++;
+                    }
+                }
+
+                hideLoading();
+                showToast(`Se corrigieron ${fixedCount} documentos con fechas inválidas.`, 'success');
+                await loadIngresos();
+                populateAnoSelect(selectAno);
+                populateAnoSelect(selectDownloadAno);
+            } catch (error) {
+                hideLoading();
+                showToast('Error al corregir formatos de fecha: ' + error.message, 'error');
+                console.error('Error en fixInvalidDateFormats:', error);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const loading = document.getElementById('ingresos-loading');
             const importProgress = document.getElementById('ingresos-import-progress');
@@ -427,6 +482,7 @@
             const downloadAll = document.getElementById('downloadAll');
             const downloadPage = document.getElementById('downloadPage');
             const downloadMes = document.getElementById('downloadMes');
+            const fixDates = document.getElementById('fixDates');
             const fileUpload = document.getElementById('fileUpload');
             const editModal = document.getElementById('editModal');
             const deleteModal = document.getElementById('deleteModal');
@@ -448,7 +504,6 @@
             let currentDeleteId = null;
             let currentDeleteNumeroFactura = null;
 
-            // Inicializar fechas con la fecha actual
             const today = formatDateToYYYYMMDD(new Date());
             fechaIngresoInput.value = today;
             fechaFacturaInput.value = today;
@@ -457,7 +512,6 @@
             document.getElementById('editFechaFactura').value = today;
             document.getElementById('editFechaSalida').value = today;
 
-            // Formatear monto con separación de miles
             function formatMontoInput(input) {
                 input.addEventListener('input', (e) => {
                     const value = e.target.value.replace(/[^\d]/g, '');
@@ -926,6 +980,14 @@
                 });
             }
 
+            if (fixDates) {
+                fixDates.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    fixInvalidDateFormats();
+                    actionsMenu.style.display = 'none';
+                });
+            }
+
             async function loadIngresos() {
                 showLoading();
                 try {
@@ -937,13 +999,39 @@
                     meses = [];
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
-                        // Validar que fechaIngreso exista y sea una cadena válida
-                        if (!data.fechaIngreso || typeof data.fechaIngreso !== 'string' || !parseDateDDMMYYYY(data.fechaIngreso)) {
-                            console.warn(`Documento ${doc.id} tiene fechaIngreso inválida: ${data.fechaIngreso}`);
-                            return; // Omitir documentos con fechaIngreso inválida
+                        let fechaIngreso = data.fechaIngreso;
+                        let fechaFactura = data.fechaFactura;
+                        let fechaOc = data.fechaOc;
+                        let fechaSalida = data.fechaSalida;
+
+                        if (fechaIngreso && typeof fechaIngreso === 'object' && 'toDate' in fechaIngreso) {
+                            fechaIngreso = formatDateToDDMMYYYY(fechaIngreso.toDate());
                         }
-                        ingresos.push({ id: doc.id, ...data });
-                        const fechaIngresoDate = parseDateDDMMYYYY(data.fechaIngreso);
+                        if (fechaFactura && typeof fechaFactura === 'object' && 'toDate' in fechaFactura) {
+                            fechaFactura = formatDateToDDMMYYYY(fechaFactura.toDate());
+                        }
+                        if (fechaOc && typeof fechaOc === 'object' && 'toDate' in fechaOc) {
+                            fechaOc = formatDateToDDMMYYYY(fechaOc.toDate());
+                        }
+                        if (fechaSalida && typeof fechaSalida === 'object' && 'toDate' in fechaSalida) {
+                            fechaSalida = formatDateToDDMMYYYY(fechaSalida.toDate());
+                        }
+
+                        if (!fechaIngreso || typeof fechaIngreso !== 'string' || !parseDateDDMMYYYY(fechaIngreso)) {
+                            console.warn(`Documento ${doc.id} tiene fechaIngreso inválida: ${data.fechaIngreso}`);
+                            return;
+                        }
+
+                        const ingreso = {
+                            id: doc.id,
+                            ...data,
+                            fechaIngreso,
+                            fechaFactura: fechaFactura || '',
+                            fechaOc: fechaOc || '',
+                            fechaSalida: fechaSalida || ''
+                        };
+                        ingresos.push(ingreso);
+                        const fechaIngresoDate = parseDateDDMMYYYY(fechaIngreso);
                         if (fechaIngresoDate && !isNaN(fechaIngresoDate)) {
                             const ano = fechaIngresoDate.getFullYear();
                             const mes = fechaIngresoDate.toLocaleString('es-CL', { month: 'long' });
@@ -951,12 +1039,13 @@
                             if (!mesesPorAno[ano]) mesesPorAno[ano] = new Set();
                             mesesPorAno[ano].add(mes);
                             if (!ingresosPorMes[mes]) ingresosPorMes[mes] = [];
-                            ingresosPorMes[mes].push({ id: doc.id, ...data });
+                            ingresosPorMes[mes].push(ingreso);
                             if (!meses.includes(mes)) meses.push(mes);
                         }
                     });
                     meses = meses.sort((a, b) => new Date(Date.parse('01 ' + a + ' 2000')) - new Date(Date.parse('01 ' + b + ' 2000')));
                     ingresos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    console.log('Ingresos cargados:', ingresos);
                     renderTable();
                     hideLoading();
                 } catch (error) {
@@ -989,20 +1078,41 @@
             }
 
             function getFilteredIngresos() {
-                return ingresos.filter(ingreso =>
-                    String(ingreso.numeroFactura || '').toLowerCase().includes(searchNumeroFactura.toLowerCase()) &&
-                    String(ingreso.proveedor || '').toLowerCase().includes(searchProveedor.toLowerCase()) &&
-                    String(ingreso.oc || '').toLowerCase().includes(searchOrdenCompra.toLowerCase()) &&
-                    String(ingreso.acta || '').toLowerCase().includes(searchActa.toLowerCase()) &&
-                    String(ingreso.salida || '').toLowerCase().includes(searchSalidas.toLowerCase()) &&
-                    (!fechaDesde || parseDateDDMMYYYY(ingreso.fechaIngreso) >= parseDateDDMMYYYY(fechaDesde.replace(/-/g, '/'))) &&
-                    (!fechaHasta || parseDateDDMMYYYY(ingreso.fechaIngreso) <= parseDateDDMMYYYY(fechaHasta.replace(/-/g, '/'))) &&
-                    (!selectedAno || parseDateDDMMYYYY(ingreso.fechaIngreso).getFullYear() == selectedAno) &&
-                    (!selectedMes || parseDateDDMMYYYY(ingreso.fechaIngreso).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
-                ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                console.log('Filtros activos:', {
+                    searchNumeroFactura,
+                    searchProveedor,
+                    searchOrdenCompra,
+                    searchActa,
+                    searchSalidas,
+                    fechaDesde,
+                    fechaHasta,
+                    selectedAno,
+                    selectedMes
+                });
+                const filtered = ingresos.filter(ingreso => {
+                    const fechaIngresoDate = parseDateDDMMYYYY(ingreso.fechaIngreso);
+                    if (!fechaIngresoDate || isNaN(fechaIngresoDate)) {
+                        console.warn(`Ingreso con ID ${ingreso.id} tiene fechaIngreso inválida: ${ingreso.fechaIngreso}`);
+                        return false;
+                    }
+                    return (
+                        String(ingreso.numeroFactura || '').toLowerCase().includes(searchNumeroFactura.toLowerCase()) &&
+                        String(ingreso.proveedor || '').toLowerCase().includes(searchProveedor.toLowerCase()) &&
+                        String(ingreso.oc || '').toLowerCase().includes(searchOrdenCompra.toLowerCase()) &&
+                        String(ingreso.acta || '').toLowerCase().includes(searchActa.toLowerCase()) &&
+                        String(ingreso.salida || '').toLowerCase().includes(searchSalidas.toLowerCase()) &&
+                        (!fechaDesde || parseDateDDMMYYYY(ingreso.fechaIngreso) >= parseDateDDMMYYYY(fechaDesde.replace(/-/g, '/'))) &&
+                        (!fechaHasta || parseDateDDMMYYYY(ingreso.fechaIngreso) <= parseDateDDMMYYYY(fechaHasta.replace(/-/g, '/'))) &&
+                        (!selectedAno || fechaIngresoDate.getFullYear().toString() === selectedAno) &&
+                        (!selectedMes || fechaIngresoDate.toLocaleString('es-CL', { month: 'long' }) === selectedMes)
+                    );
+                }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                console.log('Ingresos filtrados:', filtered);
+                return filtered;
             }
 
             function renderTable() {
+                console.log('Rendering table with ingresos:', ingresos);
                 const filteredIngresos = getFilteredIngresos();
                 const start = (currentPage - 1) * PAGE_SIZE;
                 const end = start + PAGE_SIZE;
@@ -1010,28 +1120,32 @@
 
                 if (ingresosBody) {
                     ingresosBody.innerHTML = '';
-                    pageIngresos.forEach(ingreso => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td class="ingresos-actions">
-                                <button title="Editar" class="ingresos-btn-edit" onclick="openEditModal('${ingreso.id}', ${JSON.stringify(ingreso).replace(/"/g, '&quot;')})"><i class="fas fa-edit"></i></button>
-                                <button title="Eliminar" class="ingresos-btn-delete" onclick="openDeleteModal('${ingreso.id}', '${ingreso.numeroFactura}')"><i class="fas fa-trash"></i></button>
-                                <button title="Ver Historial" class="ingresos-btn-history" onclick="openHistoryModal('${ingreso.id}', '${ingreso.numeroFactura}')"><i class="fas fa-history"></i></button>
-                            </td>
-                            <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaIngreso))}</td>
-                            <td>${ingreso.numeroFactura || ''}</td>
-                            <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaFactura))}</td>
-                            <td>${formatNumberWithThousandsSeparator(ingreso.monto)}</td>
-                            <td>${ingreso.oc || ''}</td>
-                            <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaOc))}</td>
-                            <td>${ingreso.proveedor || ''}</td>
-                            <td>${ingreso.acta || ''}</td>
-                            <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaSalida))}</td>
-                            <td>${ingreso.salida || ''}</td>
-                            <td>${ingreso.fullName || ''}</td>
-                        `;
-                        ingresosBody.appendChild(row);
-                    });
+                    if (pageIngresos.length === 0) {
+                        ingresosBody.innerHTML = '<tr><td colspan="12">No hay registros para mostrar.</td></tr>';
+                    } else {
+                        pageIngresos.forEach(ingreso => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td class="ingresos-actions">
+                                    <button title="Editar" class="ingresos-btn-edit" onclick="openEditModal('${ingreso.id}', ${JSON.stringify(ingreso).replace(/"/g, '&quot;')})"><i class="fas fa-edit"></i></button>
+                                    <button title="Eliminar" class="ingresos-btn-delete" onclick="openDeleteModal('${ingreso.id}', '${ingreso.numeroFactura}')"><i class="fas fa-trash"></i></button>
+                                    <button title="Ver Historial" class="ingresos-btn-history" onclick="openHistoryModal('${ingreso.id}', '${ingreso.numeroFactura}')"><i class="fas fa-history"></i></button>
+                                </td>
+                                <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaIngreso))}</td>
+                                <td>${ingreso.numeroFactura || ''}</td>
+                                <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaFactura))}</td>
+                                <td>${formatNumberWithThousandsSeparator(ingreso.monto)}</td>
+                                <td>${ingreso.oc || ''}</td>
+                                <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaOc))}</td>
+                                <td>${ingreso.proveedor || ''}</td>
+                                <td>${ingreso.acta || ''}</td>
+                                <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaSalida))}</td>
+                                <td>${ingreso.salida || ''}</td>
+                                <td>${ingreso.fullName || ''}</td>
+                            `;
+                            ingresosBody.appendChild(row);
+                        });
+                    }
                 }
 
                 updatePagination(filteredIngresos.length);
@@ -1228,50 +1342,68 @@
                                 fullName: row.fullName
                             });
 
-                            let fechaIngreso = row.fechaIngreso || '';
-                            let fechaFactura = row.fechaFactura || '';
-                            let fechaOc = row.fechaOc || '';
-                            let fechaSalida = row.fechaSalida || '';
+                            let fechaIngreso = '';
+                            let fechaFactura = '';
+                            let fechaOc = '';
+                            let fechaSalida = '';
 
-                            // Process dates from Excel
-                            if (fechaIngreso && typeof fechaIngreso === 'number') {
-                                const date = excelSerialToDate(fechaIngreso);
-                                fechaIngreso = date ? formatDateToDDMMYYYY(date) : '';
-                                console.log(`Fila ${i + 2}: fechaIngreso (serial: ${row.fechaIngreso}) procesada: ${fechaIngreso}`);
-                            } else if (typeof fechaIngreso === 'string') {
-                                fechaIngreso = fechaIngreso.replace(/[\/.]/g, '-');
-                                fechaIngreso = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaIngreso));
-                                console.log(`Fila ${i + 2}: fechaIngreso (string) procesada: ${fechaIngreso}`);
+                            if (row.fechaIngreso) {
+                                if (typeof row.fechaIngreso === 'number') {
+                                    const date = excelSerialToDate(row.fechaIngreso);
+                                    fechaIngreso = date && !isNaN(date) ? formatDateToDDMMYYYY(date) : '';
+                                    console.log(`Fila ${i + 2}: fechaIngreso (serial: ${row.fechaIngreso}) procesada: ${fechaIngreso}`);
+                                } else if (typeof row.fechaIngreso === 'string') {
+                                    const parsedDate = parseDateDDMMYYYY(row.fechaIngreso.replace(/[\/.]/g, '-'));
+                                    fechaIngreso = parsedDate && !isNaN(parsedDate) ? formatDateToDDMMYYYY(parsedDate) : '';
+                                    console.log(`Fila ${i + 2}: fechaIngreso (string) procesada: ${fechaIngreso}`);
+                                } else if (row.fechaIngreso instanceof Date && !isNaN(row.fechaIngreso)) {
+                                    fechaIngreso = formatDateToDDMMYYYY(row.fechaIngreso);
+                                    console.log(`Fila ${i + 2}: fechaIngreso (Date) procesada: ${fechaIngreso}`);
+                                }
                             }
-                            if (fechaFactura && typeof fechaFactura === 'number') {
-                                const date = excelSerialToDate(fechaFactura);
-                                fechaFactura = date ? formatDateToDDMMYYYY(date) : '';
-                                console.log(`Fila ${i + 2}: fechaFactura (serial: ${row.fechaFactura}) procesada: ${fechaFactura}`);
-                            } else if (typeof fechaFactura === 'string') {
-                                fechaFactura = fechaFactura.replace(/[\/.]/g, '-');
-                                fechaFactura = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaFactura));
-                                console.log(`Fila ${i + 2}: fechaFactura (string) procesada: ${fechaFactura}`);
+                            if (row.fechaFactura) {
+                                if (typeof row.fechaFactura === 'number') {
+                                    const date = excelSerialToDate(row.fechaFactura);
+                                    fechaFactura = date && !isNaN(date) ? formatDateToDDMMYYYY(date) : '';
+                                    console.log(`Fila ${i + 2}: fechaFactura (serial: ${row.fechaFactura}) procesada: ${fechaFactura}`);
+                                } else if (typeof row.fechaFactura === 'string') {
+                                    const parsedDate = parseDateDDMMYYYY(row.fechaFactura.replace(/[\/.]/g, '-'));
+                                    fechaFactura = parsedDate && !isNaN(parsedDate) ? formatDateToDDMMYYYY(parsedDate) : '';
+                                    console.log(`Fila ${i + 2}: fechaFactura (string) procesada: ${fechaFactura}`);
+                                } else if (row.fechaFactura instanceof Date && !isNaN(row.fechaFactura)) {
+                                    fechaFactura = formatDateToDDMMYYYY(row.fechaFactura);
+                                    console.log(`Fila ${i + 2}: fechaFactura (Date) procesada: ${fechaFactura}`);
+                                }
                             }
-                            if (fechaOc && typeof fechaOc === 'number') {
-                                const date = excelSerialToDate(fechaOc);
-                                fechaOc = date ? formatDateToDDMMYYYY(date) : '';
-                                console.log(`Fila ${i + 2}: fechaOc (serial: ${row.fechaOc}) procesada: ${fechaOc}`);
-                            } else if (typeof fechaOc === 'string') {
-                                fechaOc = fechaOc.replace(/[\/.]/g, '-');
-                                fechaOc = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaOc));
-                                console.log(`Fila ${i + 2}: fechaOc (string) procesada: ${fechaOc}`);
+                            if (row.fechaOc) {
+                                if (typeof row.fechaOc === 'number') {
+                                    const date = excelSerialToDate(row.fechaOc);
+                                    fechaOc = date && !isNaN(date) ? formatDateToDDMMYYYY(date) : '';
+                                    console.log(`Fila ${i + 2}: fechaOc (serial: ${row.fechaOc}) procesada: ${fechaOc}`);
+                                } else if (typeof row.fechaOc === 'string') {
+                                    const parsedDate = parseDateDDMMYYYY(row.fechaOc.replace(/[\/.]/g, '-'));
+                                    fechaOc = parsedDate && !isNaN(parsedDate) ? formatDateToDDMMYYYY(parsedDate) : '';
+                                    console.log(`Fila ${i + 2}: fechaOc (string) procesada: ${fechaOc}`);
+                                } else if (row.fechaOc instanceof Date && !isNaN(row.fechaOc)) {
+                                    fechaOc = formatDateToDDMMYYYY(row.fechaOc);
+                                    console.log(`Fila ${i + 2}: fechaOc (Date) procesada: ${fechaOc}`);
+                                }
                             }
-                            if (fechaSalida && typeof fechaSalida === 'number') {
-                                const date = excelSerialToDate(fechaSalida);
-                                fechaSalida = date ? formatDateToDDMMYYYY(date) : '';
-                                console.log(`Fila ${i + 2}: fechaSalida (serial: ${row.fechaSalida}) procesada: ${fechaSalida}`);
-                            } else if (typeof fechaSalida === 'string') {
-                                fechaSalida = fechaSalida.replace(/[\/.]/g, '-');
-                                fechaSalida = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaSalida));
-                                console.log(`Fila ${i + 2}: fechaSalida (string) procesada: ${fechaSalida}`);
+                            if (row.fechaSalida) {
+                                if (typeof row.fechaSalida === 'number') {
+                                    const date = excelSerialToDate(row.fechaSalida);
+                                    fechaSalida = date && !isNaN(date) ? formatDateToDDMMYYYY(date) : '';
+                                    console.log(`Fila ${i + 2}: fechaSalida (serial: ${row.fechaSalida}) procesada: ${fechaSalida}`);
+                                } else if (typeof row.fechaSalida === 'string') {
+                                    const parsedDate = parseDateDDMMYYYY(row.fechaSalida.replace(/[\/.]/g, '-'));
+                                    fechaSalida = parsedDate && !isNaN(parsedDate) ? formatDateToDDMMYYYY(parsedDate) : '';
+                                    console.log(`Fila ${i + 2}: fechaSalida (string) procesada: ${fechaSalida}`);
+                                } else if (row.fechaSalida instanceof Date && !isNaN(row.fechaSalida)) {
+                                    fechaSalida = formatDateToDDMMYYYY(row.fechaSalida);
+                                    console.log(`Fila ${i + 2}: fechaSalida (Date) procesada: ${fechaSalida}`);
+                                }
                             }
 
-                            // Validate dates
                             if (!fechaIngreso || isNaN(parseDateDDMMYYYY(fechaIngreso))) {
                                 console.log(`Fila ${i + 2}: Fecha de ingreso no válida: ${fechaIngreso} (valor original: ${row.fechaIngreso})`);
                                 showToast(`Fila ${i + 2}: Fecha de ingreso no válida: ${fechaIngreso}`, 'error');
@@ -1294,7 +1426,7 @@
                             }
 
                             const processedRow = {
-                                fechaIngreso: fechaIngreso,
+                                fechaIngreso,
                                 numeroFactura: String(row.numeroFactura || '').trim(),
                                 fechaFactura: fechaFactura || '',
                                 monto: String(row.monto || '').trim().replace(/[^\d]/g, ''),
@@ -1304,7 +1436,8 @@
                                 acta: String(row.acta || '').trim(),
                                 fechaSalida: fechaSalida || '',
                                 salida: String(row.salida || '').trim(),
-                                fullName: String(row.fullName || window.currentUserData.fullName).trim()
+                                fullName: String(row.fullName || window.currentUserData.fullName || '').trim(),
+                                createdAt: new Date()
                             };
 
                             console.log(`Fila ${i + 2} procesada:`, processedRow);
@@ -1315,8 +1448,8 @@
                                 continue;
                             }
                             if (!processedRow.fechaIngreso) {
-                                console.log(`Fila ${i + 2}: Falta fecha de ingreso (valor original: ${row.fechaIngreso})`);
-                                showToast(`Fila ${i + 2}: Falta fecha de ingreso (valor original: ${row.fechaIngreso})`, 'error');
+                                console.log(`Fila ${i + 2}: Falta fecha de ingreso`);
+                                showToast(`Fila ${i + 2}: Falta fecha de ingreso`, 'error');
                                 continue;
                             }
                             if (processedRow.monto && isNaN(parseInt(processedRow.monto))) {
@@ -1327,17 +1460,16 @@
 
                             const existing = await getIngresoByUniqueKey(processedRow.numeroFactura);
                             if (existing) {
-                                const hasChanges = Object.keys(processedRow).some(key =>
-                                    key === 'fechaIngreso' || key === 'fechaFactura' || key === 'fechaOc' || key === 'fechaSalida'
-                                        ? processedRow[key] !== formatDateToDDMMYYYY(parseDateDDMMYYYY(existing[key]))
-                                        : processedRow[key] !== String(existing[key] || '').trim()
-                                );
+                                const hasChanges = Object.keys(processedRow).some(key => {
+                                    if (key === 'createdAt') return false;
+                                    if (key === 'fechaIngreso' || key === 'fechaFactura' || key === 'fechaOc' || key === 'fechaSalida') {
+                                        return processedRow[key] !== (existing[key] ? formatDateToDDMMYYYY(parseDateDDMMYYYY(existing[key])) : '');
+                                    }
+                                    return processedRow[key] !== String(existing[key] || '').trim();
+                                });
                                 if (hasChanges) {
                                     console.log(`Fila ${i + 2}: Actualizando ingreso existente: ${processedRow.numeroFactura}`);
-                                    await updateDoc(doc(db, "ingresos_lab", existing.id), {
-                                        ...processedRow,
-                                        createdAt: new Date()
-                                    });
+                                    await updateDoc(doc(db, "ingresos_lab", existing.id), processedRow);
                                     await logAction(existing.id, 'update', existing, processedRow);
                                     updatedCount++;
                                 } else {
@@ -1345,10 +1477,7 @@
                                 }
                             } else {
                                 console.log(`Fila ${i + 2}: Creando nuevo ingreso: ${processedRow.numeroFactura}`);
-                                const docRef = await addDoc(collection(db, "ingresos_lab"), {
-                                    ...processedRow,
-                                    createdAt: new Date()
-                                });
+                                const docRef = await addDoc(collection(db, "ingresos_lab"), processedRow);
                                 await logAction(docRef.id, 'create', null, processedRow);
                                 addedCount++;
                             }
@@ -1374,7 +1503,7 @@
             async function getIngresosByMes(ano, mes) {
                 return ingresos.filter(i => {
                     const fechaIngresoDate = parseDateDDMMYYYY(i.fechaIngreso);
-                    return fechaIngresoDate.getFullYear() == ano && fechaIngresoDate.toLocaleString('es-CL', { month: 'long' }) === mes;
+                    return fechaIngresoDate.getFullYear().toString() === ano && fechaIngresoDate.toLocaleString('es-CL', { month: 'long' }) === mes;
                 });
             }
 
