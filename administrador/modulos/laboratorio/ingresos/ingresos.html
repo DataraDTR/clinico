@@ -298,6 +298,13 @@
         let fechaDesde = '';
         let fechaHasta = '';
 
+        function parseDateDDMMYYYY(dateStr) {
+            if (!dateStr) return null;
+            const [day, month, year] = dateStr.split('-').map(Number);
+            if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) return null;
+            return new Date(year, month - 1, day);
+        }
+
         function formatDateToDDMMYYYY(date) {
             if (!date || isNaN(new Date(date))) return '';
             const d = new Date(date);
@@ -486,15 +493,15 @@
                 currentEditId = id;
                 currentEditOldData = { ...ingreso };
                 document.getElementById('editId').value = id;
-                document.getElementById('editFechaIngreso').value = ingreso.fechaIngreso ? formatDateToYYYYMMDD(ingreso.fechaIngreso) : today;
+                document.getElementById('editFechaIngreso').value = ingreso.fechaIngreso ? formatDateToYYYYMMDD(parseDateDDMMYYYY(ingreso.fechaIngreso)) : today;
                 document.getElementById('editNumeroFactura').value = ingreso.numeroFactura || '';
-                document.getElementById('editFechaFactura').value = ingreso.fechaFactura ? formatDateToYYYYMMDD(ingreso.fechaFactura) : today;
+                document.getElementById('editFechaFactura').value = ingreso.fechaFactura ? formatDateToYYYYMMDD(parseDateDDMMYYYY(ingreso.fechaFactura)) : today;
                 document.getElementById('editMonto').value = ingreso.monto ? formatNumberWithThousandsSeparator(ingreso.monto) : '';
                 document.getElementById('editOrdenCompra').value = ingreso.oc || '';
                 document.getElementById('editFechaOc').value = ingreso.fechaOc || '';
                 document.getElementById('editProveedor').value = ingreso.proveedor || '';
                 document.getElementById('editActa').value = ingreso.acta || '';
-                document.getElementById('editFechaSalida').value = ingreso.fechaSalida ? formatDateToYYYYMMDD(ingreso.fechaSalida) : today;
+                document.getElementById('editFechaSalida').value = ingreso.fechaSalida ? formatDateToYYYYMMDD(parseDateDDMMYYYY(ingreso.fechaSalida)) : today;
                 document.getElementById('editSalida').value = ingreso.salida || '';
                 editModal.style.display = 'block';
             }
@@ -576,15 +583,15 @@
                 if (!currentEditId) return;
 
                 const processedRow = {
-                    fechaIngreso: document.getElementById('editFechaIngreso').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editFechaIngreso').value)) : '',
+                    fechaIngreso: document.getElementById('editFechaIngreso').value ? formatDateToDDMMYYYY(parseDateDDMMYYYY(document.getElementById('editFechaIngreso').value.replace(/-/g, '/'))) : '',
                     numeroFactura: document.getElementById('editNumeroFactura').value.trim(),
-                    fechaFactura: document.getElementById('editFechaFactura').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editFechaFactura').value)) : '',
+                    fechaFactura: document.getElementById('editFechaFactura').value ? formatDateToDDMMYYYY(parseDateDDMMYYYY(document.getElementById('editFechaFactura').value.replace(/-/g, '/'))) : '',
                     monto: document.getElementById('editMonto').value.replace(/[^\d]/g, ''),
                     oc: document.getElementById('editOrdenCompra').value.trim(),
                     fechaOc: document.getElementById('editFechaOc').value,
                     proveedor: document.getElementById('editProveedor').value,
                     acta: document.getElementById('editActa').value.trim(),
-                    fechaSalida: document.getElementById('editFechaSalida').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editFechaSalida').value)) : '',
+                    fechaSalida: document.getElementById('editFechaSalida').value ? formatDateToDDMMYYYY(parseDateDDMMYYYY(document.getElementById('editFechaSalida').value.replace(/-/g, '/'))) : '',
                     salida: document.getElementById('editSalida').value.trim(),
                     fullName: window.currentUserData.fullName
                 };
@@ -666,15 +673,15 @@
                     try {
                         const data = await getIngresosByMes(ano, mes);
                         exportToExcel(data.map(i => ({
-                            fechaIngreso: formatDateToDDMMYYYY(i.fechaIngreso),
+                            fechaIngreso: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaIngreso)),
                             numeroFactura: i.numeroFactura,
-                            fechaFactura: formatDateToDDMMYYYY(i.fechaFactura),
+                            fechaFactura: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaFactura)),
                             monto: formatNumberWithThousandsSeparator(i.monto),
                             oc: i.oc,
-                            fechaOc: formatDateToDDMMYYYY(i.fechaOc),
+                            fechaOc: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaOc)),
                             proveedor: i.proveedor,
                             acta: i.acta,
-                            fechaSalida: formatDateToDDMMYYYY(i.fechaSalida),
+                            fechaSalida: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaSalida)),
                             salida: i.salida,
                             fullName: i.fullName
                         })), `ingresos_${ano}_${mes}`);
@@ -802,7 +809,7 @@
                             const orden = await getOrdenByCodigo(codigo);
                             if (orden) {
                                 proveedorInput.value = orden.proveedor || '';
-                                fechaOcInput.value = formatDateToDDMMYYYY(orden.generacion) || '';
+                                fechaOcInput.value = formatDateToDDMMYYYY(parseDateDDMMYYYY(orden.generacion)) || '';
                             } else {
                                 proveedorInput.value = '';
                                 fechaOcInput.value = '';
@@ -813,7 +820,7 @@
                             hideLoading();
                             showToast('Error al buscar la orden: ' + error.message, 'error');
                             proveedorInput.value = '';
-                            fechaOcInput.value =ains;
+                            fechaOcInput.value = '';
                         }
                     } else {
                         proveedorInput.value = '';
@@ -831,7 +838,7 @@
                             const orden = await getOrdenByCodigo(codigo);
                             if (orden) {
                                 document.getElementById('editProveedor').value = orden.proveedor || '';
-                                document.getElementById('editFechaOc').value = formatDateToDDMMYYYY(orden.generacion) || '';
+                                document.getElementById('editFechaOc').value = formatDateToDDMMYYYY(parseDateDDMMYYYY(orden.generacion)) || '';
                             } else {
                                 document.getElementById('editProveedor').value = '';
                                 document.getElementById('editFechaOc').value = '';
@@ -855,15 +862,15 @@
                 ingresarBtn.addEventListener('click', async (e) => {
                     e.preventDefault();
                     const processedRow = {
-                        fechaIngreso: fechaIngresoInput.value ? formatDateToDDMMYYYY(new Date(fechaIngresoInput.value)) : '',
+                        fechaIngreso: fechaIngresoInput.value ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaIngresoInput.value.replace(/-/g, '/'))) : '',
                         numeroFactura: numeroFacturaInput.value.trim(),
-                        fechaFactura: fechaFacturaInput.value ? formatDateToDDMMYYYY(new Date(fechaFacturaInput.value)) : '',
+                        fechaFactura: fechaFacturaInput.value ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaFacturaInput.value.replace(/-/g, '/'))) : '',
                         monto: montoInput.value.replace(/[^\d]/g, ''),
                         oc: ordenCompraInput.value.trim(),
                         fechaOc: fechaOcInput.value,
                         proveedor: proveedorInput.value,
                         acta: actaInput.value.trim(),
-                        fechaSalida: fechaSalidaInput.value ? formatDateToDDMMYYYY(new Date(fechaSalidaInput.value)) : '',
+                        fechaSalida: fechaSalidaInput.value ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaSalidaInput.value.replace(/-/g, '/'))) : '',
                         salida: salidaInput.value.trim(),
                         fullName: window.currentUserData.fullName
                     };
@@ -917,8 +924,8 @@
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
                         ingresos.push({ id: doc.id, ...data });
-                        const fechaIngresoDate = new Date(data.fechaIngreso);
-                        if (!isNaN(fechaIngresoDate)) {
+                        const fechaIngresoDate = parseDateDDMMYYYY(data.fechaIngreso);
+                        if (fechaIngresoDate && !isNaN(fechaIngresoDate)) {
                             const ano = fechaIngresoDate.getFullYear();
                             const mes = fechaIngresoDate.toLocaleString('es-CL', { month: 'long' });
                             anos.add(ano);
@@ -968,10 +975,10 @@
                     String(ingreso.oc || '').toLowerCase().includes(searchOrdenCompra.toLowerCase()) &&
                     String(ingreso.acta || '').toLowerCase().includes(searchActa.toLowerCase()) &&
                     String(ingreso.salida || '').toLowerCase().includes(searchSalidas.toLowerCase()) &&
-                    (!fechaDesde || new Date(ingreso.fechaIngreso) >= new Date(fechaDesde)) &&
-                    (!fechaHasta || new Date(ingreso.fechaIngreso) <= new Date(fechaHasta)) &&
-                    (!selectedAno || new Date(ingreso.fechaIngreso).getFullYear() == selectedAno) &&
-                    (!selectedMes || new Date(ingreso.fechaIngreso).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
+                    (!fechaDesde || parseDateDDMMYYYY(ingreso.fechaIngreso) >= parseDateDDMMYYYY(fechaDesde.replace(/-/g, '/'))) &&
+                    (!fechaHasta || parseDateDDMMYYYY(ingreso.fechaIngreso) <= parseDateDDMMYYYY(fechaHasta.replace(/-/g, '/'))) &&
+                    (!selectedAno || parseDateDDMMYYYY(ingreso.fechaIngreso).getFullYear() == selectedAno) &&
+                    (!selectedMes || parseDateDDMMYYYY(ingreso.fechaIngreso).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
                 ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             }
 
@@ -991,15 +998,15 @@
                                 <button title="Eliminar" class="ingresos-btn-delete" onclick="openDeleteModal('${ingreso.id}', '${ingreso.numeroFactura}')"><i class="fas fa-trash"></i></button>
                                 <button title="Ver Historial" class="ingresos-btn-history" onclick="openHistoryModal('${ingreso.id}', '${ingreso.numeroFactura}')"><i class="fas fa-history"></i></button>
                             </td>
-                            <td>${formatDateToDDMMYYYY(ingreso.fechaIngreso)}</td>
+                            <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaIngreso))}</td>
                             <td>${ingreso.numeroFactura || ''}</td>
-                            <td>${formatDateToDDMMYYYY(ingreso.fechaFactura)}</td>
+                            <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaFactura))}</td>
                             <td>${formatNumberWithThousandsSeparator(ingreso.monto)}</td>
                             <td>${ingreso.oc || ''}</td>
-                            <td>${formatDateToDDMMYYYY(ingreso.fechaOc)}</td>
+                            <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaOc))}</td>
                             <td>${ingreso.proveedor || ''}</td>
                             <td>${ingreso.acta || ''}</td>
-                            <td>${formatDateToDDMMYYYY(ingreso.fechaSalida)}</td>
+                            <td>${formatDateToDDMMYYYY(parseDateDDMMYYYY(ingreso.fechaSalida))}</td>
                             <td>${ingreso.salida || ''}</td>
                             <td>${ingreso.fullName || ''}</td>
                         `;
@@ -1092,15 +1099,15 @@
             downloadAll.addEventListener('click', (e) => {
                 e.preventDefault();
                 exportToExcel(ingresos.map(i => ({
-                    fechaIngreso: formatDateToDDMMYYYY(i.fechaIngreso),
+                    fechaIngreso: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaIngreso)),
                     numeroFactura: i.numeroFactura,
-                    fechaFactura: formatDateToDDMMYYYY(i.fechaFactura),
+                    fechaFactura: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaFactura)),
                     monto: formatNumberWithThousandsSeparator(i.monto),
                     oc: i.oc,
-                    fechaOc: formatDateToDDMMYYYY(i.fechaOc),
+                    fechaOc: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaOc)),
                     proveedor: i.proveedor,
                     acta: i.acta,
-                    fechaSalida: formatDateToDDMMYYYY(i.fechaSalida),
+                    fechaSalida: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaSalida)),
                     salida: i.salida,
                     fullName: i.fullName
                 })), 'todos_ingresos');
@@ -1113,15 +1120,15 @@
                 const start = (currentPage - 1) * PAGE_SIZE;
                 const end = start + PAGE_SIZE;
                 const pageData = filtered.slice(start, end).map(i => ({
-                    fechaIngreso: formatDateToDDMMYYYY(i.fechaIngreso),
+                    fechaIngreso: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaIngreso)),
                     numeroFactura: i.numeroFactura,
-                    fechaFactura: formatDateToDDMMYYYY(i.fechaFactura),
+                    fechaFactura: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaFactura)),
                     monto: formatNumberWithThousandsSeparator(i.monto),
                     oc: i.oc,
-                    fechaOc: formatDateToDDMMYYYY(i.fechaOc),
+                    fechaOc: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaOc)),
                     proveedor: i.proveedor,
                     acta: i.acta,
-                    fechaSalida: formatDateToDDMMYYYY(i.fechaSalida),
+                    fechaSalida: formatDateToDDMMYYYY(parseDateDDMMYYYY(i.fechaSalida)),
                     salida: i.salida,
                     fullName: i.fullName
                 }));
@@ -1169,14 +1176,12 @@
                     const reader = new FileReader();
                     reader.onload = async (e) => {
                         const data = new Uint8Array(e.target.result);
-                        const wb = XLSX.read(data, {type: 'array', cellDates: true, dateNF: 'dd-mm-yyyy'});
+                        const wb = XLSX.read(data, {type: 'array', cellDates: false, raw: true});
                         const ws = wb.Sheets[wb.SheetNames[0]];
                         const json = XLSX.utils.sheet_to_json(ws, {
                             header: ["fechaIngreso", "numeroFactura", "fechaFactura", "monto", "oc", "fechaOc", "proveedor", "acta", "fechaSalida", "salida", "fullName"],
                             range: 1,
-                            defval: '',
-                            raw: false,
-                            dateNF: 'dd-mm-yyyy'
+                            defval: ''
                         });
 
                         let addedCount = 0;
@@ -1192,46 +1197,55 @@
                             let fechaOc = row.fechaOc;
                             let fechaSalida = row.fechaSalida;
 
-                            if (typeof fechaIngreso === 'number') {
+                            // Convert Excel date or string to DD-MM-YYYY
+                            if (fechaIngreso && typeof fechaIngreso === 'string') {
+                                fechaIngreso = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaIngreso.replace(/[\/.]/g, '-')));
+                            } else if (typeof fechaIngreso === 'number') {
                                 fechaIngreso = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaIngreso));
                             }
-                            if (typeof fechaFactura === 'number') {
+                            if (fechaFactura && typeof fechaFactura === 'string') {
+                                fechaFactura = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaFactura.replace(/[\/.]/g, '-')));
+                            } else if (typeof fechaFactura === 'number') {
                                 fechaFactura = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaFactura));
                             }
-                            if (typeof fechaOc === 'number') {
+                            if (fechaOc && typeof fechaOc === 'string') {
+                                fechaOc = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaOc.replace(/[\/.]/g, '-')));
+                            } else if (typeof fechaOc === 'number') {
                                 fechaOc = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaOc));
                             }
-                            if (typeof fechaSalida === 'number') {
+                            if (fechaSalida && typeof fechaSalida === 'string') {
+                                fechaSalida = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaSalida.replace(/[\/.]/g, '-')));
+                            } else if (typeof fechaSalida === 'number') {
                                 fechaSalida = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaSalida));
                             }
 
-                            if (fechaIngreso && isNaN(new Date(fechaIngreso))) {
+                            if (fechaIngreso && isNaN(parseDateDDMMYYYY(fechaIngreso))) {
                                 showToast(`Fila ${i + 2}: Fecha de ingreso no válida`, 'error');
                                 continue;
                             }
-                            if (fechaFactura && isNaN(new Date(fechaFactura))) {
+                            if (fechaFactura && isNaN(parseDateDDMMYYYY(fechaFactura))) {
                                 showToast(`Fila ${i + 2}: Fecha de factura no válida`, 'error');
                                 continue;
                             }
-                            if (fechaOc && isNaN(new Date(fechaOc))) {
+                            if (fechaOc && isNaN(parseDateDDMMYYYY(fechaOc))) {
                                 showToast(`Fila ${i + 2}: Fecha de OC no válida`, 'error');
                                 continue;
                             }
-                            if (fechaSalida && isNaN(new Date(fechaSalida))) {
+                            if (fechaSalida && isNaN(parseDateDDMMYYYY(fechaSalida))) {
                                 showToast(`Fila ${i + 2}: Fecha de salida no válida`, 'error');
                                 continue;
                             }
 
                             const processedRow = {
-                                fechaIngreso: fechaIngreso ? formatDateToDDMMYYYY(new Date(fechaIngreso)) : formatDateToDDMMYYYY(new Date()),
+                                fechaIngreso: fechaIngreso ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaIngreso)) : formatDateToDDMMYYYY(new Date()),
                                 numeroFactura: String(row.numeroFactura || '').trim(),
-                                fechaFactura: fechaFactura ? formatDateToDDMMYYYY(new Date(fechaFactura)) : formatDateToDDMMYYYY(new Date()),
+                                fechaFactura: fechaFactura ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaFactura)) : formatDateToDDMMYYYY(new Date()),
                                 monto: String(row.monto || '').trim().replace(/[^\d]/g, ''),
                                 oc: String(row.oc || '').trim(),
-                                fechaOc: fechaOc ? formatDateToDDMMYYYY(new Date(fechaOc)) : '',
+                                fechaOc: fechaOc ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaOc)) : '',
                                 proveedor: String(row.proveedor || '').trim(),
                                 acta: String(row.acta || '').trim(),
-                                fechaSalida: fechaSalida ? formatDateToDDMMYYYY(new Date(fechaSalida)) : formatDateToDDMMYYYY(new Date()),
+                                fechaSalida: fechaSalida ? formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaSalida)) : formatDateToDDMMYYYY(new Date()),
                                 salida: String(row.salida || '').trim(),
                                 fullName: String(row.fullName || window.currentUserData.fullName).trim()
                             };
@@ -1241,7 +1255,7 @@
                                 if (existing) {
                                     const hasChanges = Object.keys(processedRow).some(key => 
                                         key === 'fechaIngreso' || key === 'fechaFactura' || key === 'fechaOc' || key === 'fechaSalida' 
-                                        ? processedRow[key] !== formatDateToDDMMYYYY(existing[key])
+                                        ? processedRow[key] !== formatDateToDDMMYYYY(parseDateDDMMYYYY(existing[key]))
                                         : processedRow[key] !== String(existing[key] || '').trim()
                                     );
                                     if (hasChanges) {
@@ -1283,7 +1297,7 @@
 
             async function getIngresosByMes(ano, mes) {
                 return ingresos.filter(i => {
-                    const fechaIngresoDate = new Date(i.fechaIngreso);
+                    const fechaIngresoDate = parseDateDDMMYYYY(i.fechaIngreso);
                     return fechaIngresoDate.getFullYear() == ano && fechaIngresoDate.toLocaleString('es-CL', { month: 'long' }) === mes;
                 });
             }
