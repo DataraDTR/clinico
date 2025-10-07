@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,10 +15,11 @@
         window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc, orderBy, getDoc };
     </script>
 </head>
+
 <body>
     <div class="ingresos-main-container">
         <h1 class="ingresos-title">Importación de Ingresos</h1>
-        
+
         <div id="ingresos-message"></div>
 
         <div class="ingresos-fields-container">
@@ -78,7 +80,8 @@
         <div class="ingresos-fields-container">
             <div class="ingresos-form-group">
                 <label for="buscarNumeroFactura" class="ingresos-label">Buscar Número de Factura:</label>
-                <input type="text" id="buscarNumeroFactura" placeholder="Buscar por número de factura" autocomplete="off">
+                <input type="text" id="buscarNumeroFactura" placeholder="Buscar por número de factura"
+                    autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="buscarProveedor" class="ingresos-label">Buscar Proveedor:</label>
@@ -465,11 +468,11 @@
             formatMontoInput(montoInput);
             formatMontoInput(document.getElementById('editMonto'));
 
-            window.showLoading = function() {
+            window.showLoading = function () {
                 if (loading) loading.classList.add('show');
             };
 
-            window.hideLoading = function() {
+            window.hideLoading = function () {
                 if (loading) loading.classList.remove('show');
             };
 
@@ -934,6 +937,11 @@
                     meses = [];
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
+                        // Validar que fechaIngreso exista y sea una cadena válida
+                        if (!data.fechaIngreso || typeof data.fechaIngreso !== 'string' || !parseDateDDMMYYYY(data.fechaIngreso)) {
+                            console.warn(`Documento ${doc.id} tiene fechaIngreso inválida: ${data.fechaIngreso}`);
+                            return; // Omitir documentos con fechaIngreso inválida
+                        }
                         ingresos.push({ id: doc.id, ...data });
                         const fechaIngresoDate = parseDateDDMMYYYY(data.fechaIngreso);
                         if (fechaIngresoDate && !isNaN(fechaIngresoDate)) {
@@ -954,6 +962,7 @@
                 } catch (error) {
                     hideLoading();
                     showToast('Error al cargar los ingresos: ' + error.message, 'error');
+                    console.error('Error en loadIngresos:', error);
                 }
             }
 
@@ -980,7 +989,7 @@
             }
 
             function getFilteredIngresos() {
-                return ingresos.filter(ingreso => 
+                return ingresos.filter(ingreso =>
                     String(ingreso.numeroFactura || '').toLowerCase().includes(searchNumeroFactura.toLowerCase()) &&
                     String(ingreso.proveedor || '').toLowerCase().includes(searchProveedor.toLowerCase()) &&
                     String(ingreso.oc || '').toLowerCase().includes(searchOrdenCompra.toLowerCase()) &&
@@ -1263,8 +1272,8 @@
                             }
 
                             // Validate dates
-                            if (fechaIngreso && isNaN(parseDateDDMMYYYY(fechaIngreso))) {
-                                console.log(`Fila ${i + 2}: Fecha de ingreso no válida: ${fechaIngreso}`);
+                            if (!fechaIngreso || isNaN(parseDateDDMMYYYY(fechaIngreso))) {
+                                console.log(`Fila ${i + 2}: Fecha de ingreso no válida: ${fechaIngreso} (valor original: ${row.fechaIngreso})`);
                                 showToast(`Fila ${i + 2}: Fecha de ingreso no válida: ${fechaIngreso}`, 'error');
                                 continue;
                             }
@@ -1285,7 +1294,7 @@
                             }
 
                             const processedRow = {
-                                fechaIngreso: fechaIngreso || '',
+                                fechaIngreso: fechaIngreso,
                                 numeroFactura: String(row.numeroFactura || '').trim(),
                                 fechaFactura: fechaFactura || '',
                                 monto: String(row.monto || '').trim().replace(/[^\d]/g, ''),
@@ -1318,10 +1327,10 @@
 
                             const existing = await getIngresoByUniqueKey(processedRow.numeroFactura);
                             if (existing) {
-                                const hasChanges = Object.keys(processedRow).some(key => 
-                                    key === 'fechaIngreso' || key === 'fechaFactura' || key === 'fechaOc' || key === 'fechaSalida' 
-                                    ? processedRow[key] !== formatDateToDDMMYYYY(parseDateDDMMYYYY(existing[key]))
-                                    : processedRow[key] !== String(existing[key] || '').trim()
+                                const hasChanges = Object.keys(processedRow).some(key =>
+                                    key === 'fechaIngreso' || key === 'fechaFactura' || key === 'fechaOc' || key === 'fechaSalida'
+                                        ? processedRow[key] !== formatDateToDDMMYYYY(parseDateDDMMYYYY(existing[key]))
+                                        : processedRow[key] !== String(existing[key] || '').trim()
                                 );
                                 if (hasChanges) {
                                     console.log(`Fila ${i + 2}: Actualizando ingreso existente: ${processedRow.numeroFactura}`);
@@ -1375,4 +1384,5 @@
         });
     </script>
 </body>
+
 </html>
