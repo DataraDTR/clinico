@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +14,6 @@
         window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc, orderBy, getDoc };
     </script>
 </head>
-
 <body>
     <div class="ingresos-main-container">
         <h1 class="ingresos-title">Importación de Ingresos</h1>
@@ -81,8 +79,7 @@
         <div class="ingresos-fields-container">
             <div class="ingresos-form-group">
                 <label for="buscarNumeroFactura" class="ingresos-label">Buscar Número de Factura:</label>
-                <input type="text" id="buscarNumeroFactura" placeholder="Buscar por número de factura"
-                    autocomplete="off">
+                <input type="text" id="buscarNumeroFactura" placeholder="Buscar por número de factura" autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="buscarProveedor" class="ingresos-label">Buscar Proveedor:</label>
@@ -284,7 +281,7 @@
 
         setPersistence(auth, browserSessionPersistence);
 
-        const PAGE_SIZE = 10;
+        const PAGE_SIZE = 50; // Changed to 50 rows per page
 
         let ingresos = [];
         let currentPage = 1;
@@ -304,6 +301,10 @@
 
         function parseDateDDMMYYYY(dateStr) {
             if (!dateStr) return null;
+            if (typeof dateStr === 'object' && 'toDate' in dateStr) {
+                const date = dateStr.toDate();
+                return date && !isNaN(date) ? date : null;
+            }
             const normalized = String(dateStr).replace(/[\/.]/g, '-');
             const [day, month, year] = normalized.split('-').map(Number);
             if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) return null;
@@ -1513,5 +1514,4 @@
         });
     </script>
 </body>
-
 </html>
