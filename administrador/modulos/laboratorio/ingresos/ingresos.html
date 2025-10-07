@@ -554,7 +554,7 @@
 
             editForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                if (!currentEdit spoofId) return;
+                if (!currentEditId) return;
 
                 const processedRow = {
                     fechaIngreso: document.getElementById('editFechaIngreso').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editFechaIngreso').value)) : '',
