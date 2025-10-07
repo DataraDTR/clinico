@@ -1213,7 +1213,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         continue;
                     }
 
-                    if (!row.numeroFactura || typeof row.numeroFactura !== 'string' || row.numeroFactura.trim() === '') {
+                    // Modificado para aceptar números y convertirlos a string, asegurando que no esté vacío
+                    const numeroFacturaStr = String(row.numeroFactura).trim();
+                    if (!numeroFacturaStr) {
                         console.log(`Fila ${i + 2}: Número de factura no válido: ${row.numeroFactura}`);
                         showToast(`Fila ${i + 2}: Número de factura no válido: ${row.numeroFactura}`, 'error');
                         continue;
@@ -1221,7 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const processedRow = {
                         fechaIngreso,
-                        numeroFactura: String(row.numeroFactura).trim(),
+                        numeroFactura: numeroFacturaStr,
                         fechaFactura,
                         monto: String(row.monto || '').replace(/[^\d]/g, ''),
                         oc: String(row.oc || '').trim(),
