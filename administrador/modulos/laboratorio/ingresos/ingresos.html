@@ -349,7 +349,7 @@
                 console.warn('Datos del usuario no disponibles para log');
                 return;
             }
-            await addDoc(collection(db, "ingresos_historial"), {
+            await addDoc(collection(db, "ingresos_lab_historial"), {
                 ingresoId,
                 action,
                 timestamp: new Date(),
@@ -506,7 +506,7 @@
             function openHistoryModal(id, numeroFactura) {
                 historyTitle.textContent = `HISTORIAL INGRESO ${numeroFactura}`;
                 showLoading();
-                const q = query(collection(db, "ingresos_historial"), where("ingresoId", "==", id), orderBy("timestamp", "desc"));
+                const q = query(collection(db, "ingresos_lab_historial"), where("ingresoId", "==", id), orderBy("timestamp", "desc"));
                 getDocs(q).then((querySnapshot) => {
                     hideLoading();
                     let html = '';
