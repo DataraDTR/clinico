@@ -300,7 +300,9 @@
 
         function parseDateDDMMYYYY(dateStr) {
             if (!dateStr) return null;
-            const [day, month, year] = dateStr.split(/[-\/.]/).map(Number);
+            // Normalizar separadores: reemplazar / o . por -
+            const normalized = String(dateStr).replace(/[\/.]/g, '-');
+            const [day, month, year] = normalized.split('-').map(Number);
             if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) return null;
             return new Date(year, month - 1, day);
         }
@@ -1194,7 +1196,19 @@
 
                         for (let i = 0; i < json.length; i++) {
                             const row = json[i];
-                            console.log(`Procesando fila ${i + 2}:`, row); // Depuración: mostrar cada fila
+                            console.log(`Procesando fila ${i + 2}:`, {
+                                fechaIngreso: row.fechaIngreso,
+                                numeroFactura: row.numeroFactura,
+                                fechaFactura: row.fechaFactura,
+                                monto: row.monto,
+                                oc: row.oc,
+                                fechaOc: row.fechaOc,
+                                proveedor: row.proveedor,
+                                acta: row.acta,
+                                fechaSalida: row.fechaSalida,
+                                salida: row.salida,
+                                fullName: row.fullName
+                            }); // Depuración: mostrar valores específicos
 
                             let fechaIngreso = row.fechaIngreso || '';
                             let fechaFactura = row.fechaFactura || '';
@@ -1205,26 +1219,34 @@
                             if (fechaIngreso && typeof fechaIngreso === 'string') {
                                 fechaIngreso = fechaIngreso.replace(/[\/.]/g, '-');
                                 fechaIngreso = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaIngreso));
+                                console.log(`Fila ${i + 2}: fechaIngreso procesada: ${fechaIngreso}`); // Depuración
                             } else if (typeof fechaIngreso === 'number') {
                                 fechaIngreso = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaIngreso));
+                                console.log(`Fila ${i + 2}: fechaIngreso (serial) procesada: ${fechaIngreso}`); // Depuración
                             }
                             if (fechaFactura && typeof fechaFactura === 'string') {
                                 fechaFactura = fechaFactura.replace(/[\/.]/g, '-');
                                 fechaFactura = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaFactura));
+                                console.log(`Fila ${i + 2}: fechaFactura procesada: ${fechaFactura}`); // Depuración
                             } else if (typeof fechaFactura === 'number') {
                                 fechaFactura = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaFactura));
+                                console.log(`Fila ${i + 2}: fechaFactura (serial) procesada: ${fechaFactura}`); // Depuración
                             }
                             if (fechaOc && typeof fechaOc === 'string') {
                                 fechaOc = fechaOc.replace(/[\/.]/g, '-');
                                 fechaOc = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaOc));
+                                console.log(`Fila ${i + 2}: fechaOc procesada: ${fechaOc}`); // Depuración
                             } else if (typeof fechaOc === 'number') {
                                 fechaOc = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaOc));
+                                console.log(`Fila ${i + 2}: fechaOc (serial) procesada: ${fechaOc}`); // Depuración
                             }
                             if (fechaSalida && typeof fechaSalida === 'string') {
                                 fechaSalida = fechaSalida.replace(/[\/.]/g, '-');
                                 fechaSalida = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaSalida));
+                                console.log(`Fila ${i + 2}: fechaSalida procesada: ${fechaSalida}`); // Depuración
                             } else if (typeof fechaSalida === 'number') {
                                 fechaSalida = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaSalida));
+                                console.log(`Fila ${i + 2}: fechaSalida (serial) procesada: ${fechaSalida}`); // Depuración
                             }
 
                             // Validate dates
@@ -1271,8 +1293,8 @@
                                 continue;
                             }
                             if (!processedRow.fechaIngreso) {
-                                console.log(`Fila ${i + 2}: Falta fecha de ingreso`); // Depuración
-                                showToast(`Fila ${i + 2}: Falta fecha de ingreso`, 'error');
+                                console.log(`Fila ${i + 2}: Falta fecha de ingreso (valor original: ${row.fechaIngreso})`); // Depuración
+                                showToast(`Fila ${i + 2}: Falta fecha de ingreso (valor original: ${row.fechaIngreso})`, 'error');
                                 continue;
                             }
                             if (processedRow.monto && isNaN(parseInt(processedRow.monto))) {
