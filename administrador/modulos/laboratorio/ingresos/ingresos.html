@@ -104,7 +104,7 @@
         .ingresos-dropdown-menu {
             display: none;
             position: absolute;
-            left: 0;
+            right: 0;
             top: 100%;
             background-color: white;
             min-width: 200px;
@@ -485,6 +485,7 @@
             }
             .ingresos-dropdown-menu {
                 min-width: 180px;
+                right: 0;
             }
         }
     </style>
@@ -1129,7 +1130,7 @@
                 const ws = XLSX.utils.aoa_to_sheet([[
                     "Fecha de Ingreso", "Número de Factura", "Fecha de Factura", "Monto", "OC", "Fecha de OC", "Proveedor", "Acta", "Fecha de Salida", "Salida", "Usuario"
                 ], [
-                    "06-10-2025", "FACT001", "06-10-2025", "10000", "OC001", "06-10-2025", "Proveedor A", "ACTA001", "06-10-2025", "Salida 1", "Usuario Ejemplo"
+                    "07-10-2025", "FACT001", "07-10-2025", "10000", "OC001", "07-10-2025", "Proveedor A", "ACTA001", "07-10-2025", "Salida 1", "Usuario Ejemplo"
                 ]]);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Template");
