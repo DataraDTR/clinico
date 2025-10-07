@@ -1184,6 +1184,8 @@
                             defval: ''
                         });
 
+                        console.log('Datos crudos del Excel:', json); // Depuración: mostrar datos crudos
+
                         let addedCount = 0;
                         let updatedCount = 0;
                         const totalRows = json.length;
@@ -1192,6 +1194,8 @@
 
                         for (let i = 0; i < json.length; i++) {
                             const row = json[i];
+                            console.log(`Procesando fila ${i + 2}:`, row); // Depuración: mostrar cada fila
+
                             let fechaIngreso = row.fechaIngreso || '';
                             let fechaFactura = row.fechaFactura || '';
                             let fechaOc = row.fechaOc || '';
@@ -1199,41 +1203,49 @@
 
                             // Process dates from Excel
                             if (fechaIngreso && typeof fechaIngreso === 'string') {
-                                fechaIngreso = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaIngreso.replace(/[\/.]/g, '-')));
+                                fechaIngreso = fechaIngreso.replace(/[\/.]/g, '-');
+                                fechaIngreso = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaIngreso));
                             } else if (typeof fechaIngreso === 'number') {
                                 fechaIngreso = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaIngreso));
                             }
                             if (fechaFactura && typeof fechaFactura === 'string') {
-                                fechaFactura = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaFactura.replace(/[\/.]/g, '-')));
+                                fechaFactura = fechaFactura.replace(/[\/.]/g, '-');
+                                fechaFactura = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaFactura));
                             } else if (typeof fechaFactura === 'number') {
                                 fechaFactura = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaFactura));
                             }
                             if (fechaOc && typeof fechaOc === 'string') {
-                                fechaOc = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaOc.replace(/[\/.]/g, '-')));
+                                fechaOc = fechaOc.replace(/[\/.]/g, '-');
+                                fechaOc = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaOc));
                             } else if (typeof fechaOc === 'number') {
                                 fechaOc = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaOc));
                             }
                             if (fechaSalida && typeof fechaSalida === 'string') {
-                                fechaSalida = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaSalida.replace(/[\/.]/g, '-')));
+                                fechaSalida = fechaSalida.replace(/[\/.]/g, '-');
+                                fechaSalida = formatDateToDDMMYYYY(parseDateDDMMYYYY(fechaSalida));
                             } else if (typeof fechaSalida === 'number') {
                                 fechaSalida = formatDateToDDMMYYYY(XLSX.SSF.parse_date_code(fechaSalida));
                             }
 
                             // Validate dates
                             if (fechaIngreso && isNaN(parseDateDDMMYYYY(fechaIngreso))) {
-                                showToast(`Fila ${i + 2}: Fecha de ingreso no válida`, 'error');
+                                console.log(`Fila ${i + 2}: Fecha de ingreso no válida: ${fechaIngreso}`); // Depuración
+                                showToast(`Fila ${i + 2}: Fecha de ingreso no válida: ${fechaIngreso}`, 'error');
                                 continue;
                             }
                             if (fechaFactura && isNaN(parseDateDDMMYYYY(fechaFactura))) {
-                                showToast(`Fila ${i + 2}: Fecha de factura no válida`, 'error');
+                                console.log(`Fila ${i + 2}: Fecha de factura no válida: ${fechaFactura}`); // Depuración
+                                showToast(`Fila ${i + 2}: Fecha de factura no válida: ${fechaFactura}`, 'error');
                                 continue;
                             }
                             if (fechaOc && isNaN(parseDateDDMMYYYY(fechaOc))) {
-                                showToast(`Fila ${i + 2}: Fecha de OC no válida`, 'error');
+                                console.log(`Fila ${i + 2}: Fecha de OC no válida: ${fechaOc}`); // Depuración
+                                showToast(`Fila ${i + 2}: Fecha de OC no válida: ${fechaOc}`, 'error');
                                 continue;
                             }
                             if (fechaSalida && isNaN(parseDateDDMMYYYY(fechaSalida))) {
-                                showToast(`Fila ${i + 2}: Fecha de salida no válida`, 'error');
+                                console.log(`Fila ${i + 2}: Fecha de salida no válida: ${fechaSalida}`); // Depuración
+                                showToast(`Fila ${i + 2}: Fecha de salida no válida: ${fechaSalida}`, 'error');
                                 continue;
                             }
 
@@ -1251,32 +1263,50 @@
                                 fullName: String(row.fullName || window.currentUserData.fullName).trim()
                             };
 
-                            if (processedRow.numeroFactura && processedRow.fechaIngreso) {
-                                const existing = await getIngresoByUniqueKey(processedRow.numeroFactura);
-                                if (existing) {
-                                    const hasChanges = Object.keys(processedRow).some(key => 
-                                        key === 'fechaIngreso' || key === 'fechaFactura' || key === 'fechaOc' || key === 'fechaSalida' 
-                                        ? processedRow[key] !== formatDateToDDMMYYYY(parseDateDDMMYYYY(existing[key]))
-                                        : processedRow[key] !== String(existing[key] || '').trim()
-                                    );
-                                    if (hasChanges) {
-                                        await updateDoc(doc(db, "ingresos_lab", existing.id), {
-                                            ...processedRow,
-                                            createdAt: new Date()
-                                        });
-                                        await logAction(existing.id, 'update', existing, processedRow);
-                                        updatedCount++;
-                                    }
-                                } else {
-                                    const docRef = await addDoc(collection(db, "ingresos_lab"), {
+                            console.log(`Fila ${i + 2} procesada:`, processedRow); // Depuración: mostrar fila procesada
+
+                            if (!processedRow.numeroFactura) {
+                                console.log(`Fila ${i + 2}: Falta número de factura`); // Depuración
+                                showToast(`Fila ${i + 2}: Falta número de factura`, 'error');
+                                continue;
+                            }
+                            if (!processedRow.fechaIngreso) {
+                                console.log(`Fila ${i + 2}: Falta fecha de ingreso`); // Depuración
+                                showToast(`Fila ${i + 2}: Falta fecha de ingreso`, 'error');
+                                continue;
+                            }
+                            if (processedRow.monto && isNaN(parseInt(processedRow.monto))) {
+                                console.log(`Fila ${i + 2}: Monto no válido: ${processedRow.monto}`); // Depuración
+                                showToast(`Fila ${i + 2}: Monto no válido: ${processedRow.monto}`, 'error');
+                                continue;
+                            }
+
+                            const existing = await getIngresoByUniqueKey(processedRow.numeroFactura);
+                            if (existing) {
+                                const hasChanges = Object.keys(processedRow).some(key => 
+                                    key === 'fechaIngreso' || key === 'fechaFactura' || key === 'fechaOc' || key === 'fechaSalida' 
+                                    ? processedRow[key] !== formatDateToDDMMYYYY(parseDateDDMMYYYY(existing[key]))
+                                    : processedRow[key] !== String(existing[key] || '').trim()
+                                );
+                                if (hasChanges) {
+                                    console.log(`Fila ${i + 2}: Actualizando ingreso existente: ${processedRow.numeroFactura}`); // Depuración
+                                    await updateDoc(doc(db, "ingresos_lab", existing.id), {
                                         ...processedRow,
                                         createdAt: new Date()
                                     });
-                                    await logAction(docRef.id, 'create', null, processedRow);
-                                    addedCount++;
+                                    await logAction(existing.id, 'update', existing, processedRow);
+                                    updatedCount++;
+                                } else {
+                                    console.log(`Fila ${i + 2}: Sin cambios para ingreso existente: ${processedRow.numeroFactura}`); // Depuración
                                 }
                             } else {
-                                showToast(`Fila ${i + 2}: Faltan número de factura o fecha de ingreso`, 'error');
+                                console.log(`Fila ${i + 2}: Creando nuevo ingreso: ${processedRow.numeroFactura}`); // Depuración
+                                const docRef = await addDoc(collection(db, "ingresos_lab"), {
+                                    ...processedRow,
+                                    createdAt: new Date()
+                                });
+                                await logAction(docRef.id, 'create', null, processedRow);
+                                addedCount++;
                             }
 
                             const progress = ((i + 1) / totalRows) * 100;
@@ -1293,6 +1323,7 @@
                 } catch (error) {
                     hideImportProgress();
                     showToast('Error al importar el archivo: ' + error.message, 'error');
+                    console.error('Error general en importFromExcel:', error); // Depuración
                 }
             }
 
