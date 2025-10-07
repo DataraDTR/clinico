@@ -851,7 +851,7 @@
                             acta: i.acta,
                             fechaSalida: formatDateToDDMMYYYY(i.fechaSalida),
                             salida: i.salida,
-                            usuario: i.usuario
+                            fullName: i.fullName
                         })), `ingresos_${ano}_${mes}`);
                         hideLoading();
                         closeDownloadMesModalHandler();
@@ -869,7 +869,7 @@
                     window.location.replace('../../../../../index.html');
                     return;
                 }
-                window.currentUserData = { fullName: user.displayName || 'Usuario Invitado', username: user.email || 'invitado' };
+                window.currentUserData = { fullName: user.displayName || 'Usuario Invitado' };
                 await loadIngresos();
                 populateAnoSelect(selectAno);
                 selectAno.value = selectedAno;
@@ -1075,7 +1075,7 @@
                     acta: i.acta,
                     fechaSalida: formatDateToDDMMYYYY(i.fechaSalida),
                     salida: i.salida,
-                    usuario: i.usuario
+                    fullName: i.fullName
                 })), 'todos_ingresos');
                 actionsMenu.style.display = 'none';
             });
@@ -1096,7 +1096,7 @@
                     acta: i.acta,
                     fechaSalida: formatDateToDDMMYYYY(i.fechaSalida),
                     salida: i.salida,
-                    usuario: i.usuario
+                    fullName: i.fullName
                 }));
                 exportToExcel(pageData, 'pagina_actual_ingresos');
                 actionsMenu.style.display = 'none';
@@ -1128,9 +1128,9 @@
 
             function downloadImportTemplate() {
                 const ws = XLSX.utils.aoa_to_sheet([[
-                    "Fecha de Ingreso", "Número de Factura", "Fecha de Factura", "Monto", "OC", "Fecha de OC", "Proveedor", "Acta", "Fecha de Salida", "Salida", "Usuario"
+                    "Fecha de Ingreso", "Número de Factura", "Fecha de Factura", "Monto", "OC", "Fecha de OC", "Proveedor", "Acta", "Fecha de Salida", "Salida", "Nombre Completo"
                 ], [
-                    "07-10-2025", "FACT001", "07-10-2025", "10000", "OC001", "07-10-2025", "Proveedor A", "ACTA001", "07-10-2025", "Salida 1", "Usuario Ejemplo"
+                    "07-10-2025", "FACT001", "07-10-2025", "10000", "OC001", "07-10-2025", "Proveedor A", "ACTA001", "07-10-2025", "Salida 1", "Maikol Ganga Pinto"
                 ]]);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Template");
@@ -1145,7 +1145,7 @@
                         const wb = XLSX.read(data, {type: 'array', cellDates: true, dateNF: 'dd-mm-yyyy'});
                         const ws = wb.Sheets[wb.SheetNames[0]];
                         const json = XLSX.utils.sheet_to_json(ws, {
-                            header: ["fechaIngreso", "numeroFactura", "fechaFactura", "monto", "oc", "fechaOc", "proveedor", "acta", "fechaSalida", "salida", "usuario"],
+                            header: ["fechaIngreso", "numeroFactura", "fechaFactura", "monto", "oc", "fechaOc", "proveedor", "acta", "fechaSalida", "salida", "fullName"],
                             range: 1,
                             defval: '',
                             raw: false,
@@ -1206,7 +1206,7 @@
                                 acta: String(row.acta || '').trim(),
                                 fechaSalida: fechaSalida ? formatDateToDDMMYYYY(new Date(fechaSalida)) : '',
                                 salida: String(row.salida || '').trim(),
-                                usuario: String(row.usuario || window.currentUserData.username).trim()
+                                fullName: String(row.fullName || window.currentUserData.fullName).trim()
                             };
 
                             if (processedRow.numeroFactura && processedRow.fechaIngreso) {
@@ -1294,7 +1294,7 @@
                             <td>${ingreso.acta || ''}</td>
                             <td>${formatDateToDDMMYYYY(ingreso.fechaSalida) || ''}</td>
                             <td>${ingreso.salida || ''}</td>
-                            <td>${ingreso.usuario || ''}</td>
+                            <td>${ingreso.fullName || ''}</td>
                         `;
                         ingresosBody.appendChild(row);
                     });
@@ -1378,7 +1378,7 @@
                     acta: actaInput.value.trim(),
                     fechaSalida: fechaSalidaInput.value ? formatDateToDDMMYYYY(new Date(fechaSalidaInput.value)) : '',
                     salida: salidaInput.value.trim(),
-                    usuario: window.currentUserData.username
+                    fullName: window.currentUserData.fullName
                 };
 
                 if (processedRow.numeroFactura && processedRow.fechaIngreso) {
