@@ -5,490 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Importación de Ingresos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="ingresos.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc };
+        import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc, orderBy, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        window.firebaseModules = { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence, getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc, orderBy, getDoc };
     </script>
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            overflow: hidden;
-            font-size: 12px;
-        }
-        .ingresos-main-container {
-            width: 100%;
-            height: 100%;
-            background: white;
-            padding: 5px 20px 20px 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        .ingresos-title {
-            text-align: start;
-            margin: 0 0 15px 0;
-            font-size: 18px;
-        }
-        .ingresos-fields-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
-        }
-        .ingresos-search-section {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            flex: 1;
-        }
-        .ingresos-form-group {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 4px;
-            flex: 1;
-            min-width: 0;
-            max-width: 200px;
-        }
-        .ingresos-label {
-            font-size: 10px;
-            font-weight: bold;
-            color: #333;
-            white-space: nowrap;
-        }
-        #fechaIngreso, #numeroFactura, #fechaFactura, #monto, #ordenCompra, #acta, #salida, #fechaOc, #proveedor, #fechaSalida, #buscarNumeroFactura, #buscarProveedor, #buscarOrdenCompra, #buscarActa, #buscarSalidas, #fechaDesde, #fechaHasta, #selectAno, #selectMes {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 11px;
-            box-sizing: border-box;
-        }
-        #fechaIngreso:focus, #numeroFactura:focus, #fechaFactura:focus, #monto:focus, #ordenCompra:focus, #acta:focus, #salida:focus, #fechaOc:focus, #proveedor:focus, #fechaSalida:focus, #buscarNumeroFactura:focus, #buscarProveedor:focus, #buscarOrdenCompra:focus, #buscarActa:focus, #buscarSalidas:focus, #fechaDesde:focus, #fechaHasta:focus, #selectAno:focus, #selectMes:focus {
-            box-shadow: 0 0 12px rgba(0, 123, 255, 0.5);
-            outline: none;
-        }
-        #fechaOc, #proveedor {
-            background-color: #f8f9fa;
-            cursor: not-allowed;
-        }
-        .ingresos-actions-menu {
-            position: relative;
-            text-align: right;
-        }
-        #actionsBtn {
-            background: none;
-            border: none;
-            color: #007bff;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 8px 16px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        #actionsBtn:hover {
-            color: #0056b3;
-            text-decoration: underline;
-        }
-        .ingresos-dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 2px 8px 16px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 4px;
-            overflow: hidden;
-            flex-direction: column;
-        }
-        .ingresos-dropdown-menu a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-        .ingresos-dropdown-menu a:hover {
-            background-color: #f1f1f1;
-        }
-        .ingresos-table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
-        .ingresos-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-            border: 1px solid #ddd;
-            table-layout: fixed;
-        }
-        .ingresos-table th, .ingresos-table td {
-            padding: 4px;
-            text-align: left;
-            border: 1px solid #ddd;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .ingresos-table th {
-            background-color: #f2f2f2;
-            font-size: 11px;
-            cursor: col-resize;
-            position: relative;
-        }
-        .ingresos-table th::after {
-            content: '';
-            position: absolute;
-            right: -5px;
-            top: 0;
-            width: 10px;
-            height: 100%;
-            cursor: col-resize;
-        }
-        .ingresos-table tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-        .ingresos-table th:nth-child(1), .ingresos-table td:nth-child(1) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(2), .ingresos-table td:nth-child(2) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(3), .ingresos-table td:nth-child(3) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(4), .ingresos-table td:nth-child(4) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(5), .ingresos-table td:nth-child(5) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(6), .ingresos-table td:nth-child(6) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(7), .ingresos-table td:nth-child(7) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(8), .ingresos-table td:nth-child(8) { width: 150px; min-width: 120px; max-width: 150px; }
-        .ingresos-table th:nth-child(9), .ingresos-table td:nth-child(9) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(10), .ingresos-table td:nth-child(10) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(11), .ingresos-table td:nth-child(11) { width: 100px; min-width: 80px; max-width: 100px; }
-        .ingresos-table th:nth-child(12), .ingresos-table td:nth-child(12) { width: 150px; min-width: 120px; max-width: 150px; }
-        .resizing {
-            user-select: none;
-        }
-        .ingresos-pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 4px;
-            flex-wrap: nowrap;
-        }
-        .ingresos-pagination-info {
-            font-size: 11px;
-            flex: 1;
-            text-align: left;
-        }
-        .ingresos-pagination-controls {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex-shrink: 0;
-        }
-        .ingresos-pagination-controls button {
-            padding: 6px 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-        .ingresos-pagination-controls button:hover:not(:disabled) {
-            background-color: #0056b3;
-        }
-        .ingresos-pagination-controls button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        .ingresos-page-numbers {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
-        .ingresos-page-numbers button {
-            padding: 4px 8px;
-            border: 1px solid #ddd;
-            background: white;
-            cursor: pointer;
-            font-size: 11px;
-            border-radius: 4px;
-        }
-        .ingresos-page-numbers button.active {
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-        .ingresos-page-numbers button:hover:not(.active) {
-            background-color: #f0f0f0;
-        }
-        .ingresos-page-numbers .ingresos-dots {
-            padding: 4px;
-            cursor: default;
-            font-size: 11px;
-            line-height: 1.5;
-        }
-        #ingresos-message {
-            margin-bottom: 20px;
-            padding: 8px;
-            border-radius: 4px;
-            display: none;
-            font-size: 11px;
-        }
-        .ingresos-message-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .ingresos-message-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .ingresos-loading {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 120px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 16px;
-            backdrop-filter: blur(8px);
-        }
-        .ingresos-loading.show {
-            display: flex;
-        }
-        .ingresos-loading-spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid #e3f2fd;
-            border-top: 3px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 8px;
-        }
-        .ingresos-loading-text {
-            font-size: 12px;
-            color: #333;
-            font-weight: 500;
-            text-align: center;
-        }
-        .ingresos-import-progress {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            z-index: 1000;
-            padding: 20px;
-            backdrop-filter: blur(8px);
-        }
-        .ingresos-import-progress.show {
-            display: block;
-        }
-        .ingresos-progress-bar-container {
-            width: 100%;
-            height: 20px;
-            background-color: #e3f2fd;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-        .ingresos-progress-bar {
-            height: 100%;
-            background-color: #007bff;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        .ingresos-progress-text {
-            font-size: 12px;
-            color: #333;
-            font-weight: 500;
-            text-align: center;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .ingresos-toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #d4edda;
-            color: #155724;
-            padding: 12px 20px;
-            border-radius: 6px;
-            border: 1px solid #c3e6cb;
-            font-size: 12px;
-            z-index: 1001;
-            max-width: 300px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            opacity: 0;
-            transform: translateX(100%);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .ingresos-toast.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        .ingresos-toast.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1002;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-        }
-        .modal-form-group {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 15px;
-        }
-        .modal-form-group label {
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .modal-form-group select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 11px;
-        }
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .modal-btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .modal-btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        @media (max-width: 768px) {
-            .ingresos-fields-container {
-                flex-direction: column;
-                gap: 20px;
-            }
-            .ingresos-search-section {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .ingresos-form-group {
-                max-width: none;
-            }
-            .ingresos-toast {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-            .ingresos-loading {
-                width: 100px;
-                height: 70px;
-                padding: 12px;
-            }
-            .ingresos-loading-spinner {
-                width: 28px;
-                height: 28px;
-            }
-            .ingresos-import-progress {
-                width: 90%;
-                max-width: 280px;
-                padding: 15px;
-            }
-            .modal-content {
-                width: 90%;
-                margin: 20% auto;
-            }
-            .ingresos-pagination {
-                flex-direction: row;
-                align-items: center;
-                gap: 10px;
-            }
-            .ingresos-pagination-info {
-                font-size: 10px;
-            }
-            .ingresos-pagination-controls button {
-                padding: 4px 8px;
-                font-size: 10px;
-            }
-            .ingresos-page-numbers button {
-                padding: 3px 6px;
-                font-size: 10px;
-            }
-            .ingresos-dropdown-menu {
-                min-width: 180px;
-                right: 0;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="ingresos-main-container">
@@ -637,30 +161,108 @@
         </div>
 
         <div id="ingresos-toast" class="ingresos-toast"></div>
-    </div>
 
-    <div id="downloadMesModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeDownloadMes">&times;</span>
-            <h2>Descargar por Mes</h2>
-            <div class="modal-form-group">
-                <label for="selectDownloadAno">Año:</label>
-                <select id="selectDownloadAno"></select>
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeEditModal">&times;</span>
+                <h2>Editar Ingreso</h2>
+                <form id="editForm">
+                    <input type="hidden" id="editId">
+                    <div class="modal-form-group">
+                        <label for="editFechaIngreso">Fecha de Ingreso:</label>
+                        <input type="date" id="editFechaIngreso" required>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editNumeroFactura">Número de Factura:</label>
+                        <input type="text" id="editNumeroFactura" required>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editFechaFactura">Fecha de Factura:</label>
+                        <input type="date" id="editFechaFactura">
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editMonto">Monto:</label>
+                        <input type="text" id="editMonto">
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editOrdenCompra">Orden de Compra:</label>
+                        <input type="text" id="editOrdenCompra">
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editFechaOc">Fecha de OC:</label>
+                        <input type="text" id="editFechaOc" readonly>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editProveedor">Proveedor:</label>
+                        <input type="text" id="editProveedor" readonly>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editActa">Acta:</label>
+                        <input type="text" id="editActa">
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editFechaSalida">Fecha de Salida:</label>
+                        <input type="date" id="editFechaSalida">
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="editSalida">Salida:</label>
+                        <input type="text" id="editSalida">
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" class="modal-btn modal-btn-secondary" id="cancelEdit">Cancelar</button>
+                        <button type="submit" class="modal-btn modal-btn-primary">Guardar</button>
+                    </div>
+                </form>
             </div>
-            <div class="modal-form-group">
-                <label for="selectDownloadMes">Mes:</label>
-                <select id="selectDownloadMes"></select>
+        </div>
+
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeDeleteModal">&times;</span>
+                <h2>Eliminar Ingreso</h2>
+                <p class="delete-modal-text" id="deleteText"></p>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" id="cancelDelete">No</button>
+                    <button type="button" class="modal-btn modal-btn-danger" id="confirmDelete">Sí</button>
+                </div>
             </div>
-            <div class="modal-buttons">
-                <button type="button" class="modal-btn modal-btn-secondary" id="cancelDownloadMes">Cancelar</button>
-                <button type="button" class="modal-btn modal-btn-primary" id="confirmDownloadMes">Descargar</button>
+        </div>
+
+        <div id="historyModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeHistory">&times;</span>
+                <h2 id="historyTitle">HISTORIAL INGRESO</h2>
+                <hr>
+                <div id="historyContent"></div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" id="closeHistoryBtn">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="downloadMesModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeDownloadMes">&times;</span>
+                <h2>Descargar por Mes</h2>
+                <div class="modal-form-group">
+                    <label for="selectDownloadAno">Año:</label>
+                    <select id="selectDownloadAno"></select>
+                </div>
+                <div class="modal-form-group">
+                    <label for="selectDownloadMes">Mes:</label>
+                    <select id="selectDownloadMes"></select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" id="cancelDownloadMes">Cancelar</button>
+                    <button type="button" class="modal-btn modal-btn-primary" id="confirmDownloadMes">Descargar</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script type="module">
         const { initializeApp, getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } = window.firebaseModules;
-        const { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc } = window.firebaseModules;
+        const { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc, orderBy, getDoc } = window.firebaseModules;
 
         const firebaseConfig = {
             apiKey: "AIzaSyD6JY7FaRqjZoN6OzbFHoIXxd-IJL3H-Ek",
@@ -706,11 +308,17 @@
         }
 
         function formatDateToYYYYMMDD(date) {
+            if (!date || isNaN(new Date(date))) return '';
             const d = new Date(date);
             const day = String(d.getDate()).padStart(2, '0');
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const year = d.getFullYear();
             return `${year}-${month}-${day}`;
+        }
+
+        function formatNumberWithThousandsSeparator(number) {
+            if (!number) return '';
+            return parseInt(number).toLocaleString('es-CL');
         }
 
         async function getOrdenByCodigo(codigo) {
@@ -722,6 +330,35 @@
                 return { id: doc.id, ...doc.data() };
             }
             return null;
+        }
+
+        async function getIngresoByUniqueKey(numeroFactura, excludeId = null) {
+            if (!numeroFactura) return null;
+            const q = query(collection(db, "ingresos_lab"), where("numeroFactura", "==", numeroFactura.trim()));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                const doc = querySnapshot.docs[0];
+                if (excludeId && doc.id === excludeId) return null;
+                return { id: doc.id, ...doc.data() };
+            }
+            return null;
+        }
+
+        async function logAction(ingresoId, action, oldData = null, newData = null) {
+            if (!window.currentUserData) {
+                console.warn('Datos del usuario no disponibles para log');
+                return;
+            }
+            await addDoc(collection(db, "ingresos_historial"), {
+                ingresoId,
+                action,
+                timestamp: new Date(),
+                userId: auth.currentUser ? auth.currentUser.uid : null,
+                userFullName: window.currentUserData.fullName || 'Usuario Invitado',
+                username: window.currentUserData.username || 'invitado',
+                oldData,
+                newData
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -769,6 +406,29 @@
             const downloadPage = document.getElementById('downloadPage');
             const downloadMes = document.getElementById('downloadMes');
             const fileUpload = document.getElementById('fileUpload');
+            const editModal = document.getElementById('editModal');
+            const deleteModal = document.getElementById('deleteModal');
+            const historyModal = document.getElementById('historyModal');
+            const closeEditModal = document.getElementById('closeEditModal');
+            const cancelEdit = document.getElementById('cancelEdit');
+            const editForm = document.getElementById('editForm');
+            const closeDeleteModal = document.getElementById('closeDeleteModal');
+            const cancelDelete = document.getElementById('cancelDelete');
+            const confirmDelete = document.getElementById('confirmDelete');
+            const deleteText = document.getElementById('deleteText');
+            const closeHistory = document.getElementById('closeHistory');
+            const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+            const historyTitle = document.getElementById('historyTitle');
+            const historyContent = document.getElementById('historyContent');
+
+            let currentEditId = null;
+            let currentEditOldData = null;
+            let currentDeleteId = null;
+            let currentDeleteNumeroFactura = null;
+
+            // Inicializar fechaSalida con la fecha actual
+            fechaSalidaInput.value = formatDateToYYYYMMDD(new Date());
+            document.getElementById('editFechaSalida').value = formatDateToYYYYMMDD(new Date());
 
             window.showLoading = function() {
                 if (loading) loading.classList.add('show');
@@ -805,16 +465,162 @@
                 }
             }
 
-            async function getIngresoByUniqueKey(numeroFactura) {
-                if (!numeroFactura) return null;
-                const q = query(collection(db, "ingresos_lab"), where("numeroFactura", "==", numeroFactura.trim()));
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    const doc = querySnapshot.docs[0];
-                    return { id: doc.id, ...doc.data() };
-                }
-                return null;
+            function openEditModal(id, ingreso) {
+                currentEditId = id;
+                currentEditOldData = { ...ingreso };
+                document.getElementById('editId').value = id;
+                document.getElementById('editFechaIngreso').value = ingreso.fechaIngreso ? formatDateToYYYYMMDD(ingreso.fechaIngreso) : '';
+                document.getElementById('editNumeroFactura').value = ingreso.numeroFactura || '';
+                document.getElementById('editFechaFactura').value = ingreso.fechaFactura ? formatDateToYYYYMMDD(ingreso.fechaFactura) : '';
+                document.getElementById('editMonto').value = ingreso.monto ? formatNumberWithThousandsSeparator(ingreso.monto) : '';
+                document.getElementById('editOrdenCompra').value = ingreso.oc || '';
+                document.getElementById('editFechaOc').value = ingreso.fechaOc || '';
+                document.getElementById('editProveedor').value = ingreso.proveedor || '';
+                document.getElementById('editActa').value = ingreso.acta || '';
+                document.getElementById('editFechaSalida').value = ingreso.fechaSalida ? formatDateToYYYYMMDD(ingreso.fechaSalida) : formatDateToYYYYMMDD(new Date());
+                document.getElementById('editSalida').value = ingreso.salida || '';
+                editModal.style.display = 'block';
             }
+
+            function closeEditModalHandler() {
+                editModal.style.display = 'none';
+                currentEditId = null;
+                currentEditOldData = null;
+                editForm.reset();
+                document.getElementById('editFechaSalida').value = formatDateToYYYYMMDD(new Date());
+            }
+
+            function openDeleteModal(id, numeroFactura) {
+                currentDeleteId = id;
+                currentDeleteNumeroFactura = numeroFactura;
+                deleteText.textContent = `¿Desea eliminar el ingreso con número de factura "${numeroFactura}"?`;
+                deleteModal.style.display = 'block';
+            }
+
+            function closeDeleteModalHandler() {
+                deleteModal.style.display = 'none';
+                currentDeleteId = null;
+                currentDeleteNumeroFactura = null;
+            }
+
+            function openHistoryModal(id, numeroFactura) {
+                historyTitle.textContent = `HISTORIAL INGRESO ${numeroFactura}`;
+                showLoading();
+                const q = query(collection(db, "ingresos_historial"), where("ingresoId", "==", id), orderBy("timestamp", "desc"));
+                getDocs(q).then((querySnapshot) => {
+                    hideLoading();
+                    let html = '';
+                    querySnapshot.forEach((doc) => {
+                        const log = doc.data();
+                        const date = log.timestamp ? log.timestamp.toDate().toLocaleString('es-CL') : 'Fecha inválida';
+                        if (log.action === 'create') {
+                            html += `<div class="history-entry">Creado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} | ${date}</div>`;
+                        } else if (log.action === 'update') {
+                            html += `<div class="history-entry">Modificado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} | ${date} | Factura: ${log.oldData ? log.oldData.numeroFactura : 'N/A'} → ${log.newData ? log.newData.numeroFactura : 'N/A'}</div>`;
+                        } else if (log.action === 'delete') {
+                            html += `<div class="history-entry">Eliminado | ${log.userFullName || 'Desconocido'} | ${log.username || 'desconocido'} | ${date}</div>`;
+                        }
+                    });
+                    historyContent.innerHTML = html || '<div>No hay historial disponible.</div>';
+                    historyModal.style.display = 'block';
+                }).catch((error) => {
+                    hideLoading();
+                    showToast('Error al cargar el historial: ' + error.message, 'error');
+                });
+            }
+
+            function closeHistoryModalHandler() {
+                historyModal.style.display = 'none';
+                historyContent.innerHTML = '';
+            }
+
+            closeEditModal.addEventListener('click', closeEditModalHandler);
+            cancelEdit.addEventListener('click', closeEditModalHandler);
+            window.addEventListener('click', (e) => {
+                if (e.target === editModal) closeEditModalHandler();
+            });
+
+            closeDeleteModal.addEventListener('click', closeDeleteModalHandler);
+            cancelDelete.addEventListener('click', closeDeleteModalHandler);
+            window.addEventListener('click', (e) => {
+                if (e.target === deleteModal) closeDeleteModalHandler();
+            });
+
+            closeHistory.addEventListener('click', closeHistoryModalHandler);
+            closeHistoryBtn.addEventListener('click', closeHistoryModalHandler);
+            window.addEventListener('click', (e) => {
+                if (e.target === historyModal) closeHistoryModalHandler();
+            });
+
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentEdit spoofId) return;
+
+                const processedRow = {
+                    fechaIngreso: document.getElementById('editFechaIngreso').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editFechaIngreso').value)) : '',
+                    numeroFactura: document.getElementById('editNumeroFactura').value.trim(),
+                    fechaFactura: document.getElementById('editFechaFactura').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editFechaFactura').value)) : '',
+                    monto: document.getElementById('editMonto').value.replace(/\./g, ''),
+                    oc: document.getElementById('editOrdenCompra').value.trim(),
+                    fechaOc: document.getElementById('editFechaOc').value,
+                    proveedor: document.getElementById('editProveedor').value,
+                    acta: document.getElementById('editActa').value.trim(),
+                    fechaSalida: document.getElementById('editFechaSalida').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editFechaSalida').value)) : '',
+                    salida: document.getElementById('editSalida').value.trim(),
+                    fullName: window.currentUserData.fullName
+                };
+
+                if (processedRow.numeroFactura && processedRow.fechaIngreso) {
+                    showLoading();
+                    try {
+                        const existing = await getIngresoByUniqueKey(processedRow.numeroFactura, currentEditId);
+                        if (existing) {
+                            hideLoading();
+                            showToast('El número de factura ya existe.', 'error');
+                            return;
+                        }
+                        await updateDoc(doc(db, "ingresos_lab", currentEditId), {
+                            ...processedRow,
+                            createdAt: new Date()
+                        });
+                        await logAction(currentEditId, 'update', currentEditOldData, processedRow);
+                        hideLoading();
+                        showToast(`Ingreso ${processedRow.numeroFactura} actualizado exitosamente`, 'success');
+                        closeEditModalHandler();
+                        await loadIngresos();
+                    } catch (error) {
+                        hideLoading();
+                        showToast('Error al actualizar el ingreso: ' + error.message, 'error');
+                    }
+                } else {
+                    showToast('Faltan número de factura o fecha de ingreso', 'error');
+                }
+            });
+
+            confirmDelete.addEventListener('click', async () => {
+                if (!currentDeleteId || !currentDeleteNumeroFactura) return;
+
+                showLoading();
+                try {
+                    const ingresoDoc = await getDoc(doc(db, "ingresos_lab", currentDeleteId));
+                    if (ingresoDoc.exists()) {
+                        const ingresoData = ingresoDoc.data();
+                        await logAction(currentDeleteId, 'delete', ingresoData);
+                        await deleteDoc(doc(db, "ingresos_lab", currentDeleteId));
+                        hideLoading();
+                        showToast(`Ingreso ${currentDeleteNumeroFactura} eliminado exitosamente`, 'success');
+                        closeDeleteModalHandler();
+                        await loadIngresos();
+                    } else {
+                        hideLoading();
+                        showToast('El ingreso no existe.', 'error');
+                        closeDeleteModalHandler();
+                    }
+                } catch (error) {
+                    hideLoading();
+                    showToast('Error al eliminar el ingreso: ' + error.message, 'error');
+                }
+            });
 
             function openDownloadMesModal() {
                 populateAnoSelect(selectDownloadAno);
@@ -844,7 +650,7 @@
                             fechaIngreso: formatDateToDDMMYYYY(i.fechaIngreso),
                             numeroFactura: i.numeroFactura,
                             fechaFactura: formatDateToDDMMYYYY(i.fechaFactura),
-                            monto: i.monto,
+                            monto: formatNumberWithThousandsSeparator(i.monto),
                             oc: i.oc,
                             fechaOc: formatDateToDDMMYYYY(i.fechaOc),
                             proveedor: i.proveedor,
@@ -866,10 +672,22 @@
 
             onAuthStateChanged(auth, async (user) => {
                 if (!user) {
-                    window.location.replace('../../../../../index.html');
+                    window.location.replace('../index.html');
                     return;
                 }
-                window.currentUserData = { fullName: user.displayName || 'Usuario Invitado' };
+                try {
+                    const userDocRef = doc(db, 'users', user.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    if (userDoc.exists()) {
+                        window.currentUserData = userDoc.data();
+                    } else {
+                        window.currentUserData = { fullName: user.displayName || 'Usuario Invitado', username: user.email || 'invitado' };
+                    }
+                } catch (error) {
+                    console.error('Error al cargar datos del usuario:', error);
+                    window.currentUserData = { fullName: 'Usuario Invitado', username: 'invitado' };
+                    showToast('Error al cargar datos del usuario.', 'error');
+                }
                 await loadIngresos();
                 populateAnoSelect(selectAno);
                 selectAno.value = selectedAno;
@@ -985,6 +803,89 @@
                 });
             }
 
+            if (document.getElementById('editOrdenCompra')) {
+                document.getElementById('editOrdenCompra').addEventListener('input', async (e) => {
+                    const codigo = e.target.value.trim();
+                    if (codigo) {
+                        showLoading();
+                        try {
+                            const orden = await getOrdenByCodigo(codigo);
+                            if (orden) {
+                                document.getElementById('editProveedor').value = orden.proveedor || '';
+                                document.getElementById('editFechaOc').value = formatDateToDDMMYYYY(orden.generacion) || '';
+                            } else {
+                                document.getElementById('editProveedor').value = '';
+                                document.getElementById('editFechaOc').value = '';
+                                showToast('No se encontró una orden con ese código', 'error');
+                            }
+                            hideLoading();
+                        } catch (error) {
+                            hideLoading();
+                            showToast('Error al buscar la orden: ' + error.message, 'error');
+                            document.getElementById('editProveedor').value = '';
+                            document.getElementById('editFechaOc').value = '';
+                        }
+                    } else {
+                        document.getElementById('editProveedor').value = '';
+                        document.getElementById('editFechaOc').value = '';
+                    }
+                });
+            }
+
+            if (ingresarBtn) {
+                ingresarBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const processedRow = {
+                        fechaIngreso: fechaIngresoInput.value ? formatDateToDDMMYYYY(new Date(fechaIngresoInput.value)) : '',
+                        numeroFactura: numeroFacturaInput.value.trim(),
+                        fechaFactura: fechaFacturaInput.value ? formatDateToDDMMYYYY(new Date(fechaFacturaInput.value)) : '',
+                        monto: montoInput.value.replace(/\./g, ''),
+                        oc: ordenCompraInput.value.trim(),
+                        fechaOc: fechaOcInput.value,
+                        proveedor: proveedorInput.value,
+                        acta: actaInput.value.trim(),
+                        fechaSalida: fechaSalidaInput.value ? formatDateToDDMMYYYY(new Date(fechaSalidaInput.value)) : '',
+                        salida: salidaInput.value.trim(),
+                        fullName: window.currentUserData.fullName
+                    };
+
+                    if (processedRow.numeroFactura && processedRow.fechaIngreso) {
+                        showLoading();
+                        try {
+                            const existing = await getIngresoByUniqueKey(processedRow.numeroFactura);
+                            if (existing) {
+                                hideLoading();
+                                showToast('El número de factura ya existe.', 'error');
+                                return;
+                            }
+                            const docRef = await addDoc(collection(db, "ingresos_lab"), {
+                                ...processedRow,
+                                createdAt: new Date()
+                            });
+                            await logAction(docRef.id, 'create', null, processedRow);
+                            hideLoading();
+                            showToast(`Ingreso ${processedRow.numeroFactura} registrado exitosamente`, 'success');
+                            fechaIngresoInput.value = '';
+                            numeroFacturaInput.value = '';
+                            fechaFacturaInput.value = '';
+                            montoInput.value = '';
+                            ordenCompraInput.value = '';
+                            actaInput.value = '';
+                            salidaInput.value = '';
+                            fechaOcInput.value = '';
+                            proveedorInput.value = '';
+                            fechaSalidaInput.value = formatDateToYYYYMMDD(new Date());
+                            await loadIngresos();
+                        } catch (error) {
+                            hideLoading();
+                            showToast('Error al registrar el ingreso: ' + error.message, 'error');
+                        }
+                    } else {
+                        showToast('Faltan número de factura o fecha de ingreso', 'error');
+                    }
+                });
+            }
+
             async function loadIngresos() {
                 showLoading();
                 try {
@@ -1010,6 +911,7 @@
                         }
                     });
                     meses = meses.sort((a, b) => new Date(Date.parse('01 ' + a + ' 2000')) - new Date(Date.parse('01 ' + b + ' 2000')));
+                    ingresos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                     renderTable();
                     hideLoading();
                 } catch (error) {
@@ -1040,6 +942,112 @@
                 }
             }
 
+            function getFilteredIngresos() {
+                return ingresos.filter(ingreso => 
+                    String(ingreso.numeroFactura || '').toLowerCase().includes(searchNumeroFactura.toLowerCase()) &&
+                    String(ingreso.proveedor || '').toLowerCase().includes(searchProveedor.toLowerCase()) &&
+                    String(ingreso.oc || '').toLowerCase().includes(searchOrdenCompra.toLowerCase()) &&
+                    String(ingreso.acta || '').toLowerCase().includes(searchActa.toLowerCase()) &&
+                    String(ingreso.salida || '').toLowerCase().includes(searchSalidas.toLowerCase()) &&
+                    (!fechaDesde || new Date(ingreso.fechaIngreso) >= new Date(fechaDesde)) &&
+                    (!fechaHasta || new Date(ingreso.fechaIngreso) <= new Date(fechaHasta)) &&
+                    (!selectedAno || new Date(ingreso.fechaIngreso).getFullYear() == selectedAno) &&
+                    (!selectedMes || new Date(ingreso.fechaIngreso).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
+                ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+
+            function renderTable() {
+                const filteredIngresos = getFilteredIngresos();
+                const start = (currentPage - 1) * PAGE_SIZE;
+                const end = start + PAGE_SIZE;
+                const pageIngresos = filteredIngresos.slice(start, end);
+
+                if (ingresosBody) {
+                    ingresosBody.innerHTML = '';
+                    pageIngresos.forEach(ingreso => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="ingresos-actions">
+                                <button title="Editar" class="ingresos-btn-edit" onclick="openEditModal('${ingreso.id}', ${JSON.stringify(ingreso).replace(/"/g, '&quot;')})"><i class="fas fa-edit"></i></button>
+                                <button title="Eliminar" class="ingresos-btn-delete" onclick="openDeleteModal('${ingreso.id}', '${ingreso.numeroFactura}')"><i class="fas fa-trash"></i></button>
+                                <button title="Ver Historial" class="ingresos-btn-history" onclick="openHistoryModal('${ingreso.id}', '${ingreso.numeroFactura}')"><i class="fas fa-history"></i></button>
+                            </td>
+                            <td>${formatDateToDDMMYYYY(ingreso.fechaIngreso)}</td>
+                            <td>${ingreso.numeroFactura || ''}</td>
+                            <td>${formatDateToDDMMYYYY(ingreso.fechaFactura)}</td>
+                            <td>${formatNumberWithThousandsSeparator(ingreso.monto)}</td>
+                            <td>${ingreso.oc || ''}</td>
+                            <td>${formatDateToDDMMYYYY(ingreso.fechaOc)}</td>
+                            <td>${ingreso.proveedor || ''}</td>
+                            <td>${ingreso.acta || ''}</td>
+                            <td>${formatDateToDDMMYYYY(ingreso.fechaSalida)}</td>
+                            <td>${ingreso.salida || ''}</td>
+                            <td>${ingreso.fullName || ''}</td>
+                        `;
+                        ingresosBody.appendChild(row);
+                    });
+                }
+
+                updatePagination(filteredIngresos.length);
+            }
+
+            function updatePagination(total) {
+                const totalPages = Math.ceil(total / PAGE_SIZE);
+                const startPage = Math.max(1, currentPage - 2);
+                const endPage = Math.min(totalPages, startPage + 4);
+
+                const startRecord = (currentPage - 1) * PAGE_SIZE + 1;
+                const endRecord = Math.min(currentPage * PAGE_SIZE, total);
+                const recordsThisPage = endRecord - startRecord + 1;
+                if (paginationInfo) paginationInfo.textContent = `Página ${currentPage} de ${totalPages} | ${recordsThisPage} registros en esta página de ${total}`;
+
+                if (prevBtn) prevBtn.disabled = currentPage === 1;
+                if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+
+                if (pageNumbers) {
+                    pageNumbers.innerHTML = '';
+                    for (let i = startPage; i <= endPage; i++) {
+                        if (i > startPage && i <= endPage - 1 && endPage - startPage > 3) {
+                            const dots = document.createElement('span');
+                            dots.textContent = '...';
+                            dots.className = 'ingresos-dots';
+                            pageNumbers.appendChild(dots);
+                            i = endPage - 1;
+                            continue;
+                        }
+                        const btn = document.createElement('button');
+                        btn.textContent = i;
+                        btn.className = i === currentPage ? 'active' : '';
+                        btn.addEventListener('click', () => goToPage(i));
+                        pageNumbers.appendChild(btn);
+                    }
+                }
+            }
+
+            function goToPage(page) {
+                currentPage = page;
+                renderTable();
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderTable();
+                    }
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    const totalPages = Math.ceil(getFilteredIngresos().length / PAGE_SIZE);
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderTable();
+                    }
+                });
+            }
+
             actionsBtn.addEventListener('click', () => {
                 actionsMenu.style.display = actionsMenu.style.display === 'block' ? 'none' : 'block';
             });
@@ -1068,7 +1076,7 @@
                     fechaIngreso: formatDateToDDMMYYYY(i.fechaIngreso),
                     numeroFactura: i.numeroFactura,
                     fechaFactura: formatDateToDDMMYYYY(i.fechaFactura),
-                    monto: i.monto,
+                    monto: formatNumberWithThousandsSeparator(i.monto),
                     oc: i.oc,
                     fechaOc: formatDateToDDMMYYYY(i.fechaOc),
                     proveedor: i.proveedor,
@@ -1089,7 +1097,7 @@
                     fechaIngreso: formatDateToDDMMYYYY(i.fechaIngreso),
                     numeroFactura: i.numeroFactura,
                     fechaFactura: formatDateToDDMMYYYY(i.fechaFactura),
-                    monto: i.monto,
+                    monto: formatNumberWithThousandsSeparator(i.monto),
                     oc: i.oc,
                     fechaOc: formatDateToDDMMYYYY(i.fechaOc),
                     proveedor: i.proveedor,
@@ -1130,7 +1138,7 @@
                 const ws = XLSX.utils.aoa_to_sheet([[
                     "Fecha de Ingreso", "Número de Factura", "Fecha de Factura", "Monto", "OC", "Fecha de OC", "Proveedor", "Acta", "Fecha de Salida", "Salida", "Nombre Completo"
                 ], [
-                    "07-10-2025", "FACT001", "07-10-2025", "10000", "OC001", "07-10-2025", "Proveedor A", "ACTA001", "07-10-2025", "Salida 1", "Maikol Ganga Pinto"
+                    "07-10-2025", "FACT001", "07-10-2025", "10000", "OC001", "07-10-2025", "Proveedor A", "ACTA001", "07-10-2025", "Salida 1", "Usuario Ejemplo"
                 ]]);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Template");
@@ -1204,7 +1212,7 @@
                                 fechaOc: fechaOc ? formatDateToDDMMYYYY(new Date(fechaOc)) : '',
                                 proveedor: String(row.proveedor || '').trim(),
                                 acta: String(row.acta || '').trim(),
-                                fechaSalida: fechaSalida ? formatDateToDDMMYYYY(new Date(fechaSalida)) : '',
+                                fechaSalida: fechaSalida ? formatDateToDDMMYYYY(new Date(fechaSalida)) : formatDateToDDMMYYYY(new Date()),
                                 salida: String(row.salida || '').trim(),
                                 fullName: String(row.fullName || window.currentUserData.fullName).trim()
                             };
@@ -1222,13 +1230,15 @@
                                             ...processedRow,
                                             createdAt: new Date()
                                         });
+                                        await logAction(existing.id, 'update', existing, processedRow);
                                         updatedCount++;
                                     }
                                 } else {
-                                    await addDoc(collection(db, "ingresos_lab"), {
+                                    const docRef = await addDoc(collection(db, "ingresos_lab"), {
                                         ...processedRow,
                                         createdAt: new Date()
                                     });
+                                    await logAction(docRef.id, 'create', null, processedRow);
                                     addedCount++;
                                 }
                             } else {
@@ -1259,199 +1269,9 @@
                 });
             }
 
-            function getFilteredIngresos() {
-                return ingresos.filter(ingreso => 
-                    String(ingreso.numeroFactura || '').toLowerCase().includes(searchNumeroFactura.toLowerCase()) &&
-                    String(ingreso.proveedor || '').toLowerCase().includes(searchProveedor.toLowerCase()) &&
-                    String(ingreso.oc || '').toLowerCase().includes(searchOrdenCompra.toLowerCase()) &&
-                    String(ingreso.acta || '').toLowerCase().includes(searchActa.toLowerCase()) &&
-                    String(ingreso.salida || '').toLowerCase().includes(searchSalidas.toLowerCase()) &&
-                    (!fechaDesde || new Date(ingreso.fechaIngreso) >= new Date(fechaDesde)) &&
-                    (!fechaHasta || new Date(ingreso.fechaIngreso) <= new Date(fechaHasta)) &&
-                    (!selectedAno || new Date(ingreso.fechaIngreso).getFullYear() == selectedAno) &&
-                    (!selectedMes || new Date(ingreso.fechaIngreso).toLocaleString('es-CL', { month: 'long' }) === selectedMes)
-                );
-            }
-
-            function renderTable() {
-                const filteredIngresos = getFilteredIngresos();
-                const start = (currentPage - 1) * PAGE_SIZE;
-                const end = start + PAGE_SIZE;
-                const pageIngresos = filteredIngresos.sort((a, b) => a.numeroFactura.localeCompare(b.numeroFactura)).slice(start, end);
-                if (ingresosBody) {
-                    ingresosBody.innerHTML = '';
-                    pageIngresos.forEach(ingreso => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td></td>
-                            <td>${formatDateToDDMMYYYY(ingreso.fechaIngreso) || ''}</td>
-                            <td>${ingreso.numeroFactura || ''}</td>
-                            <td>${formatDateToDDMMYYYY(ingreso.fechaFactura) || ''}</td>
-                            <td>${ingreso.monto ? parseInt(ingreso.monto).toLocaleString('es-CL') : ''}</td>
-                            <td>${ingreso.oc || ''}</td>
-                            <td>${formatDateToDDMMYYYY(ingreso.fechaOc) || ''}</td>
-                            <td>${ingreso.proveedor || ''}</td>
-                            <td>${ingreso.acta || ''}</td>
-                            <td>${formatDateToDDMMYYYY(ingreso.fechaSalida) || ''}</td>
-                            <td>${ingreso.salida || ''}</td>
-                            <td>${ingreso.fullName || ''}</td>
-                        `;
-                        ingresosBody.appendChild(row);
-                    });
-                }
-                updatePagination(filteredIngresos.length);
-            }
-
-            function updatePagination(total) {
-                const totalPages = Math.ceil(total / PAGE_SIZE);
-                const startPage = Math.max(1, currentPage - 2);
-                const endPage = Math.min(totalPages, startPage + 4);
-                const startRecord = (currentPage - 1) * PAGE_SIZE + 1;
-                const endRecord = Math.min(currentPage * PAGE_SIZE, total);
-                const recordsThisPage = endRecord - startRecord + 1;
-                if (paginationInfo) paginationInfo.textContent = `Página ${currentPage} de ${totalPages} | ${recordsThisPage} registros en esta página de ${total}`;
-                if (prevBtn) prevBtn.disabled = currentPage === 1;
-                if (nextBtn) nextBtn.disabled = currentPage === totalPages;
-                if (pageNumbers) {
-                    pageNumbers.innerHTML = '';
-                    for (let i = startPage; i <= endPage; i++) {
-                        if (i > startPage && i <= endPage - 1 && endPage - startPage > 3) {
-                            const dots = document.createElement('span');
-                            dots.textContent = '...';
-                            dots.className = 'ingresos-dots';
-                            pageNumbers.appendChild(dots);
-                            continue;
-                        }
-                        const btn = document.createElement('button');
-                        btn.textContent = i;
-                        btn.className = i === currentPage ? 'active' : '';
-                        btn.addEventListener('click', () => goToPage(i));
-                        pageNumbers.appendChild(btn);
-                    }
-                }
-            }
-
-            function goToPage(page) {
-                currentPage = page;
-                renderTable();
-            }
-
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => {
-                    if (currentPage > 1) {
-                        currentPage--;
-                        renderTable();
-                    }
-                });
-            }
-
-            if (nextBtn) {
-                nextBtn.addEventListener('click', () => {
-                    const totalPages = Math.ceil(getFilteredIngresos().length / PAGE_SIZE);
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        renderTable();
-                    }
-                });
-            }
-
-            const today = new Date();
-            fechaIngresoInput.value = formatDateToYYYYMMDD(today);
-            fechaFacturaInput.value = formatDateToYYYYMMDD(today);
-            fechaSalidaInput.value = formatDateToYYYYMMDD(today);
-
-            montoInput.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/[^0-9]/g, '');
-                value = parseInt(value, 10) || 0;
-                e.target.value = value.toLocaleString('es-CL');
-            });
-
-            ingresarBtn.addEventListener('click', async () => {
-                const processedRow = {
-                    fechaIngreso: fechaIngresoInput.value ? formatDateToDDMMYYYY(new Date(fechaIngresoInput.value)) : '',
-                    numeroFactura: numeroFacturaInput.value.trim(),
-                    fechaFactura: fechaFacturaInput.value ? formatDateToDDMMYYYY(new Date(fechaFacturaInput.value)) : '',
-                    monto: montoInput.value.replace(/\./g, ''),
-                    oc: ordenCompraInput.value.trim(),
-                    fechaOc: fechaOcInput.value,
-                    proveedor: proveedorInput.value,
-                    acta: actaInput.value.trim(),
-                    fechaSalida: fechaSalidaInput.value ? formatDateToDDMMYYYY(new Date(fechaSalidaInput.value)) : '',
-                    salida: salidaInput.value.trim(),
-                    fullName: window.currentUserData.fullName
-                };
-
-                if (processedRow.numeroFactura && processedRow.fechaIngreso) {
-                    const existing = await getIngresoByUniqueKey(processedRow.numeroFactura);
-                    if (existing) {
-                        await updateDoc(doc(db, "ingresos_lab", existing.id), {
-                            ...processedRow,
-                            createdAt: new Date()
-                        });
-                        showToast('Ingreso actualizado exitosamente', 'success');
-                    } else {
-                        await addDoc(collection(db, "ingresos_lab"), {
-                            ...processedRow,
-                            createdAt: new Date()
-                        });
-                        showToast('Ingreso agregado exitosamente', 'success');
-                    }
-                    numeroFacturaInput.value = '';
-                    fechaFacturaInput.value = formatDateToYYYYMMDD(new Date());
-                    montoInput.value = '';
-                    ordenCompraInput.value = '';
-                    actaInput.value = '';
-                    salidaInput.value = '';
-                    fechaSalidaInput.value = formatDateToYYYYMMDD(new Date());
-                    proveedorInput.value = '';
-                    fechaOcInput.value = '';
-                    await loadIngresos();
-                } else {
-                    showToast('Faltan número de factura o fecha de ingreso', 'error');
-                }
-            });
-
-            function enableColumnResizing() {
-                const table = document.getElementById('ingresosTable');
-                const headers = table.querySelectorAll('th');
-                headers.forEach((header, index) => {
-                    header.addEventListener('mousedown', (e) => {
-                        const rect = header.getBoundingClientRect();
-                        if (e.clientX > rect.right - 10) {
-                            e.preventDefault();
-                            document.body.classList.add('resizing');
-                            const startX = e.clientX;
-                            const startWidth = header.offsetWidth;
-                            const minWidth = parseInt(getComputedStyle(header).minWidth) || 50;
-                            const maxWidth = 2000;
-                            header.style.maxWidth = 'none';
-                            const cells = table.querySelectorAll(`td:nth-child(${index + 1})`);
-                            cells.forEach(cell => {
-                                cell.style.maxWidth = 'none';
-                            });
-                            const onMouseMove = (moveEvent) => {
-                                let newWidth = startWidth + (moveEvent.clientX - startX);
-                                newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
-                                header.style.width = `${newWidth}px`;
-                                cells.forEach(cell => {
-                                    cell.style.width = `${newWidth}px`;
-                                });
-                            };
-                            const onMouseUp = () => {
-                                document.body.classList.remove('resizing');
-                                document.removeEventListener('mousemove', onMouseMove);
-                                document.removeEventListener('mouseup', onMouseUp);
-                                document.removeEventListener('mouseleave', onMouseUp);
-                            };
-                            document.addEventListener('mousemove', onMouseMove);
-                            document.addEventListener('mouseup', onMouseUp);
-                            document.addEventListener('mouseleave', onMouseUp);
-                        }
-                    });
-                });
-            }
-
-            enableColumnResizing();
+            window.openEditModal = openEditModal;
+            window.openDeleteModal = openDeleteModal;
+            window.openHistoryModal = openHistoryModal;
         });
     </script>
 </body>
