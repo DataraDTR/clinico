@@ -23,44 +23,44 @@
         <div class="ingresos-fields-container">
             <div class="ingresos-form-group">
                 <label for="fechaIngreso" class="ingresos-label">Fecha de Ingreso:</label>
-                <input type="date" id="fechaIngreso">
+                <input type="date" id="fechaIngreso" autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="numeroFactura" class="ingresos-label">Número de Factura:</label>
-                <input type="text" id="numeroFactura">
+                <input type="text" id="numeroFactura" autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="fechaFactura" class="ingresos-label">Fecha de Factura:</label>
-                <input type="date" id="fechaFactura">
+                <input type="date" id="fechaFactura" autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="monto" class="ingresos-label">Monto:</label>
-                <input type="text" id="monto">
+                <input type="text" id="monto" autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="ordenCompra" class="ingresos-label">Orden de Compra:</label>
-                <input type="text" id="ordenCompra">
+                <input type="text" id="ordenCompra" autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="acta" class="ingresos-label">Acta:</label>
-                <input type="text" id="acta">
+                <input type="text" id="acta" autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="salida" class="ingresos-label">Salida:</label>
-                <input type="text" id="salida">
+                <input type="text" id="salida" autocomplete="off">
             </div>
             <button id="ingresarBtn" class="modal-btn modal-btn-primary">Ingresar</button>
             <div class="ingresos-form-group">
                 <label for="fechaOc" class="ingresos-label">Fecha de OC:</label>
-                <input type="text" id="fechaOc" readonly>
+                <input type="text" id="fechaOc" readonly autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="proveedor" class="ingresos-label">Proveedor:</label>
-                <input type="text" id="proveedor" readonly>
+                <input type="text" id="proveedor" readonly autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="fechaSalida" class="ingresos-label">Fecha de Salida:</label>
-                <input type="date" id="fechaSalida">
+                <input type="date" id="fechaSalida" autocomplete="off">
             </div>
             <div class="ingresos-actions-menu">
                 <button id="actionsBtn"><i class="fas fa-angle-down"></i> Acciones</button>
@@ -98,19 +98,19 @@
             </div>
             <div class="ingresos-form-group">
                 <label for="fechaDesde" class="ingresos-label">Fecha Desde:</label>
-                <input type="date" id="fechaDesde">
+                <input type="date" id="fechaDesde" autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="fechaHasta" class="ingresos-label">Fecha Hasta:</label>
-                <input type="date" id="fechaHasta">
+                <input type="date" id="fechaHasta" autocomplete="off">
             </div>
             <div class="ingresos-form-group">
                 <label for="selectAno" class="ingresos-label">Año:</label>
-                <select id="selectAno"></select>
+                <select id="selectAno" autocomplete="off"></select>
             </div>
             <div class="ingresos-form-group">
                 <label for="selectMes" class="ingresos-label">Mes:</label>
-                <select id="selectMes"></select>
+                <select id="selectMes" autocomplete="off"></select>
             </div>
         </div>
 
@@ -167,46 +167,46 @@
                 <span class="close" id="closeEditModal">&times;</span>
                 <h2>Editar Ingreso</h2>
                 <form id="editForm">
-                    <input type="hidden" id="editId">
+                    <input type="hidden" id="editId" autocomplete="off">
                     <div class="modal-form-group">
                         <label for="editFechaIngreso">Fecha de Ingreso:</label>
-                        <input type="date" id="editFechaIngreso" required>
+                        <input type="date" id="editFechaIngreso" required autocomplete="off">
                     </div>
                     <div class="modal-form-group">
                         <label for="editNumeroFactura">Número de Factura:</label>
-                        <input type="text" id="editNumeroFactura" required>
+                        <input type="text" id="editNumeroFactura" required autocomplete="off">
                     </div>
                     <div class="modal-form-group">
                         <label for="editFechaFactura">Fecha de Factura:</label>
-                        <input type="date" id="editFechaFactura">
+                        <input type="date" id="editFechaFactura" autocomplete="off">
                     </div>
                     <div class="modal-form-group">
                         <label for="editMonto">Monto:</label>
-                        <input type="text" id="editMonto">
+                        <input type="text" id="editMonto" autocomplete="off">
                     </div>
                     <div class="modal-form-group">
                         <label for="editOrdenCompra">Orden de Compra:</label>
-                        <input type="text" id="editOrdenCompra">
+                        <input type="text" id="editOrdenCompra" autocomplete="off">
                     </div>
                     <div class="modal-form-group">
                         <label for="editFechaOc">Fecha de OC:</label>
-                        <input type="text" id="editFechaOc" readonly>
+                        <input type="text" id="editFechaOc" readonly autocomplete="off">
                     </div>
                     <div class="modal-form-group">
                         <label for="editProveedor">Proveedor:</label>
-                        <input type="text" id="editProveedor" readonly>
+                        <input type="text" id="editProveedor" readonly autocomplete="off">
                     </div>
                     <div class="modal-form-group">
                         <label for="editActa">Acta:</label>
-                        <input type="text" id="editActa">
+                        <input type="text" id="editActa" autocomplete="off">
                     </div>
                     <div class="modal-form-group">
                         <label for="editFechaSalida">Fecha de Salida:</label>
-                        <input type="date" id="editFechaSalida">
+                        <input type="date" id="editFechaSalida" autocomplete="off">
                     </div>
                     <div class="modal-form-group">
                         <label for="editSalida">Salida:</label>
-                        <input type="text" id="editSalida">
+                        <input type="text" id="editSalida" autocomplete="off">
                     </div>
                     <div class="modal-buttons">
                         <button type="button" class="modal-btn modal-btn-secondary" id="cancelEdit">Cancelar</button>
@@ -246,11 +246,11 @@
                 <h2>Descargar por Mes</h2>
                 <div class="modal-form-group">
                     <label for="selectDownloadAno">Año:</label>
-                    <select id="selectDownloadAno"></select>
+                    <select id="selectDownloadAno" autocomplete="off"></select>
                 </div>
                 <div class="modal-form-group">
                     <label for="selectDownloadMes">Mes:</label>
-                    <select id="selectDownloadMes"></select>
+                    <select id="selectDownloadMes" autocomplete="off"></select>
                 </div>
                 <div class="modal-buttons">
                     <button type="button" class="modal-btn modal-btn-secondary" id="cancelDownloadMes">Cancelar</button>
@@ -318,7 +318,8 @@
 
         function formatNumberWithThousandsSeparator(number) {
             if (!number) return '';
-            return parseInt(number).toLocaleString('es-CL');
+            const cleaned = String(number).replace(/[^\d]/g, '');
+            return cleaned ? Number(cleaned).toLocaleString('es-CL') : '';
         }
 
         async function getOrdenByCodigo(codigo) {
@@ -426,9 +427,25 @@
             let currentDeleteId = null;
             let currentDeleteNumeroFactura = null;
 
-            // Inicializar fechaSalida con la fecha actual
-            fechaSalidaInput.value = formatDateToYYYYMMDD(new Date());
-            document.getElementById('editFechaSalida').value = formatDateToYYYYMMDD(new Date());
+            // Inicializar fechas con la fecha actual
+            const today = formatDateToYYYYMMDD(new Date());
+            fechaIngresoInput.value = today;
+            fechaFacturaInput.value = today;
+            fechaSalidaInput.value = today;
+            document.getElementById('editFechaIngreso').value = today;
+            document.getElementById('editFechaFactura').value = today;
+            document.getElementById('editFechaSalida').value = today;
+
+            // Formatear monto con separación de miles
+            function formatMontoInput(input) {
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value.replace(/[^\d]/g, '');
+                    e.target.value = formatNumberWithThousandsSeparator(value);
+                });
+            }
+
+            formatMontoInput(montoInput);
+            formatMontoInput(document.getElementById('editMonto'));
 
             window.showLoading = function() {
                 if (loading) loading.classList.add('show');
@@ -469,15 +486,15 @@
                 currentEditId = id;
                 currentEditOldData = { ...ingreso };
                 document.getElementById('editId').value = id;
-                document.getElementById('editFechaIngreso').value = ingreso.fechaIngreso ? formatDateToYYYYMMDD(ingreso.fechaIngreso) : '';
+                document.getElementById('editFechaIngreso').value = ingreso.fechaIngreso ? formatDateToYYYYMMDD(ingreso.fechaIngreso) : today;
                 document.getElementById('editNumeroFactura').value = ingreso.numeroFactura || '';
-                document.getElementById('editFechaFactura').value = ingreso.fechaFactura ? formatDateToYYYYMMDD(ingreso.fechaFactura) : '';
+                document.getElementById('editFechaFactura').value = ingreso.fechaFactura ? formatDateToYYYYMMDD(ingreso.fechaFactura) : today;
                 document.getElementById('editMonto').value = ingreso.monto ? formatNumberWithThousandsSeparator(ingreso.monto) : '';
                 document.getElementById('editOrdenCompra').value = ingreso.oc || '';
                 document.getElementById('editFechaOc').value = ingreso.fechaOc || '';
                 document.getElementById('editProveedor').value = ingreso.proveedor || '';
                 document.getElementById('editActa').value = ingreso.acta || '';
-                document.getElementById('editFechaSalida').value = ingreso.fechaSalida ? formatDateToYYYYMMDD(ingreso.fechaSalida) : formatDateToYYYYMMDD(new Date());
+                document.getElementById('editFechaSalida').value = ingreso.fechaSalida ? formatDateToYYYYMMDD(ingreso.fechaSalida) : today;
                 document.getElementById('editSalida').value = ingreso.salida || '';
                 editModal.style.display = 'block';
             }
@@ -487,7 +504,9 @@
                 currentEditId = null;
                 currentEditOldData = null;
                 editForm.reset();
-                document.getElementById('editFechaSalida').value = formatDateToYYYYMMDD(new Date());
+                document.getElementById('editFechaIngreso').value = today;
+                document.getElementById('editFechaFactura').value = today;
+                document.getElementById('editFechaSalida').value = today;
             }
 
             function openDeleteModal(id, numeroFactura) {
@@ -560,7 +579,7 @@
                     fechaIngreso: document.getElementById('editFechaIngreso').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editFechaIngreso').value)) : '',
                     numeroFactura: document.getElementById('editNumeroFactura').value.trim(),
                     fechaFactura: document.getElementById('editFechaFactura').value ? formatDateToDDMMYYYY(new Date(document.getElementById('editFechaFactura').value)) : '',
-                    monto: document.getElementById('editMonto').value.replace(/\./g, ''),
+                    monto: document.getElementById('editMonto').value.replace(/[^\d]/g, ''),
                     oc: document.getElementById('editOrdenCompra').value.trim(),
                     fechaOc: document.getElementById('editFechaOc').value,
                     proveedor: document.getElementById('editProveedor').value,
@@ -794,7 +813,7 @@
                             hideLoading();
                             showToast('Error al buscar la orden: ' + error.message, 'error');
                             proveedorInput.value = '';
-                            fechaOcInput.value = '';
+                            fechaOcInput.value =ains;
                         }
                     } else {
                         proveedorInput.value = '';
@@ -839,7 +858,7 @@
                         fechaIngreso: fechaIngresoInput.value ? formatDateToDDMMYYYY(new Date(fechaIngresoInput.value)) : '',
                         numeroFactura: numeroFacturaInput.value.trim(),
                         fechaFactura: fechaFacturaInput.value ? formatDateToDDMMYYYY(new Date(fechaFacturaInput.value)) : '',
-                        monto: montoInput.value.replace(/\./g, ''),
+                        monto: montoInput.value.replace(/[^\d]/g, ''),
                         oc: ordenCompraInput.value.trim(),
                         fechaOc: fechaOcInput.value,
                         proveedor: proveedorInput.value,
@@ -865,16 +884,16 @@
                             await logAction(docRef.id, 'create', null, processedRow);
                             hideLoading();
                             showToast(`Ingreso ${processedRow.numeroFactura} registrado exitosamente`, 'success');
-                            fechaIngresoInput.value = '';
+                            fechaIngresoInput.value = today;
                             numeroFacturaInput.value = '';
-                            fechaFacturaInput.value = '';
+                            fechaFacturaInput.value = today;
                             montoInput.value = '';
                             ordenCompraInput.value = '';
                             actaInput.value = '';
                             salidaInput.value = '';
                             fechaOcInput.value = '';
                             proveedorInput.value = '';
-                            fechaSalidaInput.value = formatDateToYYYYMMDD(new Date());
+                            fechaSalidaInput.value = today;
                             await loadIngresos();
                         } catch (error) {
                             hideLoading();
@@ -1204,10 +1223,10 @@
                             }
 
                             const processedRow = {
-                                fechaIngreso: fechaIngreso ? formatDateToDDMMYYYY(new Date(fechaIngreso)) : '',
+                                fechaIngreso: fechaIngreso ? formatDateToDDMMYYYY(new Date(fechaIngreso)) : formatDateToDDMMYYYY(new Date()),
                                 numeroFactura: String(row.numeroFactura || '').trim(),
-                                fechaFactura: fechaFactura ? formatDateToDDMMYYYY(new Date(fechaFactura)) : '',
-                                monto: String(row.monto || '').trim().replace(/\./g, ''),
+                                fechaFactura: fechaFactura ? formatDateToDDMMYYYY(new Date(fechaFactura)) : formatDateToDDMMYYYY(new Date()),
+                                monto: String(row.monto || '').trim().replace(/[^\d]/g, ''),
                                 oc: String(row.oc || '').trim(),
                                 fechaOc: fechaOc ? formatDateToDDMMYYYY(new Date(fechaOc)) : '',
                                 proveedor: String(row.proveedor || '').trim(),
